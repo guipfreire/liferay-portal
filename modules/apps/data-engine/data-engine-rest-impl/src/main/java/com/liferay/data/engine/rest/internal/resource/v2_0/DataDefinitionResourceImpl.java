@@ -619,14 +619,14 @@ public class DataDefinitionResourceImpl
 
 				JSONArray jsonArray = (JSONArray)jsonObject.get("pages");
 
-				JSONObject page = (JSONObject)jsonArray.get(0);
+				JSONObject pageJSONObject = (JSONObject)jsonArray.get(0);
 
-				JSONArray rows = (JSONArray)page.get("rows");
+				JSONArray rowsJSONArray = (JSONArray)pageJSONObject.get("rows");
 
 				Map<String, Object> customProperties =
 					dataDefinitionField.getCustomProperties();
 
-				customProperties.put("rows", rows.toString());
+				customProperties.put("rows", rowsJSONArray.toString());
 
 				dataDefinitionField.setNestedDataDefinitionFields(
 					dataDefinition.getDataDefinitionFields());
