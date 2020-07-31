@@ -27,10 +27,10 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.revert.schema.version.exception.NoSuchEntryException;
 import com.liferay.revert.schema.version.model.RSVEntry;
+import com.liferay.revert.schema.version.model.RSVEntryTable;
 import com.liferay.revert.schema.version.model.impl.RSVEntryImpl;
 import com.liferay.revert.schema.version.model.impl.RSVEntryModelImpl;
 import com.liferay.revert.schema.version.service.persistence.RSVEntryPersistence;
@@ -86,6 +86,8 @@ public class RSVEntryPersistenceImpl
 
 		setModelImplClass(RSVEntryImpl.class);
 		setModelPKClass(long.class);
+
+		setTable(RSVEntryTable.INSTANCE);
 	}
 
 	/**
@@ -96,8 +98,7 @@ public class RSVEntryPersistenceImpl
 	@Override
 	public void cacheResult(RSVEntry rsvEntry) {
 		entityCache.putResult(
-			entityCacheEnabled, RSVEntryImpl.class, rsvEntry.getPrimaryKey(),
-			rsvEntry);
+			RSVEntryImpl.class, rsvEntry.getPrimaryKey(), rsvEntry);
 
 		rsvEntry.resetOriginalValues();
 	}
@@ -111,8 +112,7 @@ public class RSVEntryPersistenceImpl
 	public void cacheResult(List<RSVEntry> rsvEntries) {
 		for (RSVEntry rsvEntry : rsvEntries) {
 			if (entityCache.getResult(
-					entityCacheEnabled, RSVEntryImpl.class,
-					rsvEntry.getPrimaryKey()) == null) {
+					RSVEntryImpl.class, rsvEntry.getPrimaryKey()) == null) {
 
 				cacheResult(rsvEntry);
 			}
@@ -147,8 +147,7 @@ public class RSVEntryPersistenceImpl
 	 */
 	@Override
 	public void clearCache(RSVEntry rsvEntry) {
-		entityCache.removeResult(
-			entityCacheEnabled, RSVEntryImpl.class, rsvEntry.getPrimaryKey());
+		entityCache.removeResult(RSVEntryImpl.class, rsvEntry.getPrimaryKey());
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
@@ -161,8 +160,7 @@ public class RSVEntryPersistenceImpl
 
 		for (RSVEntry rsvEntry : rsvEntries) {
 			entityCache.removeResult(
-				entityCacheEnabled, RSVEntryImpl.class,
-				rsvEntry.getPrimaryKey());
+				RSVEntryImpl.class, rsvEntry.getPrimaryKey());
 		}
 	}
 
@@ -173,8 +171,7 @@ public class RSVEntryPersistenceImpl
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				entityCacheEnabled, RSVEntryImpl.class, primaryKey);
+			entityCache.removeResult(RSVEntryImpl.class, primaryKey);
 		}
 	}
 
@@ -313,8 +310,7 @@ public class RSVEntryPersistenceImpl
 		}
 
 		entityCache.putResult(
-			entityCacheEnabled, RSVEntryImpl.class, rsvEntry.getPrimaryKey(),
-			rsvEntry, false);
+			RSVEntryImpl.class, rsvEntry.getPrimaryKey(), rsvEntry, false);
 
 		rsvEntry.resetOriginalValues();
 
@@ -495,10 +491,6 @@ public class RSVEntryPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(finderPath, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -544,9 +536,6 @@ public class RSVEntryPersistenceImpl
 					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY);
-
 				throw processException(exception);
 			}
 			finally {
@@ -582,21 +571,16 @@ public class RSVEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		RSVEntryModelImpl.setEntityCacheEnabled(entityCacheEnabled);
-		RSVEntryModelImpl.setFinderCacheEnabled(finderCacheEnabled);
-
 		_finderPathWithPaginationFindAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, RSVEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
+			RSVEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"findAll", new String[0]);
 
 		_finderPathWithoutPaginationFindAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, RSVEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
-			new String[0]);
+			RSVEntryImpl.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"findAll", new String[0]);
 
 		_finderPathCountAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
 			new String[0]);
 	}
 
@@ -614,12 +598,6 @@ public class RSVEntryPersistenceImpl
 		unbind = "-"
 	)
 	public void setConfiguration(Configuration configuration) {
-		super.setConfiguration(configuration);
-
-		_columnBitmaskEnabled = GetterUtil.getBoolean(
-			configuration.get(
-				"value.object.column.bitmask.enabled.com.liferay.revert.schema.version.model.RSVEntry"),
-			true);
 	}
 
 	@Override
@@ -639,8 +617,6 @@ public class RSVEntryPersistenceImpl
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		super.setSessionFactory(sessionFactory);
 	}
-
-	private boolean _columnBitmaskEnabled;
 
 	@Reference
 	protected EntityCache entityCache;

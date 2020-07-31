@@ -14,19 +14,16 @@
 
 package com.liferay.layout.page.template.admin.web.internal.headless.delivery.dto.v1_0.converter;
 
-import com.liferay.fragment.contributor.FragmentCollectionContributor;
 import com.liferay.fragment.contributor.FragmentCollectionContributorTracker;
 import com.liferay.fragment.entry.processor.util.EditableFragmentEntryProcessorUtil;
-import com.liferay.fragment.model.FragmentCollection;
 import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryLink;
-import com.liferay.fragment.renderer.FragmentRenderer;
-import com.liferay.fragment.renderer.FragmentRendererTracker;
-import com.liferay.fragment.renderer.constants.FragmentRendererConstants;
-import com.liferay.fragment.service.FragmentCollectionLocalService;
+import com.liferay.fragment.processor.PortletRegistry;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.fragment.service.FragmentEntryLocalService;
 import com.liferay.fragment.util.configuration.FragmentEntryConfigurationParser;
+import com.liferay.headless.delivery.dto.v1_0.ClassPKReference;
+import com.liferay.headless.delivery.dto.v1_0.ContextReference;
 import com.liferay.headless.delivery.dto.v1_0.Fragment;
 import com.liferay.headless.delivery.dto.v1_0.FragmentField;
 import com.liferay.headless.delivery.dto.v1_0.FragmentFieldBackgroundImage;
@@ -39,6 +36,7 @@ import com.liferay.headless.delivery.dto.v1_0.FragmentLink;
 import com.liferay.headless.delivery.dto.v1_0.FragmentMappedValue;
 import com.liferay.headless.delivery.dto.v1_0.Mapping;
 import com.liferay.headless.delivery.dto.v1_0.PageFragmentInstanceDefinition;
+import com.liferay.headless.delivery.dto.v1_0.WidgetInstance;
 import com.liferay.info.display.contributor.InfoDisplayContributor;
 import com.liferay.info.display.contributor.InfoDisplayContributorTracker;
 import com.liferay.info.display.contributor.InfoDisplayObjectProvider;
@@ -50,12 +48,11 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -108,16 +105,13 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 			{
 				fragment = new Fragment() {
 					{
-						collectionName = _getFragmentCollectionName(
-							fragmentEntry, rendererKey);
 						key = _getFragmentKey(fragmentEntry, rendererKey);
-						name = _getFragmentName(
-							fragmentEntry, fragmentEntryLink, rendererKey);
 					}
 				};
 				fragmentConfig = _getFragmentConfig(fragmentEntryLink);
 				fragmentFields = _getFragmentFields(
 					fragmentEntryLink, saveInlineContent, saveMapping);
+				widgetInstances = _getWidgetInstances(fragmentEntryLink);
 			}
 		};
 	}
@@ -158,58 +152,6 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 		}
 
 		return fragmentFields;
-	}
-
-	private String _getFragmentCollectionName(
-		FragmentEntry fragmentEntry, String rendererKey) {
-
-		if (fragmentEntry == null) {
-			if (Validator.isNull(rendererKey)) {
-				rendererKey =
-					FragmentRendererConstants.
-						FRAGMENT_ENTRY_FRAGMENT_RENDERER_KEY;
-			}
-
-			FragmentRenderer fragmentRenderer =
-				_fragmentRendererTracker.getFragmentRenderer(rendererKey);
-
-			return LanguageUtil.get(
-				ResourceBundleUtil.getBundle(
-					LocaleUtil.getSiteDefault(), fragmentRenderer.getClass()),
-				"fragment.collection.label." +
-					fragmentRenderer.getCollectionKey());
-		}
-
-		FragmentCollection fragmentCollection =
-			_fragmentCollectionLocalService.fetchFragmentCollection(
-				fragmentEntry.getFragmentCollectionId());
-
-		if (fragmentCollection != null) {
-			return fragmentCollection.getName();
-		}
-
-		String[] parts = StringUtil.split(rendererKey, StringPool.DASH);
-
-		if (ArrayUtil.isEmpty(parts)) {
-			return null;
-		}
-
-		List<FragmentCollectionContributor> fragmentCollectionContributors =
-			_fragmentCollectionContributorTracker.
-				getFragmentCollectionContributors();
-
-		for (FragmentCollectionContributor fragmentCollectionContributor :
-				fragmentCollectionContributors) {
-
-			if (Objects.equals(
-					fragmentCollectionContributor.getFragmentCollectionKey(),
-					parts[0])) {
-
-				return fragmentCollectionContributor.getName();
-			}
-		}
-
-		return null;
 	}
 
 	private Map<String, Object> _getFragmentConfig(
@@ -320,42 +262,6 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 		return rendererKey;
 	}
 
-	private String _getFragmentName(
-		FragmentEntry fragmentEntry, FragmentEntryLink fragmentEntryLink,
-		String rendererKey) {
-
-		if (fragmentEntry != null) {
-			return fragmentEntry.getName();
-		}
-
-		JSONObject editableValuesJSONObject = null;
-
-		try {
-			editableValuesJSONObject = JSONFactoryUtil.createJSONObject(
-				fragmentEntryLink.getEditableValues());
-		}
-		catch (JSONException jsonException) {
-			return null;
-		}
-
-		String portletId = editableValuesJSONObject.getString("portletId");
-
-		if (Validator.isNotNull(portletId)) {
-			return _portal.getPortletTitle(
-				portletId, LocaleUtil.getSiteDefault());
-		}
-
-		if (Validator.isNull(rendererKey)) {
-			rendererKey =
-				FragmentRendererConstants.FRAGMENT_ENTRY_FRAGMENT_RENDERER_KEY;
-		}
-
-		FragmentRenderer fragmentRenderer =
-			_fragmentRendererTracker.getFragmentRenderer(rendererKey);
-
-		return fragmentRenderer.getLabel(LocaleUtil.getSiteDefault());
-	}
-
 	private Function<Object, String> _getImageURLTransformerFunction() {
 		return object -> {
 			if (object instanceof JSONObject) {
@@ -385,12 +291,37 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 		return fragmentFields;
 	}
 
+	private WidgetInstance[] _getWidgetInstances(
+		FragmentEntryLink fragmentEntryLink) {
+
+		List<String> fragmentEntryLinkPortletIds =
+			_portletRegistry.getFragmentEntryLinkPortletIds(fragmentEntryLink);
+
+		if (ListUtil.isNull(fragmentEntryLinkPortletIds)) {
+			return null;
+		}
+
+		List<WidgetInstance> widgetInstances = new ArrayList<>();
+
+		for (String fragmentEntryLinkPortletId : fragmentEntryLinkPortletIds) {
+			widgetInstances.add(
+				_widgetInstanceDTOConverter.toDTO(
+					fragmentEntryLink, fragmentEntryLinkPortletId));
+		}
+
+		return widgetInstances.toArray(new WidgetInstance[0]);
+	}
+
 	private boolean _isSaveFragmentMappedValue(
 		JSONObject jsonObject, boolean saveMapping) {
 
 		if (saveMapping && jsonObject.has("classNameId") &&
 			jsonObject.has("classPK") && jsonObject.has("fieldId")) {
 
+			return true;
+		}
+
+		if (saveMapping && jsonObject.has("collectionFieldId")) {
 			return true;
 		}
 
@@ -427,8 +358,10 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 			return null;
 		}
 
-		InfoDisplayContributor infoDisplayContributor =
-			_infoDisplayContributorTracker.getInfoDisplayContributor(className);
+		InfoDisplayContributor<Object> infoDisplayContributor =
+			(InfoDisplayContributor<Object>)
+				_infoDisplayContributorTracker.getInfoDisplayContributor(
+					className);
 
 		if (infoDisplayContributor == null) {
 			return null;
@@ -437,8 +370,10 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 		long classPK = jsonObject.getLong("classPK");
 
 		try {
-			InfoDisplayObjectProvider infoDisplayObjectProvider =
-				infoDisplayContributor.getInfoDisplayObjectProvider(classPK);
+			InfoDisplayObjectProvider<Object> infoDisplayObjectProvider =
+				(InfoDisplayObjectProvider<Object>)
+					infoDisplayContributor.getInfoDisplayObjectProvider(
+						classPK);
 
 			if (infoDisplayObjectProvider == null) {
 				return null;
@@ -535,7 +470,7 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 
 		return new FragmentFieldBackgroundImage() {
 			{
-				backgroundImage = new FragmentImage() {
+				backgroundFragmentImage = new FragmentImage() {
 					{
 						title = _toTitleFragmentInlineValue(
 							jsonObject, localeMap);
@@ -715,12 +650,18 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 			{
 				mapping = new Mapping() {
 					{
-						defaultValue = fragmentInlineValue;
-						itemClassName = _toItemClassName(jsonObject);
-						itemClassPK = _toitemClassPK(jsonObject);
+						defaultFragmentInlineValue = fragmentInlineValue;
+						itemReference = _toItemReference(jsonObject);
 
 						setFieldKey(
 							() -> {
+								String collectionFieldId = jsonObject.getString(
+									"collectionFieldId");
+
+								if (Validator.isNotNull(collectionFieldId)) {
+									return collectionFieldId;
+								}
+
 								String fieldId = jsonObject.getString(
 									"fieldId");
 
@@ -728,7 +669,14 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 									return fieldId;
 								}
 
-								return jsonObject.getString("mappedField");
+								String mappedField = jsonObject.getString(
+									"mappedField");
+
+								if (Validator.isNotNull(mappedField)) {
+									return mappedField;
+								}
+
+								return null;
 							});
 					}
 				};
@@ -808,6 +756,41 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 		return classPK;
 	}
 
+	private Object _toItemReference(JSONObject jsonObject) {
+		String collectionFieldId = jsonObject.getString("collectionFieldId");
+		String fieldId = jsonObject.getString("fieldId");
+		String mappedField = jsonObject.getString("mappedField");
+
+		if (Validator.isNull(collectionFieldId) && Validator.isNull(fieldId) &&
+			Validator.isNull(mappedField)) {
+
+			return null;
+		}
+
+		if (Validator.isNotNull(collectionFieldId)) {
+			return new ContextReference() {
+				{
+					contextSource = ContextSource.COLLECTION_ITEM;
+				}
+			};
+		}
+
+		if (Validator.isNotNull(mappedField)) {
+			return new ContextReference() {
+				{
+					contextSource = ContextSource.DISPLAY_PAGE_ITEM;
+				}
+			};
+		}
+
+		return new ClassPKReference() {
+			{
+				className = _toItemClassName(jsonObject);
+				classPK = _toitemClassPK(jsonObject);
+			}
+		};
+	}
+
 	private Map<String, String> _toLocaleMap(JSONObject jsonObject) {
 		return new HashMap<String, String>() {
 			{
@@ -858,9 +841,6 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 		_fragmentCollectionContributorTracker;
 
 	@Reference
-	private FragmentCollectionLocalService _fragmentCollectionLocalService;
-
-	@Reference
 	private FragmentEntryConfigurationParser _fragmentEntryConfigurationParser;
 
 	@Reference
@@ -870,12 +850,15 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 	private FragmentEntryLocalService _fragmentEntryLocalService;
 
 	@Reference
-	private FragmentRendererTracker _fragmentRendererTracker;
-
-	@Reference
 	private InfoDisplayContributorTracker _infoDisplayContributorTracker;
 
 	@Reference
 	private Portal _portal;
+
+	@Reference
+	private PortletRegistry _portletRegistry;
+
+	@Reference
+	private WidgetInstanceDTOConverter _widgetInstanceDTOConverter;
 
 }

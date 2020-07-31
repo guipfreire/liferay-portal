@@ -20,6 +20,8 @@ import com.liferay.expando.kernel.service.persistence.ExpandoColumnPersistence;
 import com.liferay.expando.kernel.service.persistence.ExpandoRowPersistence;
 import com.liferay.expando.kernel.service.persistence.ExpandoTablePersistence;
 import com.liferay.expando.kernel.service.persistence.ExpandoValuePersistence;
+import com.liferay.petra.function.UnsafeFunction;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -43,6 +45,7 @@ import com.liferay.portal.kernel.service.persistence.BasePersistence;
 import com.liferay.portal.kernel.service.persistence.ClassNamePersistence;
 import com.liferay.portal.kernel.service.persistence.UserFinder;
 import com.liferay.portal.kernel.service.persistence.UserPersistence;
+import com.liferay.portal.kernel.service.persistence.change.tracking.CTPersistence;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -77,6 +80,10 @@ public abstract class ExpandoRowLocalServiceBaseImpl
 	/**
 	 * Adds the expando row to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ExpandoRowLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param expandoRow the expando row
 	 * @return the expando row that was added
 	 */
@@ -103,6 +110,10 @@ public abstract class ExpandoRowLocalServiceBaseImpl
 	/**
 	 * Deletes the expando row with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ExpandoRowLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param rowId the primary key of the expando row
 	 * @return the expando row that was removed
 	 * @throws PortalException if a expando row with the primary key could not be found
@@ -116,6 +127,10 @@ public abstract class ExpandoRowLocalServiceBaseImpl
 	/**
 	 * Deletes the expando row from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ExpandoRowLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param expandoRow the expando row
 	 * @return the expando row that was removed
 	 */
@@ -123,6 +138,11 @@ public abstract class ExpandoRowLocalServiceBaseImpl
 	@Override
 	public ExpandoRow deleteExpandoRow(ExpandoRow expandoRow) {
 		return expandoRowPersistence.remove(expandoRow);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return expandoRowPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -332,6 +352,10 @@ public abstract class ExpandoRowLocalServiceBaseImpl
 
 	/**
 	 * Updates the expando row in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ExpandoRowLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param expandoRow the expando row
 	 * @return the expando row that was updated
@@ -679,8 +703,23 @@ public abstract class ExpandoRowLocalServiceBaseImpl
 		return ExpandoRowLocalService.class.getName();
 	}
 
-	protected Class<?> getModelClass() {
+	@Override
+	public CTPersistence<ExpandoRow> getCTPersistence() {
+		return expandoRowPersistence;
+	}
+
+	@Override
+	public Class<ExpandoRow> getModelClass() {
 		return ExpandoRow.class;
+	}
+
+	@Override
+	public <R, E extends Throwable> R updateWithUnsafeFunction(
+			UnsafeFunction<CTPersistence<ExpandoRow>, R, E>
+				updateUnsafeFunction)
+		throws E {
+
+		return updateUnsafeFunction.apply(expandoRowPersistence);
 	}
 
 	protected String getModelClassName() {

@@ -59,9 +59,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -86,10 +84,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -598,7 +598,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 	}
 
-	private static URL[] _getClassPathURLs() throws IOException {
+	private static URL[] _getClassPathURLs() throws Exception {
 		File coreDir = new File(PropsValues.MODULE_FRAMEWORK_BASE_DIR, "core");
 
 		File[] files = coreDir.listFiles();
@@ -684,7 +684,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 	}
 
 	private Map<String, String> _buildFrameworkProperties(Class<?> clazz)
-		throws URISyntaxException {
+		throws Exception {
 
 		if (_log.isDebugEnabled()) {
 			_log.debug("Building OSGi framework properties");
@@ -703,20 +703,19 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		// Fileinstall. See LPS-56385.
 
 		properties.put(
-			FrameworkPropsKeys.FELIX_FILEINSTALL_DIR,
-			_getFelixFileInstallDir());
+			FrameworkPropsKeys.FILE_INSTALL_DIR, _getFileInstallDir());
 		properties.put(
-			FrameworkPropsKeys.FELIX_FILEINSTALL_POLL,
+			FrameworkPropsKeys.FILE_INSTALL_POLL,
 			String.valueOf(PropsValues.MODULE_FRAMEWORK_AUTO_DEPLOY_INTERVAL));
 		properties.put(
-			FrameworkPropsKeys.FELIX_FILEINSTALL_START_LEVEL,
+			FrameworkPropsKeys.FILE_INSTALL_START_LEVEL,
 			String.valueOf(
 				PropsValues.MODULE_FRAMEWORK_DYNAMIC_INSTALL_START_LEVEL));
 		properties.put(
-			FrameworkPropsKeys.FELIX_FILEINSTALL_TMPDIR,
+			FrameworkPropsKeys.FILE_INSTALL_TMPDIR,
 			SystemProperties.get(SystemProperties.TMP_DIR));
 		properties.put(
-			FrameworkPropsKeys.FELIX_FILEINSTALL_WEB_START_LEVEL,
+			FrameworkPropsKeys.FILE_INSTALL_WEB_START_LEVEL,
 			String.valueOf(PropsValues.MODULE_FRAMEWORK_WEB_START_LEVEL));
 
 		// Framework
@@ -848,7 +847,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 	}
 
-	private void _cleanOSGiStateFolder() throws IOException {
+	private void _cleanOSGiStateFolder() throws Exception {
 		Files.walkFileTree(
 			Paths.get(PropsValues.MODULE_FRAMEWORK_STATE_DIR),
 			new SimpleFileVisitor<Path>() {
@@ -924,7 +923,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 
 	private Set<Bundle> _deployStaticBundlesFromFile(
 			File file, Set<String> overrideStaticFileNames)
-		throws IOException {
+		throws Exception {
 
 		Set<Bundle> bundles = new HashSet<>();
 
@@ -1038,7 +1037,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 	}
 
-	private String _getFelixFileInstallDir() {
+	private String _getFileInstallDir() {
 		return PropsValues.MODULE_FRAMEWORK_PORTAL_DIR + StringPool.COMMA +
 			StringUtil.merge(PropsValues.MODULE_FRAMEWORK_AUTO_DEPLOY_DIRS);
 	}
@@ -1168,7 +1167,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 			_log.debug("Initializing required startup directories");
 		}
 
-		String[] dirNames = StringUtil.split(_getFelixFileInstallDir());
+		String[] dirNames = StringUtil.split(_getFileInstallDir());
 
 		for (String dirName : dirNames) {
 			FileUtil.mkdirs(dirName);
@@ -1182,7 +1181,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 	private void _installBundlesFromDir(
 			String dirPath, Map<String, Long> checksums,
 			Set<String> fragmentHosts)
-		throws IOException {
+		throws Exception {
 
 		BundleContext bundleContext = _framework.getBundleContext();
 
@@ -1255,17 +1254,18 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		BundleContext bundleContext = _framework.getBundleContext();
 
 		Class<?> configInstallerClass = classLoader.loadClass(
-			"org.apache.felix.fileinstall.internal.ConfigInstaller");
+			"com.liferay.portal.file.install.internal.ConfigInstaller");
 
 		Method method = configInstallerClass.getDeclaredMethod(
-			"install", File.class);
+			"transformURL", File.class);
 
 		Constructor<?> constructor =
 			configInstallerClass.getDeclaredConstructor(
 				BundleContext.class,
 				classLoader.loadClass("org.osgi.service.cm.ConfigurationAdmin"),
 				classLoader.loadClass(
-					"org.apache.felix.fileinstall.internal.FileInstall"));
+					"com.liferay.portal.file.install.internal." +
+						"FileInstallImplBundleActivator"));
 
 		constructor.setAccessible(true);
 
@@ -1280,12 +1280,12 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 
 		dir = dir.getCanonicalFile();
 
-		for (File file : dir.listFiles()) {
+		for (File file : _listConfigs(dir)) {
 			method.invoke(configInstaller, file);
 		}
 	}
 
-	private Map<String, Long> _installDynamicBundles() throws IOException {
+	private Map<String, Long> _installDynamicBundles() throws Exception {
 		Map<String, Long> checksums = new HashMap<>();
 
 		Set<String> fragmentHosts = new HashSet<>();
@@ -1382,6 +1382,58 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 
 		return true;
+	}
+
+	private List<File> _listConfigs(File dir) {
+		if (!dir.isDirectory()) {
+			return Collections.<File>emptyList();
+		}
+
+		BundleContext bundleContext = _framework.getBundleContext();
+
+		String subdirMode = bundleContext.getProperty(
+			"file.install.subdir.mode");
+
+		if (Objects.equals(subdirMode, "recurse")) {
+			Queue<File> queue = new LinkedList<>();
+
+			queue.add(dir);
+
+			List<File> files = new ArrayList<>();
+
+			File curDir = null;
+
+			while ((curDir = queue.poll()) != null) {
+				for (File file : curDir.listFiles()) {
+					if (file.isDirectory()) {
+						queue.add(file);
+					}
+					else {
+						String name = file.getName();
+
+						if (name.endsWith(".cfg") || name.endsWith(".config")) {
+							files.add(file);
+						}
+					}
+				}
+			}
+
+			return files;
+		}
+
+		return Arrays.asList(
+			dir.listFiles(
+				file -> {
+					if (file.isFile()) {
+						String name = file.getName();
+
+						if (name.endsWith(".cfg") || name.endsWith(".config")) {
+							return true;
+						}
+					}
+
+					return false;
+				}));
 	}
 
 	private String _parseBundleSymbolicName(Attributes attributes) {
@@ -1586,14 +1638,14 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		for (String staticJarFileName :
 				PropsValues.MODULE_FRAMEWORK_STATIC_JARS) {
 
-			File staticJarFile = new File(
+			Path staticJarPath = Paths.get(
 				PropsValues.LIFERAY_LIB_PORTAL_DIR, staticJarFileName);
 
-			if (staticJarFile.exists()) {
-				jarPaths.add(staticJarFile.toPath());
+			if (Files.exists(staticJarPath)) {
+				jarPaths.add(staticJarPath);
 			}
 			else {
-				_log.error("Missing " + staticJarFile);
+				_log.error("Missing " + staticJarPath);
 			}
 		}
 
@@ -1716,7 +1768,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 			if (!_isFragmentBundle(bundle)) {
 				if (Objects.equals(
 						bundle.getSymbolicName(),
-						"org.apache.felix.fileinstall")) {
+						"com.liferay.portal.file.install.impl")) {
 
 					fileInstallBundle = bundle;
 				}
@@ -1848,7 +1900,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 	}
 
 	private void _startConfigurationBundles(Collection<Bundle> bundles)
-		throws BundleException {
+		throws Exception {
 
 		Iterator<Bundle> iterator = bundles.iterator();
 
@@ -1983,9 +2035,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 	}
 
 	@SuppressWarnings("deprecation")
-	private void _validateModuleFrameworkBaseDirForEquinox()
-		throws MalformedURLException {
-
+	private void _validateModuleFrameworkBaseDirForEquinox() throws Exception {
 		File baseDir = new File(PropsValues.MODULE_FRAMEWORK_BASE_DIR);
 
 		baseDir = baseDir.getAbsoluteFile();

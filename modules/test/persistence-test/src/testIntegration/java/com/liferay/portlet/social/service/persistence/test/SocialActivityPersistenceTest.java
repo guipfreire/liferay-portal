@@ -121,6 +121,10 @@ public class SocialActivityPersistenceTest {
 
 		SocialActivity newSocialActivity = _persistence.create(pk);
 
+		newSocialActivity.setMvccVersion(RandomTestUtil.nextLong());
+
+		newSocialActivity.setCtCollectionId(RandomTestUtil.nextLong());
+
 		newSocialActivity.setGroupId(RandomTestUtil.nextLong());
 
 		newSocialActivity.setCompanyId(RandomTestUtil.nextLong());
@@ -152,6 +156,12 @@ public class SocialActivityPersistenceTest {
 		SocialActivity existingSocialActivity = _persistence.findByPrimaryKey(
 			newSocialActivity.getPrimaryKey());
 
+		Assert.assertEquals(
+			existingSocialActivity.getMvccVersion(),
+			newSocialActivity.getMvccVersion());
+		Assert.assertEquals(
+			existingSocialActivity.getCtCollectionId(),
+			newSocialActivity.getCtCollectionId());
 		Assert.assertEquals(
 			existingSocialActivity.getActivityId(),
 			newSocialActivity.getActivityId());
@@ -227,13 +237,6 @@ public class SocialActivityPersistenceTest {
 		_persistence.countByMirrorActivityId(RandomTestUtil.nextLong());
 
 		_persistence.countByMirrorActivityId(0L);
-	}
-
-	@Test
-	public void testCountByClassNameId() throws Exception {
-		_persistence.countByClassNameId(RandomTestUtil.nextLong());
-
-		_persistence.countByClassNameId(0L);
 	}
 
 	@Test
@@ -315,11 +318,12 @@ public class SocialActivityPersistenceTest {
 
 	protected OrderByComparator<SocialActivity> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create(
-			"SocialActivity", "activityId", true, "groupId", true, "companyId",
-			true, "userId", true, "createDate", true, "activitySetId", true,
-			"mirrorActivityId", true, "classNameId", true, "classPK", true,
-			"parentClassNameId", true, "parentClassPK", true, "type", true,
-			"extraData", true, "receiverUserId", true);
+			"SocialActivity", "mvccVersion", true, "ctCollectionId", true,
+			"activityId", true, "groupId", true, "companyId", true, "userId",
+			true, "createDate", true, "activitySetId", true, "mirrorActivityId",
+			true, "classNameId", true, "classPK", true, "parentClassNameId",
+			true, "parentClassPK", true, "type", true, "extraData", true,
+			"receiverUserId", true);
 	}
 
 	@Test
@@ -588,6 +592,10 @@ public class SocialActivityPersistenceTest {
 		long pk = RandomTestUtil.nextLong();
 
 		SocialActivity socialActivity = _persistence.create(pk);
+
+		socialActivity.setMvccVersion(RandomTestUtil.nextLong());
+
+		socialActivity.setCtCollectionId(RandomTestUtil.nextLong());
 
 		socialActivity.setGroupId(RandomTestUtil.nextLong());
 

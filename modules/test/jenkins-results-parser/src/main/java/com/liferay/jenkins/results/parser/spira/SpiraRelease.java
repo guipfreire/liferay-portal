@@ -14,6 +14,7 @@
 
 package com.liferay.jenkins.results.parser.spira;
 
+import com.liferay.jenkins.results.parser.JenkinsResultsParserUtil;
 import com.liferay.jenkins.results.parser.JenkinsResultsParserUtil.HttpRequestMethod;
 
 import java.io.IOException;
@@ -81,7 +82,7 @@ public class SpiraRelease extends IndentLevelSpiraArtifact {
 				requestJSONObject.toString());
 
 			return spiraProject.getSpiraReleaseByID(
-				responseJSONObject.getInt(ID_KEY));
+				responseJSONObject.getInt(KEY_ID));
 		}
 		catch (IOException ioException) {
 			throw new RuntimeException(ioException);
@@ -116,7 +117,7 @@ public class SpiraRelease extends IndentLevelSpiraArtifact {
 		SpiraProject spiraProject, int releaseID) {
 
 		List<SpiraRelease> spiraReleases = getSpiraReleases(
-			spiraProject, new SearchQuery.SearchParameter(ID_KEY, releaseID));
+			spiraProject, new SearchQuery.SearchParameter(KEY_ID, releaseID));
 
 		if (spiraReleases.isEmpty()) {
 			return;
@@ -175,7 +176,7 @@ public class SpiraRelease extends IndentLevelSpiraArtifact {
 			SpiraReleaseBuild.getSpiraReleaseBuilds(
 				getSpiraProject(), this,
 				new SearchQuery.SearchParameter(
-					SpiraReleaseBuild.ID_KEY, releaseBuildID));
+					SpiraReleaseBuild.KEY_ID, releaseBuildID));
 
 		if (spiraReleaseBuilds.size() > 1) {
 			throw new RuntimeException(
@@ -188,6 +189,15 @@ public class SpiraRelease extends IndentLevelSpiraArtifact {
 		}
 
 		return spiraReleaseBuilds.get(0);
+	}
+
+	@Override
+	public String getURL() {
+		SpiraProject spiraProject = getSpiraProject();
+
+		return JenkinsResultsParserUtil.combine(
+			SPIRA_BASE_URL, String.valueOf(spiraProject.getID()), "/Release/",
+			String.valueOf(getID()), ".aspx");
 	}
 
 	public static enum Status {
@@ -257,7 +267,7 @@ public class SpiraRelease extends IndentLevelSpiraArtifact {
 
 	protected static final String ARTIFACT_TYPE_NAME = "release";
 
-	protected static final String ID_KEY = "ReleaseId";
+	protected static final String KEY_ID = "ReleaseId";
 
 	private static List<JSONObject> _requestSpiraReleases(
 		int spiraProjectID, SearchQuery.SearchParameter... searchParameters) {

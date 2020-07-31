@@ -31,6 +31,7 @@ import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.service.JournalArticleLocalServiceUtil;
 import com.liferay.journal.web.internal.asset.model.JournalArticleAssetRenderer;
 import com.liferay.journal.web.internal.configuration.JournalWebConfiguration;
+import com.liferay.journal.web.internal.configuration.util.FFImportExportTranslationConfigurationUtil;
 import com.liferay.journal.web.internal.portlet.JournalPortlet;
 import com.liferay.journal.web.internal.security.permission.resource.JournalArticlePermission;
 import com.liferay.journal.web.internal.security.permission.resource.JournalFolderPermission;
@@ -66,7 +67,8 @@ import com.liferay.taglib.security.PermissionsURLTag;
 import com.liferay.trash.TrashHelper;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
+import java.util.Set;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletRequest;
@@ -116,6 +118,9 @@ public class JournalArticleActionDropdownItemsProvider {
 		UnsafeConsumer<DropdownItem, Exception> viewContentArticleAction =
 			_getViewContentArticleActionUnsafeConsumer();
 
+		boolean importExportTranslationEnabled =
+			_isImportExportTranslationEnabled(hasViewPermission);
+
 		return DropdownItemListBuilder.add(
 			() -> hasUpdatePermission, _getEditArticleActionUnsafeConsumer()
 		).add(
@@ -139,11 +144,20 @@ public class JournalArticleActionDropdownItemsProvider {
 			() -> hasViewPermission && (previewContentArticleAction != null),
 			previewContentArticleAction
 		).add(
-			() -> hasViewPermission && hasUpdatePermission,
-			_getViewHistoryArticleActionUnsafeConsumer()
+			() -> importExportTranslationEnabled,
+			_getTranslateActionUnsafeConsumer()
+		).add(
+			() -> importExportTranslationEnabled,
+			_getExportForTranslationActionUnsafeConsumer()
+		).add(
+			() -> importExportTranslationEnabled,
+			_getImportTranslationActionUnsafeConsumer()
 		).add(
 			() -> hasViewPermission && (availableLanguageIds.length > 1),
 			_getDeleteArticleTranslationsActionUnsafeConsumer()
+		).add(
+			() -> hasViewPermission && hasUpdatePermission,
+			_getViewHistoryArticleActionUnsafeConsumer()
 		).add(
 			_getViewUsagesArticleActionUnsafeConsumer()
 		).add(
@@ -429,6 +443,32 @@ public class JournalArticleActionDropdownItemsProvider {
 	}
 
 	private UnsafeConsumer<DropdownItem, Exception>
+		_getExportForTranslationActionUnsafeConsumer() {
+
+		return dropdownItem -> {
+			dropdownItem.putData("action", "exportTranslation");
+			dropdownItem.putData("articleEntryId", _article.getArticleId());
+			dropdownItem.setLabel(
+				LanguageUtil.get(
+					_httpServletRequest, "export-for-translation"));
+		};
+	}
+
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getImportTranslationActionUnsafeConsumer() {
+
+		return dropdownItem -> {
+			dropdownItem.setHref(
+				_liferayPortletResponse.createRenderURL(), "mvcPath",
+				"/import_translation.jsp", "redirect", _getRedirect(),
+				"referringPortletResource", _getReferringPortletResource(),
+				"articleId", _article.getArticleId());
+			dropdownItem.setLabel(
+				LanguageUtil.get(_httpServletRequest, "import-translation"));
+		};
+	}
+
+	private UnsafeConsumer<DropdownItem, Exception>
 		_getMoveArticleActionUnsafeConsumer() {
 
 		return dropdownItem -> {
@@ -511,7 +551,7 @@ public class JournalArticleActionDropdownItemsProvider {
 	}
 
 	private String _getPreviewURL() throws Exception {
-		AssetRendererFactory assetRendererFactory =
+		AssetRendererFactory<?> assetRendererFactory =
 			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClass(
 				JournalArticle.class);
 
@@ -542,17 +582,16 @@ public class JournalArticleActionDropdownItemsProvider {
 			JournalUtil.getPreviewPlid(_article, _themeDisplay),
 			JournalPortletKeys.JOURNAL, PortletRequest.RENDER_PHASE);
 
-		Map<String, String[]> parameters = HashMapBuilder.put(
-			"articleId", new String[] {_article.getArticleId()}
-		).put(
-			"groupId", new String[] {String.valueOf(_article.getGroupId())}
-		).put(
-			"mvcPath", new String[] {"/preview_article_content.jsp"}
-		).put(
-			"version", new String[] {String.valueOf(_article.getVersion())}
-		).build();
-
-		portletURL.setParameters(parameters);
+		portletURL.setParameters(
+			HashMapBuilder.put(
+				"articleId", new String[] {_article.getArticleId()}
+			).put(
+				"groupId", new String[] {String.valueOf(_article.getGroupId())}
+			).put(
+				"mvcPath", new String[] {"/preview_article_content.jsp"}
+			).put(
+				"version", new String[] {String.valueOf(_article.getVersion())}
+			).build());
 
 		portletURL.setWindowState(LiferayWindowState.POP_UP);
 
@@ -574,7 +613,7 @@ public class JournalArticleActionDropdownItemsProvider {
 		publishArticleURL.setParameter("articleId", _article.getArticleId());
 
 		return dropdownItem -> {
-			dropdownItem.putData("action", "publishToLive");
+			dropdownItem.putData("action", "publishArticleToLive");
 			dropdownItem.putData(
 				"publishArticleURL", publishArticleURL.toString());
 			dropdownItem.setLabel(
@@ -650,6 +689,23 @@ public class JournalArticleActionDropdownItemsProvider {
 	}
 
 	private UnsafeConsumer<DropdownItem, Exception>
+		_getTranslateActionUnsafeConsumer() {
+
+		return dropdownItem -> {
+			dropdownItem.setHref(
+				_liferayPortletResponse.createRenderURL(),
+				"mvcRenderCommandName", "/journal/translate", "redirect",
+				_getRedirect(), "referringPortletResource",
+				_getReferringPortletResource(), "groupId",
+				_article.getGroupId(), "folderId", _article.getFolderId(),
+				"articleId", _article.getArticleId(), "version",
+				_article.getVersion());
+			dropdownItem.setLabel(
+				LanguageUtil.get(_httpServletRequest, "translate"));
+		};
+	}
+
+	private UnsafeConsumer<DropdownItem, Exception>
 			_getViewContentArticleActionUnsafeConsumer()
 		throws Exception {
 
@@ -666,7 +722,7 @@ public class JournalArticleActionDropdownItemsProvider {
 		};
 	}
 
-	private String _getViewContentURL() throws PortalException {
+	private String _getViewContentURL() throws Exception {
 		if (!_isShowViewContentURL()) {
 			return StringPool.BLANK;
 		}
@@ -724,6 +780,23 @@ public class JournalArticleActionDropdownItemsProvider {
 		};
 	}
 
+	private boolean _isImportExportTranslationEnabled(
+		boolean hasViewPermission) {
+
+		if (hasViewPermission &&
+			FFImportExportTranslationConfigurationUtil.enabled()) {
+
+			Set<Locale> availableLocales = LanguageUtil.getAvailableLocales(
+				_themeDisplay.getSiteGroupId());
+
+			if (availableLocales.size() > 1) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private boolean _isShowPublishAction() {
 		PermissionChecker permissionChecker =
 			_themeDisplay.getPermissionChecker();
@@ -779,7 +852,7 @@ public class JournalArticleActionDropdownItemsProvider {
 		return false;
 	}
 
-	private boolean _isShowViewContentURL() throws PortalException {
+	private boolean _isShowViewContentURL() throws Exception {
 		if (_article == null) {
 			return false;
 		}

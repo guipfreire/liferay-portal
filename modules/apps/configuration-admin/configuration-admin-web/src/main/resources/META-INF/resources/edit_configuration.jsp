@@ -81,7 +81,7 @@ renderResponse.setTitle(categoryDisplayName);
 <portlet:actionURL name="bindConfiguration" var="bindConfigurationActionURL" />
 <portlet:actionURL name="deleteConfiguration" var="deleteConfigurationActionURL" />
 
-<div class="container-fluid container-fluid-max-xl">
+<clay:container-fluid>
 	<clay:col
 		size="12"
 	>
@@ -92,9 +92,9 @@ renderResponse.setTitle(categoryDisplayName);
 			showParentGroups="<%= false %>"
 		/>
 	</clay:col>
-</div>
+</clay:container-fluid>
 
-<div class="container-fluid container-fluid-max-xl">
+<clay:container-fluid>
 	<clay:row>
 		<clay:col
 			md="3"
@@ -105,7 +105,7 @@ renderResponse.setTitle(categoryDisplayName);
 		<clay:col
 			md="9"
 		>
-			<div class="sheet sheet-lg">
+			<clay:sheet>
 				<aui:form action="<%= bindConfigurationActionURL %>" method="post" name="fm">
 					<aui:input name="redirect" type="hidden" value="<%= bindRedirectURL %>" />
 					<aui:input name="factoryPid" type="hidden" value="<%= configurationModel.getFactoryPid() %>" />
@@ -243,7 +243,7 @@ renderResponse.setTitle(categoryDisplayName);
 						<aui:button href="<%= redirect %>" name="cancel" type="cancel" />
 					</aui:button-row>
 				</aui:form>
-			</div>
+			</clay:sheet>
 		</clay:col>
 	</clay:row>
-</div>
+</clay:container-fluid>

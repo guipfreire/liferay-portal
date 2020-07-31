@@ -453,10 +453,11 @@ public class AssetPublisherHelperImpl implements AssetPublisherHelper {
 
 	@Override
 	public List<AssetEntryResult> getAssetEntryResults(
-			SearchContainer searchContainer, AssetEntryQuery assetEntryQuery,
-			Layout layout, PortletPreferences portletPreferences,
-			String portletName, Locale locale, TimeZone timeZone,
-			long companyId, long scopeGroupId, long userId, long[] classNameIds,
+			SearchContainer<AssetEntry> searchContainer,
+			AssetEntryQuery assetEntryQuery, Layout layout,
+			PortletPreferences portletPreferences, String portletName,
+			Locale locale, TimeZone timeZone, long companyId, long scopeGroupId,
+			long userId, long[] classNameIds,
 			Map<String, Serializable> attributes)
 		throws Exception {
 
@@ -939,10 +940,11 @@ public class AssetPublisherHelperImpl implements AssetPublisherHelper {
 	}
 
 	private List<AssetEntryResult> _getAssetEntryResultsByClassName(
-			SearchContainer searchContainer, AssetEntryQuery assetEntryQuery,
-			Layout layout, PortletPreferences portletPreferences,
-			String portletName, Locale locale, TimeZone timeZone,
-			long companyId, long scopeGroupId, long userId, long[] classNameIds,
+			SearchContainer<AssetEntry> searchContainer,
+			AssetEntryQuery assetEntryQuery, Layout layout,
+			PortletPreferences portletPreferences, String portletName,
+			Locale locale, TimeZone timeZone, long companyId, long scopeGroupId,
+			long userId, long[] classNameIds,
 			Map<String, Serializable> attributes)
 		throws Exception {
 
@@ -1009,10 +1011,11 @@ public class AssetPublisherHelperImpl implements AssetPublisherHelper {
 	}
 
 	private List<AssetEntryResult> _getAssetEntryResultsByDefault(
-			SearchContainer searchContainer, AssetEntryQuery assetEntryQuery,
-			Layout layout, PortletPreferences portletPreferences,
-			String portletName, Locale locale, TimeZone timeZone,
-			long companyId, long scopeGroupId, long userId, long[] classNameIds,
+			SearchContainer<AssetEntry> searchContainer,
+			AssetEntryQuery assetEntryQuery, Layout layout,
+			PortletPreferences portletPreferences, String portletName,
+			Locale locale, TimeZone timeZone, long companyId, long scopeGroupId,
+			long userId, long[] classNameIds,
 			Map<String, Serializable> attributes)
 		throws Exception {
 
@@ -1043,11 +1046,12 @@ public class AssetPublisherHelperImpl implements AssetPublisherHelper {
 	}
 
 	private List<AssetEntryResult> _getAssetEntryResultsByVocabulary(
-			SearchContainer searchContainer, AssetEntryQuery assetEntryQuery,
-			Layout layout, PortletPreferences portletPreferences,
-			String portletName, Locale locale, TimeZone timeZone,
-			long companyId, long scopeGroupId, long userId, long[] classNameIds,
-			long assetVocabularyId, Map<String, Serializable> attributes)
+			SearchContainer<AssetEntry> searchContainer,
+			AssetEntryQuery assetEntryQuery, Layout layout,
+			PortletPreferences portletPreferences, String portletName,
+			Locale locale, TimeZone timeZone, long companyId, long scopeGroupId,
+			long userId, long[] classNameIds, long assetVocabularyId,
+			Map<String, Serializable> attributes)
 		throws Exception {
 
 		List<AssetEntryResult> assetEntryResults = new ArrayList<>();
@@ -1154,10 +1158,10 @@ public class AssetPublisherHelperImpl implements AssetPublisherHelper {
 
 		List<String> assetEntryXmlsList = ListUtil.fromArray(assetEntryXmls);
 
-		Iterator<String> itr = assetEntryXmlsList.iterator();
+		Iterator<String> iterator = assetEntryXmlsList.iterator();
 
-		while (itr.hasNext()) {
-			String assetEntryXml = itr.next();
+		while (iterator.hasNext()) {
+			String assetEntryXml = iterator.next();
 
 			Document document = SAXReaderUtil.read(assetEntryXml);
 
@@ -1166,7 +1170,7 @@ public class AssetPublisherHelperImpl implements AssetPublisherHelper {
 			String assetEntryUuid = rootElement.elementText("asset-entry-uuid");
 
 			if (assetEntryUuids.contains(assetEntryUuid)) {
-				itr.remove();
+				iterator.remove();
 			}
 		}
 

@@ -104,20 +104,20 @@ public class EditDisplayPageMenuProductNavigationControlMenuEntry
 			return false;
 		}
 
-		InfoDisplayObjectProvider infoDisplayObjectProvider =
-			(InfoDisplayObjectProvider)httpServletRequest.getAttribute(
+		InfoDisplayObjectProvider<?> infoDisplayObjectProvider =
+			(InfoDisplayObjectProvider<?>)httpServletRequest.getAttribute(
 				AssetDisplayPageWebKeys.INFO_DISPLAY_OBJECT_PROVIDER);
 
 		if (infoDisplayObjectProvider == null) {
 			return false;
 		}
 
-		AssetRendererFactory assetRendererFactory =
+		AssetRendererFactory<?> assetRendererFactory =
 			AssetRendererFactoryRegistryUtil.
 				getAssetRendererFactoryByClassNameId(
 					infoDisplayObjectProvider.getClassNameId());
 
-		AssetRenderer assetRenderer = null;
+		AssetRenderer<?> assetRenderer = null;
 
 		if (assetRendererFactory != null) {
 			assetRenderer = assetRendererFactory.getAssetRenderer(

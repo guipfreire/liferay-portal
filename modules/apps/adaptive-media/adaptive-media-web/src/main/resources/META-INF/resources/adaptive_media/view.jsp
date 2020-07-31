@@ -35,7 +35,10 @@ AMManagementToolbarDisplayContext amManagementToolbarDisplayContext = new AMMana
 PortletURL portletURL = renderResponse.createRenderURL();
 %>
 
-<div class="closed container-fluid-1280 sidenav-container sidenav-right" id="<portlet:namespace />infoPanelId">
+<clay:container-fluid
+	cssClass="closed sidenav-container sidenav-right"
+	id='<%= liferayPortletResponse.getNamespace() + "infoPanelId" %>'
+>
 	<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/adaptive_media/info_panel" var="sidebarPanelURL" />
 
 	<liferay-frontend:sidebar-panel
@@ -145,10 +148,10 @@ PortletURL portletURL = renderResponse.createRenderURL();
 							</portlet:resourceURL>
 
 							<%
-							Map<String, Object> data = HashMapBuilder.<String, Object>put(
+							Map<String, Object> props = HashMapBuilder.<String, Object>put(
 								"adaptedImages", Math.min(adaptedImages, totalImages)
 							).put(
-								"adaptiveMediaProgressComponentId", renderResponse.getNamespace() + "AdaptRemaining" + uuid
+								"adaptiveMediaProgressComponentId", liferayPortletResponse.getNamespace() + "AdaptRemaining" + uuid
 							).put(
 								"autoStartProgress", ((optimizeImagesAllConfigurationsBackgroundTasksCount > 0) && amImageConfigurationEntry.isEnabled()) || currentBackgroundTaskConfigurationEntryUuids.contains(uuid)
 							).put(
@@ -165,8 +168,8 @@ PortletURL portletURL = renderResponse.createRenderURL();
 							%>
 
 							<react:component
-								data="<%= data %>"
 								module="adaptive_media/js/AdaptiveMediaProgress.es"
+								props="<%= props %>"
 							/>
 						</div>
 					</liferay-ui:search-container-column-text>
@@ -209,7 +212,7 @@ PortletURL portletURL = renderResponse.createRenderURL();
 			</liferay-ui:search-container>
 		</aui:form>
 	</div>
-</div>
+</clay:container-fluid>
 
 <aui:script>
 	function <portlet:namespace />adaptRemaining(uuid, backgroundTaskUrl) {

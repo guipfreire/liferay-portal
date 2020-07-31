@@ -34,8 +34,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>DANGER_INFO</td>
+	<td>//*[contains(@class,'danger-info')][contains(.,'${key_dangerInfo}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>DRAFT_AUTO_SAVE</td>
 	<td>//div/small[contains(@id,'saveStatus') and contains(.,'Draft Saved at')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>EMPTY_DEPOT_ROLE</td>
+	<td>//div[contains(@id,'depotRoles')]/p[contains(@class,'text-muted')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -51,6 +61,11 @@
 <tr>
 	<td>EMPTY_INFO_DEPOT</td>
 	<td>//p[contains(@class,'text-muted')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>EMPTY_INFO_DEPOT_HIDE</td>
+	<td>//div[not(contains(@class,'hide'))]//p[contains(@class,'text-muted')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -361,6 +376,11 @@
 <tr>
 	<td>USER_BLOCKED</td>
 	<td>//div[contains(@class,'alert-block')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>WARNING_INFO</td>
+	<td>//*[contains(@class,'warning-info')][contains(.,'${key_warningInfo}')]</td>
 	<td></td>
 </tr>
 <tr>

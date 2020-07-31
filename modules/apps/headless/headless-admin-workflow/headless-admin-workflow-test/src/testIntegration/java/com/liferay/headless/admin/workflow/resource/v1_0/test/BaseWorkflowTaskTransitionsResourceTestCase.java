@@ -106,7 +106,9 @@ public abstract class BaseWorkflowTaskTransitionsResourceTestCase {
 		WorkflowTaskTransitionsResource.Builder builder =
 			WorkflowTaskTransitionsResource.builder();
 
-		workflowTaskTransitionsResource = builder.locale(
+		workflowTaskTransitionsResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -197,6 +199,13 @@ public abstract class BaseWorkflowTaskTransitionsResourceTestCase {
 
 	@Test
 	public void testGraphQLGetWorkflowTaskTransition() throws Exception {
+		Assert.assertTrue(true);
+	}
+
+	@Test
+	public void testGraphQLGetWorkflowTaskTransitionNotFound()
+		throws Exception {
+
 		Assert.assertTrue(true);
 	}
 

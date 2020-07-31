@@ -22,6 +22,7 @@ import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
+import com.liferay.portal.vulcan.util.ObjectMapperUtil;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -31,6 +32,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Generated;
+
+import javax.validation.Valid;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -44,21 +47,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "DisplayPageTemplate")
 public class DisplayPageTemplate {
 
-	@Schema
-	public String getContentSubtypeName() {
-		return contentSubtypeName;
+	public static DisplayPageTemplate toDTO(String json) {
+		return ObjectMapperUtil.readValue(DisplayPageTemplate.class, json);
 	}
 
-	public void setContentSubtypeName(String contentSubtypeName) {
-		this.contentSubtypeName = contentSubtypeName;
+	@Schema
+	@Valid
+	public ContentSubtype getContentSubtype() {
+		return contentSubtype;
+	}
+
+	public void setContentSubtype(ContentSubtype contentSubtype) {
+		this.contentSubtype = contentSubtype;
 	}
 
 	@JsonIgnore
-	public void setContentSubtypeName(
-		UnsafeSupplier<String, Exception> contentSubtypeNameUnsafeSupplier) {
+	public void setContentSubtype(
+		UnsafeSupplier<ContentSubtype, Exception>
+			contentSubtypeUnsafeSupplier) {
 
 		try {
-			contentSubtypeName = contentSubtypeNameUnsafeSupplier.get();
+			contentSubtype = contentSubtypeUnsafeSupplier.get();
 		}
 		catch (RuntimeException re) {
 			throw re;
@@ -70,23 +79,24 @@ public class DisplayPageTemplate {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String contentSubtypeName;
+	protected ContentSubtype contentSubtype;
 
 	@Schema
-	public String getContentTypeClassName() {
-		return contentTypeClassName;
+	@Valid
+	public ContentType getContentType() {
+		return contentType;
 	}
 
-	public void setContentTypeClassName(String contentTypeClassName) {
-		this.contentTypeClassName = contentTypeClassName;
+	public void setContentType(ContentType contentType) {
+		this.contentType = contentType;
 	}
 
 	@JsonIgnore
-	public void setContentTypeClassName(
-		UnsafeSupplier<String, Exception> contentTypeClassNameUnsafeSupplier) {
+	public void setContentType(
+		UnsafeSupplier<ContentType, Exception> contentTypeUnsafeSupplier) {
 
 		try {
-			contentTypeClassName = contentTypeClassNameUnsafeSupplier.get();
+			contentType = contentTypeUnsafeSupplier.get();
 		}
 		catch (RuntimeException re) {
 			throw re;
@@ -98,7 +108,7 @@ public class DisplayPageTemplate {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String contentTypeClassName;
+	protected ContentType contentType;
 
 	@Schema
 	public String getKey() {
@@ -179,32 +189,24 @@ public class DisplayPageTemplate {
 
 		sb.append("{");
 
-		if (contentSubtypeName != null) {
+		if (contentSubtype != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"contentSubtypeName\": ");
+			sb.append("\"contentSubtype\": ");
 
-			sb.append("\"");
-
-			sb.append(_escape(contentSubtypeName));
-
-			sb.append("\"");
+			sb.append(String.valueOf(contentSubtype));
 		}
 
-		if (contentTypeClassName != null) {
+		if (contentType != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"contentTypeClassName\": ");
+			sb.append("\"contentType\": ");
 
-			sb.append("\"");
-
-			sb.append(_escape(contentTypeClassName));
-
-			sb.append("\"");
+			sb.append(String.valueOf(contentType));
 		}
 
 		if (key != null) {
@@ -252,6 +254,16 @@ public class DisplayPageTemplate {
 		return string.replaceAll("\"", "\\\\\"");
 	}
 
+	private static boolean _isArray(Object value) {
+		if (value == null) {
+			return false;
+		}
+
+		Class<?> clazz = value.getClass();
+
+		return clazz.isArray();
+	}
+
 	private static String _toJSON(Map<String, ?> map) {
 		StringBuilder sb = new StringBuilder("{");
 
@@ -270,9 +282,7 @@ public class DisplayPageTemplate {
 
 			Object value = entry.getValue();
 
-			Class<?> clazz = value.getClass();
-
-			if (clazz.isArray()) {
+			if (_isArray(value)) {
 				sb.append("[");
 
 				Object[] valueArray = (Object[])value;

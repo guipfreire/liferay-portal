@@ -73,6 +73,7 @@ public class SocialRequestModelImpl
 	public static final String TABLE_NAME = "SocialRequest";
 
 	public static final Object[][] TABLE_COLUMNS = {
+		{"mvccVersion", Types.BIGINT}, {"ctCollectionId", Types.BIGINT},
 		{"uuid_", Types.VARCHAR}, {"requestId", Types.BIGINT},
 		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"userId", Types.BIGINT}, {"createDate", Types.BIGINT},
@@ -86,6 +87,8 @@ public class SocialRequestModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("ctCollectionId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("requestId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("groupId", Types.BIGINT);
@@ -102,7 +105,7 @@ public class SocialRequestModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table SocialRequest (uuid_ VARCHAR(75) null,requestId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,createDate LONG,modifiedDate LONG,classNameId LONG,classPK LONG,type_ INTEGER,extraData STRING null,receiverUserId LONG,status INTEGER)";
+		"create table SocialRequest (mvccVersion LONG default 0 not null,ctCollectionId LONG default 0 not null,uuid_ VARCHAR(75) null,requestId LONG not null,groupId LONG,companyId LONG,userId LONG,createDate LONG,modifiedDate LONG,classNameId LONG,classPK LONG,type_ INTEGER,extraData STRING null,receiverUserId LONG,status INTEGER,primary key (requestId, ctCollectionId))";
 
 	public static final String TABLE_SQL_DROP = "drop table SocialRequest";
 
@@ -118,20 +121,23 @@ public class SocialRequestModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.entity.cache.enabled.com.liferay.social.kernel.model.SocialRequest"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean ENTITY_CACHE_ENABLED = true;
 
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.finder.cache.enabled.com.liferay.social.kernel.model.SocialRequest"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean FINDER_CACHE_ENABLED = true;
 
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.column.bitmask.enabled.com.liferay.social.kernel.model.SocialRequest"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean COLUMN_BITMASK_ENABLED = true;
 
 	public static final long CLASSNAMEID_COLUMN_BITMASK = 1L;
 
@@ -166,6 +172,8 @@ public class SocialRequestModelImpl
 
 		SocialRequest model = new SocialRequestImpl();
 
+		model.setMvccVersion(soapModel.getMvccVersion());
+		model.setCtCollectionId(soapModel.getCtCollectionId());
 		model.setUuid(soapModel.getUuid());
 		model.setRequestId(soapModel.getRequestId());
 		model.setGroupId(soapModel.getGroupId());
@@ -260,9 +268,6 @@ public class SocialRequestModelImpl
 				attributeGetterFunction.apply((SocialRequest)this));
 		}
 
-		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
-		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
-
 		return attributes;
 	}
 
@@ -335,6 +340,16 @@ public class SocialRequestModelImpl
 		Map<String, BiConsumer<SocialRequest, ?>> attributeSetterBiConsumers =
 			new LinkedHashMap<String, BiConsumer<SocialRequest, ?>>();
 
+		attributeGetterFunctions.put(
+			"mvccVersion", SocialRequest::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<SocialRequest, Long>)SocialRequest::setMvccVersion);
+		attributeGetterFunctions.put(
+			"ctCollectionId", SocialRequest::getCtCollectionId);
+		attributeSetterBiConsumers.put(
+			"ctCollectionId",
+			(BiConsumer<SocialRequest, Long>)SocialRequest::setCtCollectionId);
 		attributeGetterFunctions.put("uuid", SocialRequest::getUuid);
 		attributeSetterBiConsumers.put(
 			"uuid", (BiConsumer<SocialRequest, String>)SocialRequest::setUuid);
@@ -394,6 +409,28 @@ public class SocialRequestModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
+	public long getCtCollectionId() {
+		return _ctCollectionId;
+	}
+
+	@Override
+	public void setCtCollectionId(long ctCollectionId) {
+		_ctCollectionId = ctCollectionId;
 	}
 
 	@JSON
@@ -745,6 +782,8 @@ public class SocialRequestModelImpl
 	public Object clone() {
 		SocialRequestImpl socialRequestImpl = new SocialRequestImpl();
 
+		socialRequestImpl.setMvccVersion(getMvccVersion());
+		socialRequestImpl.setCtCollectionId(getCtCollectionId());
 		socialRequestImpl.setUuid(getUuid());
 		socialRequestImpl.setRequestId(getRequestId());
 		socialRequestImpl.setGroupId(getGroupId());
@@ -788,16 +827,16 @@ public class SocialRequestModelImpl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof SocialRequest)) {
+		if (!(object instanceof SocialRequest)) {
 			return false;
 		}
 
-		SocialRequest socialRequest = (SocialRequest)obj;
+		SocialRequest socialRequest = (SocialRequest)object;
 
 		long primaryKey = socialRequest.getPrimaryKey();
 
@@ -814,11 +853,19 @@ public class SocialRequestModelImpl
 		return (int)getPrimaryKey();
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isEntityCacheEnabled() {
 		return ENTITY_CACHE_ENABLED;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isFinderCacheEnabled() {
 		return FINDER_CACHE_ENABLED;
@@ -874,6 +921,10 @@ public class SocialRequestModelImpl
 	public CacheModel<SocialRequest> toCacheModel() {
 		SocialRequestCacheModel socialRequestCacheModel =
 			new SocialRequestCacheModel();
+
+		socialRequestCacheModel.mvccVersion = getMvccVersion();
+
+		socialRequestCacheModel.ctCollectionId = getCtCollectionId();
 
 		socialRequestCacheModel.uuid = getUuid();
 
@@ -986,6 +1037,8 @@ public class SocialRequestModelImpl
 
 	}
 
+	private long _mvccVersion;
+	private long _ctCollectionId;
 	private String _uuid;
 	private String _originalUuid;
 	private long _requestId;

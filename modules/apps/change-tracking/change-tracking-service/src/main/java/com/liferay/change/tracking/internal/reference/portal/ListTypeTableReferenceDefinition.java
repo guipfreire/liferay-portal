@@ -14,8 +14,9 @@
 
 package com.liferay.change.tracking.internal.reference.portal;
 
-import com.liferay.change.tracking.reference.TableReferenceDefinition;
-import com.liferay.change.tracking.reference.helper.TableReferenceInfoDefiner;
+import com.liferay.change.tracking.spi.reference.TableReferenceDefinition;
+import com.liferay.change.tracking.spi.reference.builder.ChildTableReferenceInfoBuilder;
+import com.liferay.change.tracking.spi.reference.builder.ParentTableReferenceInfoBuilder;
 import com.liferay.portal.kernel.model.ListTypeTable;
 import com.liferay.portal.kernel.service.persistence.BasePersistence;
 import com.liferay.portal.kernel.service.persistence.ListTypePersistence;
@@ -31,14 +32,15 @@ public class ListTypeTableReferenceDefinition
 	implements TableReferenceDefinition<ListTypeTable> {
 
 	@Override
-	public void defineTableReferences(
-		TableReferenceInfoDefiner<ListTypeTable> tableReferenceInfoDefiner) {
+	public void defineChildTableReferences(
+		ChildTableReferenceInfoBuilder<ListTypeTable>
+			childTableReferenceInfoBuilder) {
+	}
 
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			ListTypeTable.INSTANCE.name);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			ListTypeTable.INSTANCE.type);
+	@Override
+	public void defineParentTableReferences(
+		ParentTableReferenceInfoBuilder<ListTypeTable>
+			parentTableReferenceInfoBuilder) {
 	}
 
 	@Override

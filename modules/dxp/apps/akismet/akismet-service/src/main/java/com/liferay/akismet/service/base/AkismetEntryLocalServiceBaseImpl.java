@@ -17,6 +17,7 @@ package com.liferay.akismet.service.base;
 import com.liferay.akismet.model.AkismetEntry;
 import com.liferay.akismet.service.AkismetEntryLocalService;
 import com.liferay.akismet.service.persistence.AkismetEntryPersistence;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -74,6 +75,10 @@ public abstract class AkismetEntryLocalServiceBaseImpl
 	/**
 	 * Adds the akismet entry to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AkismetEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param akismetEntry the akismet entry
 	 * @return the akismet entry that was added
 	 */
@@ -100,6 +105,10 @@ public abstract class AkismetEntryLocalServiceBaseImpl
 	/**
 	 * Deletes the akismet entry with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AkismetEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param akismetEntryId the primary key of the akismet entry
 	 * @return the akismet entry that was removed
 	 * @throws PortalException if a akismet entry with the primary key could not be found
@@ -115,6 +124,10 @@ public abstract class AkismetEntryLocalServiceBaseImpl
 	/**
 	 * Deletes the akismet entry from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AkismetEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param akismetEntry the akismet entry
 	 * @return the akismet entry that was removed
 	 */
@@ -122,6 +135,11 @@ public abstract class AkismetEntryLocalServiceBaseImpl
 	@Override
 	public AkismetEntry deleteAkismetEntry(AkismetEntry akismetEntry) {
 		return akismetEntryPersistence.remove(akismetEntry);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return akismetEntryPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -335,6 +353,10 @@ public abstract class AkismetEntryLocalServiceBaseImpl
 
 	/**
 	 * Updates the akismet entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AkismetEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param akismetEntry the akismet entry
 	 * @return the akismet entry that was updated

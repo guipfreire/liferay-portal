@@ -14,6 +14,7 @@
 
 package com.liferay.revert.schema.version.service;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
@@ -64,6 +65,10 @@ public interface RSVEntryLocalService
 	/**
 	 * Adds the rsv entry to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RSVEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param rsvEntry the rsv entry
 	 * @return the rsv entry that was added
 	 */
@@ -95,6 +100,10 @@ public interface RSVEntryLocalService
 	/**
 	 * Deletes the rsv entry with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RSVEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param rsvEntryId the primary key of the rsv entry
 	 * @return the rsv entry that was removed
 	 * @throws PortalException if a rsv entry with the primary key could not be found
@@ -105,11 +114,18 @@ public interface RSVEntryLocalService
 	/**
 	 * Deletes the rsv entry from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RSVEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param rsvEntry the rsv entry
 	 * @return the rsv entry that was removed
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	public RSVEntry deleteRSVEntry(RSVEntry rsvEntry);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public <T> T dslQuery(DSLQuery dslQuery);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DynamicQuery dynamicQuery();
@@ -235,6 +251,10 @@ public interface RSVEntryLocalService
 
 	/**
 	 * Updates the rsv entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RSVEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param rsvEntry the rsv entry
 	 * @return the rsv entry that was updated

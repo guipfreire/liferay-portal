@@ -52,15 +52,23 @@ public class LinkEditableElementMapper implements EditableElementMapper {
 		boolean assetDisplayPage =
 			_fragmentEntryProcessorHelper.isAssetDisplayPage(
 				fragmentEntryProcessorContext.getMode());
-
+		boolean collectionMapped =
+			_fragmentEntryProcessorHelper.isMappedCollection(configJSONObject);
 		boolean mapped = _fragmentEntryProcessorHelper.isMapped(
 			configJSONObject);
 
-		if (Validator.isNull(href) && !assetDisplayPage && !mapped) {
+		if (Validator.isNull(href) && !assetDisplayPage && !collectionMapped &&
+			!mapped) {
+
 			return;
 		}
 
-		if (mapped) {
+		if (collectionMapped) {
+			href = GetterUtil.getString(
+				_fragmentEntryProcessorHelper.getMappedCollectionValue(
+					configJSONObject, fragmentEntryProcessorContext));
+		}
+		else if (mapped) {
 			href = GetterUtil.getString(
 				_fragmentEntryProcessorHelper.getMappedValue(
 					configJSONObject, new HashMap<>(),
@@ -75,11 +83,13 @@ public class LinkEditableElementMapper implements EditableElementMapper {
 
 		boolean processEditableTag = false;
 
-		if (StringUtil.equalsIgnoreCase(element.tagName(), "lfr-editable")) {
-			processEditableTag = true;
-		}
-		else {
+		if (StringUtil.equalsIgnoreCase(element.tagName(), "a")) {
 			linkElement = element;
+		}
+		else if (StringUtil.equalsIgnoreCase(
+					element.tagName(), "lfr-editable")) {
+
+			processEditableTag = true;
 		}
 
 		boolean replaceLink = false;
@@ -102,7 +112,7 @@ public class LinkEditableElementMapper implements EditableElementMapper {
 			linkElement.html(
 				replaceLink ? firstChildElement.html() : element.html());
 
-			if (processEditableTag) {
+			if ((linkElement != element) || processEditableTag) {
 				element.html(linkElement.outerHtml());
 			}
 		}

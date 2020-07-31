@@ -107,7 +107,9 @@ public abstract class BasePostalAddressResourceTestCase {
 
 		PostalAddressResource.Builder builder = PostalAddressResource.builder();
 
-		postalAddressResource = builder.locale(
+		postalAddressResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -314,6 +316,28 @@ public abstract class BasePostalAddressResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/postalAddress"))));
+	}
+
+	@Test
+	public void testGraphQLGetPostalAddressNotFound() throws Exception {
+		Long irrelevantPostalAddressId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"postalAddress",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"postalAddressId",
+									irrelevantPostalAddressId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

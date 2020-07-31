@@ -14,10 +14,9 @@
 
 package com.liferay.change.tracking.internal.reference.portal;
 
-import com.liferay.change.tracking.reference.TableReferenceDefinition;
-import com.liferay.change.tracking.reference.helper.TableReferenceInfoDefiner;
-import com.liferay.portal.kernel.model.ClassNameTable;
-import com.liferay.portal.kernel.model.ResourcePermissionTable;
+import com.liferay.change.tracking.spi.reference.TableReferenceDefinition;
+import com.liferay.change.tracking.spi.reference.builder.ChildTableReferenceInfoBuilder;
+import com.liferay.change.tracking.spi.reference.builder.ParentTableReferenceInfoBuilder;
 import com.liferay.portal.kernel.model.RoleTable;
 import com.liferay.portal.kernel.model.Team;
 import com.liferay.portal.kernel.model.TeamTable;
@@ -35,57 +34,23 @@ public class TeamTableReferenceDefinition
 	implements TableReferenceDefinition<TeamTable> {
 
 	@Override
-	public void defineTableReferences(
-		TableReferenceInfoDefiner<TeamTable> tableReferenceInfoDefiner) {
+	public void defineChildTableReferences(
+		ChildTableReferenceInfoBuilder<TeamTable>
+			childTableReferenceInfoBuilder) {
 
-		tableReferenceInfoDefiner.defineGroupedModel(TeamTable.INSTANCE);
+		childTableReferenceInfoBuilder.resourcePermissionReference(
+			TeamTable.INSTANCE.teamId, Team.class
+		).classNameReference(
+			TeamTable.INSTANCE.teamId, RoleTable.INSTANCE.classPK, Team.class
+		);
+	}
 
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			TeamTable.INSTANCE.uuid);
+	@Override
+	public void defineParentTableReferences(
+		ParentTableReferenceInfoBuilder<TeamTable>
+			parentTableReferenceInfoBuilder) {
 
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			TeamTable.INSTANCE.name);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			TeamTable.INSTANCE.description);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			TeamTable.INSTANCE.lastPublishDate);
-
-		tableReferenceInfoDefiner.defineReferenceInnerJoin(
-			fromStep -> fromStep.from(
-				ResourcePermissionTable.INSTANCE
-			).innerJoinON(
-				TeamTable.INSTANCE,
-				TeamTable.INSTANCE.companyId.eq(
-					ResourcePermissionTable.INSTANCE.companyId
-				).and(
-					ResourcePermissionTable.INSTANCE.name.eq(
-						Team.class.getName())
-				).and(
-					ResourcePermissionTable.INSTANCE.primKeyId.eq(
-						TeamTable.INSTANCE.teamId)
-				)
-			));
-
-		tableReferenceInfoDefiner.defineReferenceInnerJoin(
-			fromStep -> fromStep.from(
-				RoleTable.INSTANCE
-			).innerJoinON(
-				TeamTable.INSTANCE,
-				TeamTable.INSTANCE.companyId.eq(
-					RoleTable.INSTANCE.companyId
-				).and(
-					TeamTable.INSTANCE.teamId.eq(RoleTable.INSTANCE.classPK)
-				)
-			).innerJoinON(
-				ClassNameTable.INSTANCE,
-				ClassNameTable.INSTANCE.classNameId.eq(
-					RoleTable.INSTANCE.classNameId
-				).and(
-					ClassNameTable.INSTANCE.value.eq(Team.class.getName())
-				)
-			));
+		parentTableReferenceInfoBuilder.groupedModel(TeamTable.INSTANCE);
 	}
 
 	@Override

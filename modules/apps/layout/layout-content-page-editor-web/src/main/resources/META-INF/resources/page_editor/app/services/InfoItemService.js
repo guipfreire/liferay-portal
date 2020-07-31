@@ -68,6 +68,51 @@ export default {
 	},
 
 	/**
+	 * Get available list item renderers for the list style
+	 * @param {object} options
+	 * @param {string} options.itemSubtype itemSubtype
+	 * @param {string} options.itemType itemType
+	 * @param {string} options.listStyle listStyle
+	 * @param {function} options.onNetworkStatus
+	 */
+	getAvailableListItemRenderers({
+		itemSubtype,
+		itemType,
+		listStyle,
+		onNetworkStatus,
+	}) {
+		return serviceFetch(
+			config.getAvailableListItemRenderersURL,
+			{
+				body: {
+					itemSubtype,
+					itemType,
+					listStyle,
+				},
+			},
+			onNetworkStatus
+		);
+	},
+
+	/**
+	 * Get available list renderers for the class name
+	 * @param {object} options
+	 * @param {string} options.className className
+	 * @param {function} options.onNetworkStatus
+	 */
+	getAvailableListRenderers({className, onNetworkStatus}) {
+		return serviceFetch(
+			config.getAvailableListRenderersURL,
+			{
+				body: {
+					className,
+				},
+			},
+			onNetworkStatus
+		);
+	},
+
+	/**
 	 * Get available structure mapping fields
 	 * @param {object} options
 	 * @param {string} options.classNameId Asset's className

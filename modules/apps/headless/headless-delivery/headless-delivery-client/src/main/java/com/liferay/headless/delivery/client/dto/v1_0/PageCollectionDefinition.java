@@ -28,16 +28,21 @@ import javax.annotation.Generated;
 @Generated("")
 public class PageCollectionDefinition implements Cloneable {
 
-	public Object getCollectionConfig() {
+	public static PageCollectionDefinition toDTO(String json) {
+		return PageCollectionDefinitionSerDes.toDTO(json);
+	}
+
+	public CollectionConfig getCollectionConfig() {
 		return collectionConfig;
 	}
 
-	public void setCollectionConfig(Object collectionConfig) {
+	public void setCollectionConfig(CollectionConfig collectionConfig) {
 		this.collectionConfig = collectionConfig;
 	}
 
 	public void setCollectionConfig(
-		UnsafeSupplier<Object, Exception> collectionConfigUnsafeSupplier) {
+		UnsafeSupplier<CollectionConfig, Exception>
+			collectionConfigUnsafeSupplier) {
 
 		try {
 			collectionConfig = collectionConfigUnsafeSupplier.get();
@@ -47,7 +52,49 @@ public class PageCollectionDefinition implements Cloneable {
 		}
 	}
 
-	protected Object collectionConfig;
+	protected CollectionConfig collectionConfig;
+
+	public String getListItemStyle() {
+		return listItemStyle;
+	}
+
+	public void setListItemStyle(String listItemStyle) {
+		this.listItemStyle = listItemStyle;
+	}
+
+	public void setListItemStyle(
+		UnsafeSupplier<String, Exception> listItemStyleUnsafeSupplier) {
+
+		try {
+			listItemStyle = listItemStyleUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String listItemStyle;
+
+	public String getListStyle() {
+		return listStyle;
+	}
+
+	public void setListStyle(String listStyle) {
+		this.listStyle = listStyle;
+	}
+
+	public void setListStyle(
+		UnsafeSupplier<String, Exception> listStyleUnsafeSupplier) {
+
+		try {
+			listStyle = listStyleUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String listStyle;
 
 	public Integer getNumberOfColumns() {
 		return numberOfColumns;
@@ -90,6 +137,27 @@ public class PageCollectionDefinition implements Cloneable {
 	}
 
 	protected Integer numberOfItems;
+
+	public String getTemplateKey() {
+		return templateKey;
+	}
+
+	public void setTemplateKey(String templateKey) {
+		this.templateKey = templateKey;
+	}
+
+	public void setTemplateKey(
+		UnsafeSupplier<String, Exception> templateKeyUnsafeSupplier) {
+
+		try {
+			templateKey = templateKeyUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String templateKey;
 
 	@Override
 	public PageCollectionDefinition clone() throws CloneNotSupportedException {

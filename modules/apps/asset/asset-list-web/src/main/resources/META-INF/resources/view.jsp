@@ -20,6 +20,11 @@
 AssetListManagementToolbarDisplayContext assetListManagementToolbarDisplayContext = new AssetListManagementToolbarDisplayContext(request, liferayPortletRequest, liferayPortletResponse, assetListDisplayContext);
 %>
 
+<clay:navigation-bar
+	inverted="<%= true %>"
+	navigationItems='<%= assetListDisplayContext.getNavigationItems("collections") %>'
+/>
+
 <clay:management-toolbar
 	displayContext="<%= assetListManagementToolbarDisplayContext %>"
 />
@@ -29,6 +34,10 @@ AssetListManagementToolbarDisplayContext assetListManagementToolbarDisplayContex
 </portlet:actionURL>
 
 <aui:form action="<%= deleteAssetListEntryURL %>" cssClass="container-fluid-1280" name="fm">
+	<liferay-ui:breadcrumb
+		showLayout="<%= false %>"
+	/>
+
 	<c:choose>
 		<c:when test="<%= assetListDisplayContext.getAssetListEntriesCount() > 0 %>">
 			<liferay-ui:search-container
@@ -84,7 +93,7 @@ AssetListManagementToolbarDisplayContext assetListManagementToolbarDisplayContex
 						long classTypeId = GetterUtil.getLong(assetListEntry.getAssetEntrySubtype());
 
 						if (classTypeId > 0) {
-							AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(assetListEntry.getAssetEntryType());
+							AssetRendererFactory<?> assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(assetListEntry.getAssetEntryType());
 
 							if ((assetRendererFactory != null) && assetRendererFactory.isSupportsClassTypes()) {
 								ClassTypeReader classTypeReader = assetRendererFactory.getClassTypeReader();

@@ -71,7 +71,23 @@ public interface UserAccountResource {
 	public Response postUserAccountBatch(String callbackURL, Object object)
 		throws Exception;
 
+	public void deleteUserAccount(Long userAccountId) throws Exception;
+
+	public Response deleteUserAccountBatch(String callbackURL, Object object)
+		throws Exception;
+
 	public UserAccount getUserAccount(Long userAccountId) throws Exception;
+
+	public UserAccount patchUserAccount(
+			Long userAccountId, UserAccount userAccount)
+		throws Exception;
+
+	public UserAccount putUserAccount(
+			Long userAccountId, UserAccount userAccount)
+		throws Exception;
+
+	public Response putUserAccountBatch(String callbackURL, Object object)
+		throws Exception;
 
 	public default void setContextAcceptLanguage(
 		AcceptLanguage contextAcceptLanguage) {

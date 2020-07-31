@@ -64,6 +64,7 @@ public class ExpandoTableModelImpl
 	public static final String TABLE_NAME = "ExpandoTable";
 
 	public static final Object[][] TABLE_COLUMNS = {
+		{"mvccVersion", Types.BIGINT}, {"ctCollectionId", Types.BIGINT},
 		{"tableId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"classNameId", Types.BIGINT}, {"name", Types.VARCHAR}
 	};
@@ -72,6 +73,8 @@ public class ExpandoTableModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("ctCollectionId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("tableId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("classNameId", Types.BIGINT);
@@ -79,7 +82,7 @@ public class ExpandoTableModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table ExpandoTable (tableId LONG not null primary key,companyId LONG,classNameId LONG,name VARCHAR(75) null)";
+		"create table ExpandoTable (mvccVersion LONG default 0 not null,ctCollectionId LONG default 0 not null,tableId LONG not null,companyId LONG,classNameId LONG,name VARCHAR(75) null,primary key (tableId, ctCollectionId))";
 
 	public static final String TABLE_SQL_DROP = "drop table ExpandoTable";
 
@@ -95,20 +98,23 @@ public class ExpandoTableModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.entity.cache.enabled.com.liferay.expando.kernel.model.ExpandoTable"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean ENTITY_CACHE_ENABLED = true;
 
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.finder.cache.enabled.com.liferay.expando.kernel.model.ExpandoTable"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean FINDER_CACHE_ENABLED = true;
 
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.column.bitmask.enabled.com.liferay.expando.kernel.model.ExpandoTable"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean COLUMN_BITMASK_ENABLED = true;
 
 	public static final long CLASSNAMEID_COLUMN_BITMASK = 1L;
 
@@ -173,9 +179,6 @@ public class ExpandoTableModelImpl
 				attributeName,
 				attributeGetterFunction.apply((ExpandoTable)this));
 		}
-
-		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
-		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
 
 		return attributes;
 	}
@@ -249,6 +252,16 @@ public class ExpandoTableModelImpl
 		Map<String, BiConsumer<ExpandoTable, ?>> attributeSetterBiConsumers =
 			new LinkedHashMap<String, BiConsumer<ExpandoTable, ?>>();
 
+		attributeGetterFunctions.put(
+			"mvccVersion", ExpandoTable::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<ExpandoTable, Long>)ExpandoTable::setMvccVersion);
+		attributeGetterFunctions.put(
+			"ctCollectionId", ExpandoTable::getCtCollectionId);
+		attributeSetterBiConsumers.put(
+			"ctCollectionId",
+			(BiConsumer<ExpandoTable, Long>)ExpandoTable::setCtCollectionId);
 		attributeGetterFunctions.put("tableId", ExpandoTable::getTableId);
 		attributeSetterBiConsumers.put(
 			"tableId",
@@ -270,6 +283,28 @@ public class ExpandoTableModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
+	public long getCtCollectionId() {
+		return _ctCollectionId;
+	}
+
+	@Override
+	public void setCtCollectionId(long ctCollectionId) {
+		_ctCollectionId = ctCollectionId;
 	}
 
 	@JSON
@@ -398,6 +433,8 @@ public class ExpandoTableModelImpl
 	public Object clone() {
 		ExpandoTableImpl expandoTableImpl = new ExpandoTableImpl();
 
+		expandoTableImpl.setMvccVersion(getMvccVersion());
+		expandoTableImpl.setCtCollectionId(getCtCollectionId());
 		expandoTableImpl.setTableId(getTableId());
 		expandoTableImpl.setCompanyId(getCompanyId());
 		expandoTableImpl.setClassNameId(getClassNameId());
@@ -424,16 +461,16 @@ public class ExpandoTableModelImpl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof ExpandoTable)) {
+		if (!(object instanceof ExpandoTable)) {
 			return false;
 		}
 
-		ExpandoTable expandoTable = (ExpandoTable)obj;
+		ExpandoTable expandoTable = (ExpandoTable)object;
 
 		long primaryKey = expandoTable.getPrimaryKey();
 
@@ -450,11 +487,19 @@ public class ExpandoTableModelImpl
 		return (int)getPrimaryKey();
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isEntityCacheEnabled() {
 		return ENTITY_CACHE_ENABLED;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isFinderCacheEnabled() {
 		return FINDER_CACHE_ENABLED;
@@ -483,6 +528,10 @@ public class ExpandoTableModelImpl
 	public CacheModel<ExpandoTable> toCacheModel() {
 		ExpandoTableCacheModel expandoTableCacheModel =
 			new ExpandoTableCacheModel();
+
+		expandoTableCacheModel.mvccVersion = getMvccVersion();
+
+		expandoTableCacheModel.ctCollectionId = getCtCollectionId();
 
 		expandoTableCacheModel.tableId = getTableId();
 
@@ -571,6 +620,8 @@ public class ExpandoTableModelImpl
 
 	}
 
+	private long _mvccVersion;
+	private long _ctCollectionId;
 	private long _tableId;
 	private long _companyId;
 	private long _originalCompanyId;

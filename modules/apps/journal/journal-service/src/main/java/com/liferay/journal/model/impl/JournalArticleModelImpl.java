@@ -171,36 +171,40 @@ public class JournalArticleModelImpl
 
 	public static final long DISPLAYDATE_COLUMN_BITMASK = 64L;
 
-	public static final long EXPIRATIONDATE_COLUMN_BITMASK = 128L;
+	public static final long FOLDERID_COLUMN_BITMASK = 128L;
 
-	public static final long FOLDERID_COLUMN_BITMASK = 256L;
+	public static final long GROUPID_COLUMN_BITMASK = 256L;
 
-	public static final long GROUPID_COLUMN_BITMASK = 512L;
+	public static final long INDEXABLE_COLUMN_BITMASK = 512L;
 
-	public static final long INDEXABLE_COLUMN_BITMASK = 1024L;
+	public static final long LAYOUTUUID_COLUMN_BITMASK = 1024L;
 
-	public static final long LAYOUTUUID_COLUMN_BITMASK = 2048L;
+	public static final long RESOURCEPRIMKEY_COLUMN_BITMASK = 2048L;
 
-	public static final long RESOURCEPRIMKEY_COLUMN_BITMASK = 4096L;
+	public static final long SMALLIMAGEID_COLUMN_BITMASK = 4096L;
 
-	public static final long SMALLIMAGEID_COLUMN_BITMASK = 8192L;
+	public static final long STATUS_COLUMN_BITMASK = 8192L;
 
-	public static final long STATUS_COLUMN_BITMASK = 16384L;
+	public static final long URLTITLE_COLUMN_BITMASK = 16384L;
 
-	public static final long URLTITLE_COLUMN_BITMASK = 32768L;
+	public static final long USERID_COLUMN_BITMASK = 32768L;
 
-	public static final long USERID_COLUMN_BITMASK = 65536L;
+	public static final long UUID_COLUMN_BITMASK = 65536L;
 
-	public static final long UUID_COLUMN_BITMASK = 131072L;
+	public static final long VERSION_COLUMN_BITMASK = 131072L;
 
-	public static final long VERSION_COLUMN_BITMASK = 262144L;
-
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
-		_entityCacheEnabled = entityCacheEnabled;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
-		_finderCacheEnabled = finderCacheEnabled;
 	}
 
 	/**
@@ -329,9 +333,6 @@ public class JournalArticleModelImpl
 				attributeName,
 				attributeGetterFunction.apply((JournalArticle)this));
 		}
-
-		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
-		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
 
 		return attributes;
 	}
@@ -1116,17 +1117,7 @@ public class JournalArticleModelImpl
 
 	@Override
 	public void setExpirationDate(Date expirationDate) {
-		_columnBitmask |= EXPIRATIONDATE_COLUMN_BITMASK;
-
-		if (_originalExpirationDate == null) {
-			_originalExpirationDate = _expirationDate;
-		}
-
 		_expirationDate = expirationDate;
-	}
-
-	public Date getOriginalExpirationDate() {
-		return _originalExpirationDate;
 	}
 
 	@JSON
@@ -1659,16 +1650,16 @@ public class JournalArticleModelImpl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof JournalArticle)) {
+		if (!(object instanceof JournalArticle)) {
 			return false;
 		}
 
-		JournalArticle journalArticle = (JournalArticle)obj;
+		JournalArticle journalArticle = (JournalArticle)object;
 
 		long primaryKey = journalArticle.getPrimaryKey();
 
@@ -1685,14 +1676,22 @@ public class JournalArticleModelImpl
 		return (int)getPrimaryKey();
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isEntityCacheEnabled() {
-		return _entityCacheEnabled;
+		return true;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isFinderCacheEnabled() {
-		return _finderCacheEnabled;
+		return true;
 	}
 
 	@Override
@@ -1760,9 +1759,6 @@ public class JournalArticleModelImpl
 
 		journalArticleModelImpl._originalDisplayDate =
 			journalArticleModelImpl._displayDate;
-
-		journalArticleModelImpl._originalExpirationDate =
-			journalArticleModelImpl._expirationDate;
 
 		journalArticleModelImpl._originalIndexable =
 			journalArticleModelImpl._indexable;
@@ -2056,9 +2052,6 @@ public class JournalArticleModelImpl
 
 	}
 
-	private static boolean _entityCacheEnabled;
-	private static boolean _finderCacheEnabled;
-
 	private long _mvccVersion;
 	private long _ctCollectionId;
 	private String _uuid;
@@ -2108,7 +2101,6 @@ public class JournalArticleModelImpl
 	private Date _displayDate;
 	private Date _originalDisplayDate;
 	private Date _expirationDate;
-	private Date _originalExpirationDate;
 	private Date _reviewDate;
 	private boolean _indexable;
 	private boolean _originalIndexable;

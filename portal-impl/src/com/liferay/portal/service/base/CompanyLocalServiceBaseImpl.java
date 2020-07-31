@@ -18,6 +18,7 @@ import com.liferay.document.library.kernel.service.persistence.DLFileEntryTypeFi
 import com.liferay.document.library.kernel.service.persistence.DLFileEntryTypePersistence;
 import com.liferay.expando.kernel.service.persistence.ExpandoColumnPersistence;
 import com.liferay.expando.kernel.service.persistence.ExpandoTablePersistence;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -97,6 +98,10 @@ public abstract class CompanyLocalServiceBaseImpl
 	/**
 	 * Adds the company to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect CompanyLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param company the company
 	 * @return the company that was added
 	 */
@@ -123,6 +128,10 @@ public abstract class CompanyLocalServiceBaseImpl
 	/**
 	 * Deletes the company with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect CompanyLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param companyId the primary key of the company
 	 * @return the company that was removed
 	 * @throws PortalException if a company with the primary key could not be found
@@ -136,6 +145,10 @@ public abstract class CompanyLocalServiceBaseImpl
 	/**
 	 * Deletes the company from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect CompanyLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param company the company
 	 * @return the company that was removed
 	 * @throws PortalException
@@ -144,6 +157,11 @@ public abstract class CompanyLocalServiceBaseImpl
 	@Override
 	public Company deleteCompany(Company company) throws PortalException {
 		return companyPersistence.remove(company);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return companyPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -352,6 +370,10 @@ public abstract class CompanyLocalServiceBaseImpl
 
 	/**
 	 * Updates the company in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect CompanyLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param company the company
 	 * @return the company that was updated

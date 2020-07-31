@@ -84,7 +84,7 @@ definition {
 
 		SelectFrameTop();
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		Alert.viewSuccessMessage();
 	}
@@ -287,7 +287,7 @@ definition {
 	}
 
 	macro configureDisplayTemplatePG {
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		Navigator.gotoNavTab(navTab = "Display Settings");
 
@@ -321,8 +321,6 @@ definition {
 			locator1 = "APConfiguration#SOURCE_SCOPE_FILTER_BY_FIELD_SELECT_BUTTON",
 			value1 = "Select");
 
-		SelectFrame();
-
 		SelectFrame(locator1 = "IFrame#SELECT_STRUCTURE_FIELD");
 
 		var key_fieldName = "${fieldFilter}";
@@ -343,7 +341,7 @@ definition {
 
 		SelectFrame(value1 = "relative=top");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		if (isSet(fieldValue)) {
 			AssertTextEquals.assertPartialText(
@@ -384,7 +382,9 @@ definition {
 
 			SelectFrameTop();
 
-			SelectFrame(locator1 = "IFrame#DIALOG");
+			WaitForElementPresent(locator1 = "APConfigurationManual#ASSET_SELECTION_MANUAL_SELECT_ASSET_ENTRIES_DIALOG");
+
+			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 			var key_assetTitle = "${assetTitle}";
 
@@ -396,7 +396,7 @@ definition {
 
 			Button.clickAdd();
 
-			SelectFrame(locator1 = "IFrame#DIALOG");
+			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 		}
 
 		Alert.viewSuccessMessage();
@@ -513,7 +513,7 @@ definition {
 
 			LexiconEntry.changeDisplayStyle(displayStyle = "table");
 
-			if ("${siteScopeType}" != "Parent Site") {
+			if ("${siteScopeType}" == "Child Site") {
 				Type(
 					locator1 = "TextInput#SITE_SEARCH_KEYWORDS",
 					value1 = "${siteName}");
@@ -531,11 +531,13 @@ definition {
 				locator1 = "APConfigurationSites#SITES_TABLE_TYPE",
 				value1 = "${siteScopeType}");
 
-			ClickNoError(locator1 = "SitesSelectSite#SITES_TABLE_CHOOSE_SITE_LINK");
+			Click(locator1 = "SitesSelectSite#SITES_TABLE_CHOOSE_SITE_LINK");
+
+			Alert.viewSuccessMessage();
 
 			SelectFrame(value1 = "relative=top");
 
-			SelectFrame(locator1 = "IFrame#DIALOG");
+			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 		}
 
 		Panel.expandPanel(panel = "Scope");
@@ -624,7 +626,7 @@ definition {
 			portletName = "Asset Publisher",
 			portletOption = "Configuration Templates");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		LexiconTable.clickEllipsisItem(
 			item = "Delete",
@@ -660,11 +662,18 @@ definition {
 
 		SelectFrame(value1 = "relative=top");
 
-		AssertClick(
-			locator1 = "Button#ADD",
-			value1 = "Add");
+		if (IsElementPresent(locator1 = "//button[contains(.,'Add')]")) {
+			AssertClick(
+				locator1 = "//button[contains(.,'Add')]",
+				value1 = "Add");
+		}
+		else if (IsElementPresent(locator1 = "Button#DONE")) {
+			AssertClick(
+				locator1 = "Button#DONE",
+				value1 = "Done");
+		}
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		PortletEntry.save();
 	}
@@ -700,7 +709,7 @@ definition {
 	}
 
 	macro enableRSSSubscription {
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		Navigator.gotoNavTab(navTab = "Subscriptions");
 
@@ -738,7 +747,7 @@ definition {
 			portletName = "${portletName}",
 			portletOption = "Configuration");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 	}
 
 	macro gotoEditAssetPG {
@@ -782,7 +791,7 @@ definition {
 			portletName = "Asset Publisher",
 			portletOption = "Configuration Templates");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		LexiconTable.clickEllipsisItem(
 			item = "Apply",
@@ -796,7 +805,7 @@ definition {
 			portletName = "Asset Publisher",
 			portletOption = "Configuration Templates");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		PortletEntry.viewEmptyMessage(entity = "Configuration Templates");
 
@@ -826,7 +835,7 @@ definition {
 
 		var key_title = "${assetListName}";
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		Navigator.gotoNavTab(navTab = "Asset Selection");
 
@@ -865,7 +874,7 @@ definition {
 
 		SelectFrameTop();
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		Pause(locator1 = "3000");
 
@@ -1239,8 +1248,6 @@ definition {
 				locator1 = "APConfiguration#SOURCE_SCOPE_FILTER_BY_FIELD_SELECT_BUTTON",
 				value1 = "Select");
 
-			SelectFrame();
-
 			SelectFrame(locator1 = "IFrame#SELECT_STRUCTURE_FIELD");
 
 			for (var assetSubtypeField : list "${assetSubtypeFields}") {
@@ -1284,7 +1291,7 @@ definition {
 	}
 
 	macro viewManualAssetTypesPG {
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		Panel.expandPanel(panel = "Asset Entries");
 

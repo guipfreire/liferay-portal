@@ -121,7 +121,9 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 		StructuredContentFolderResource.Builder builder =
 			StructuredContentFolderResource.builder();
 
-		structuredContentFolderResource = builder.locale(
+		structuredContentFolderResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -1156,6 +1158,30 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/structuredContentFolder"))));
+	}
+
+	@Test
+	public void testGraphQLGetStructuredContentFolderNotFound()
+		throws Exception {
+
+		Long irrelevantStructuredContentFolderId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"structuredContentFolder",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"structuredContentFolderId",
+									irrelevantStructuredContentFolderId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

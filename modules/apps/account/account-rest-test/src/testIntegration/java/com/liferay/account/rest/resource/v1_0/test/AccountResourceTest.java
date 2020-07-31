@@ -19,10 +19,10 @@ import com.liferay.account.model.AccountEntry;
 import com.liferay.account.rest.client.dto.v1_0.Account;
 import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -100,15 +100,13 @@ public class AccountResourceTest extends BaseAccountResourceTestCase {
 		return _toAccount(_addAccountEntry(account));
 	}
 
-	private AccountEntry _addAccountEntry() throws PortalException {
+	private AccountEntry _addAccountEntry() throws Exception {
 		return _addAccountEntry(
 			AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT,
 			RandomTestUtil.randomString(), RandomTestUtil.randomString(), null);
 	}
 
-	private AccountEntry _addAccountEntry(Account account)
-		throws PortalException {
-
+	private AccountEntry _addAccountEntry(Account account) throws Exception {
 		return _addAccountEntry(
 			account.getParentAccountId(), account.getName(),
 			account.getDescription(), account.getDomains());
@@ -117,11 +115,14 @@ public class AccountResourceTest extends BaseAccountResourceTestCase {
 	private AccountEntry _addAccountEntry(
 			long parentAccountEntryId, String name, String description,
 			String[] domains)
-		throws PortalException {
+		throws Exception {
 
 		AccountEntry accountEntry = _accountEntryLocalService.addAccountEntry(
 			TestPropsValues.getUserId(), parentAccountEntryId, name,
-			description, domains, null, WorkflowConstants.STATUS_APPROVED);
+			description, domains, null, null,
+			AccountConstants.ACCOUNT_ENTRY_TYPE_BUSINESS,
+			WorkflowConstants.STATUS_APPROVED,
+			ServiceContextTestUtil.getServiceContext());
 
 		_accountEntries.add(accountEntry);
 

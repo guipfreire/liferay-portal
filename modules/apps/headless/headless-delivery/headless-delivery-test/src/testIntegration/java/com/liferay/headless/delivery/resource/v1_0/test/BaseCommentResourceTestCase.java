@@ -119,7 +119,9 @@ public abstract class BaseCommentResourceTestCase {
 
 		CommentResource.Builder builder = CommentResource.builder();
 
-		commentResource = builder.locale(
+		commentResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -602,6 +604,26 @@ public abstract class BaseCommentResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/comment"))));
+	}
+
+	@Test
+	public void testGraphQLGetCommentNotFound() throws Exception {
+		Long irrelevantCommentId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"comment",
+						new HashMap<String, Object>() {
+							{
+								put("commentId", irrelevantCommentId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

@@ -17,18 +17,18 @@ import ClayList from '@clayui/list';
 import {Context} from '@clayui/modal';
 import React, {useContext} from 'react';
 
-import {DEPLOYMENT_ACTION} from '../pages/apps/constants.es';
-import {concatTypes} from '../pages/apps/utils.es';
+import {DEPLOYMENT_ACTION, DEPLOYMENT_TYPES} from '../pages/apps/constants.es';
 import {updateItem} from '../utils/client.es';
+import {concatValues, getTranslatedValue} from '../utils/utils.es';
 
 export default () => {
 	const [{onClose}, dispatch] = useContext(Context);
 
 	const deployApp = (item, undeploy) => {
 		return updateItem(
-			`/o/app-builder/v1.0/apps/${item.id}/deployment`,
-			{},
-			{deploymentAction: undeploy ? 'undeploy' : 'deploy'}
+			`/o/app-builder/v1.0/apps/${item.id}/${
+				undeploy ? 'undeploy' : 'deploy'
+			}`
 		)
 			.then(() => true)
 			.catch((error) => error);
@@ -36,6 +36,10 @@ export default () => {
 
 	const undeployApp = (app) => {
 		return new Promise((resolve, reject) => {
+			const appName =
+				getTranslatedValue(app, 'appName') ??
+				getTranslatedValue(app, 'name');
+
 			dispatch({
 				payload: {
 					body: (
@@ -51,7 +55,7 @@ export default () => {
 											<b>
 												{Liferay.Language.get('name')}:
 											</b>{' '}
-											{app.nameText}
+											{appName}
 										</span>
 										<span>
 											<b>
@@ -60,10 +64,10 @@ export default () => {
 												)}
 												:
 											</b>{' '}
-											{concatTypes(
+											{concatValues(
 												app.appDeployments.map(
-													(deployment) =>
-														deployment.type
+													({type}) =>
+														DEPLOYMENT_TYPES[type]
 												)
 											)}
 										</span>
@@ -108,7 +112,7 @@ export default () => {
 						</ClayButton.Group>,
 					],
 					header: DEPLOYMENT_ACTION.undeploy,
-					size: 'lg',
+					size: 'md',
 					status: 'warning',
 				},
 				type: 1,

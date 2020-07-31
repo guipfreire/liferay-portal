@@ -53,7 +53,7 @@ sortingURL.setParameter("orderByType", orderByAsc ? "desc" : "asc");
 		}
 	%>'
 	disabled="<%= sapEntriesCount == 0 %>"
-	namespace="<%= renderResponse.getNamespace() %>"
+	namespace="<%= liferayPortletResponse.getNamespace() %>"
 	selectable="<%= false %>"
 	showCreationMenu="<%= SAPPermission.contains(permissionChecker, SAPActionKeys.ACTION_ADD_SAP_ENTRY) %>"
 	showSearch="<%= false %>"
@@ -61,7 +61,7 @@ sortingURL.setParameter("orderByType", orderByAsc ? "desc" : "asc");
 	sortingURL="<%= sortingURL.toString() %>"
 />
 
-<div class="container-fluid-1280">
+<clay:container-fluid>
 	<liferay-ui:search-container
 		emptyResultsMessage="there-are-no-service-access-policies"
 		iteratorURL="<%= portletURL %>"
@@ -116,4 +116,4 @@ sortingURL.setParameter("orderByType", orderByAsc ? "desc" : "asc");
 			markupView="lexicon"
 		/>
 	</liferay-ui:search-container>
-</div>
+</clay:container-fluid>

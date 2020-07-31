@@ -26,14 +26,12 @@ definition {
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
-			panel = "Site Administration",
 			portlet = "Pages");
 
 		SitePages.addPublicPage(pageName = "Classic Theme Page");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
-			panel = "Site Administration",
 			portlet = "Pages");
 
 		SitePages.gotoPageMenuItem(
@@ -48,11 +46,12 @@ definition {
 
 		Theme.configureLookAndFeelShowMaxMinAppLinks(showMaxMinAppLinks = "true");
 
+		Theme.configureLookAndFeelCustomCSS(cssText = '''body{background-color:#42f4c5}''');
+
 		PortletEntry.save();
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
-			panel = "Site Administration",
 			portlet = "Pages");
 
 		SitePages.gotoPageMenuItem(
@@ -62,6 +61,12 @@ definition {
 		Navigator.gotoNavTab(navTab = "Look and Feel");
 
 		Navigator.gotoPage(pageName = "Classic Theme Page");
+
+		var htmlSourceText = '''body{background-color:#42f4c5}''';
+
+		AssertHTMLSourceTextPresent(value1 = "${htmlSourceText}");
+
+		takeScreenshot();
 
 		SearchPortlets.viewSearchHidden();
 

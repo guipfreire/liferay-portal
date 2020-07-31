@@ -21,7 +21,6 @@ import com.liferay.project.templates.util.FileTestUtil;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 
 import java.net.URI;
 
@@ -56,7 +55,7 @@ public class ProjectTemplatesServiceTest
 	@Parameterized.Parameters(name = "Testcase-{index}: testing {0}")
 	public static Iterable<Object[]> data() {
 		return Arrays.asList(
-			new Object[][] {{"7.0.6"}, {"7.1.3"}, {"7.2.1"}, {"7.3.1"}});
+			new Object[][] {{"7.0.6"}, {"7.1.3"}, {"7.2.1"}, {"7.3.2"}});
 	}
 
 	@BeforeClass
@@ -131,7 +130,7 @@ public class ProjectTemplatesServiceTest
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-	private void _writeServiceClass(File projectDir) throws IOException {
+	private void _writeServiceClass(File projectDir) throws Exception {
 		String importLine =
 			"import com.liferay.portal.kernel.events.LifecycleAction;";
 		String classLine =

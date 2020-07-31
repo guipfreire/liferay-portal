@@ -33,24 +33,28 @@ describe('DestinationUrlInput', () => {
 		expect(getByLabelText('destination-url'));
 	});
 
-	it('try button is disabled if url is empty', () => {
+	it('check url button is disabled if url is empty', () => {
 		const {getByTitle} = renderComponent();
 
-		const tryButton = getByTitle('try-redirection');
+		const checkButton = getByTitle('check-url');
 
-		expect(tryButton).toHaveProperty('disabled', true);
+		expect(checkButton).toHaveProperty('disabled', true);
 	});
 
-	it('try button is enabled if url is not empty', () => {
+	it('check url button is enabled with a valid url', () => {
 		const {getByLabelText, getByTitle} = renderComponent();
 
 		const inputElement = getByLabelText('destination-url');
 
-		fireEvent.change(inputElement, {target: {value: 'test'}});
+		fireEvent.change(inputElement, {target: {value: '/test'}});
 
-		const tryButton = getByTitle('try-redirection');
+		const checkButton = getByTitle('check-url');
 
-		expect(tryButton.disabled).toBe(false);
+		expect(checkButton.disabled).toBe(true);
+
+		fireEvent.change(inputElement, {target: {value: 'www.test.com'}});
+
+		expect(checkButton.disabled).toBe(false);
 	});
 
 	it('window open is called with correct url', () => {
@@ -63,10 +67,29 @@ describe('DestinationUrlInput', () => {
 			...defaultProps,
 		});
 
-		const tryButton = getByTitle('try-redirection');
+		const checkButton = getByTitle('check-url');
 
-		fireEvent.click(tryButton);
+		fireEvent.click(checkButton);
 
 		expect(global.open).toBeCalledWith(testingUrl, '_blank');
+	});
+
+	it('window open appends the http protocol it not present in the url', () => {
+		global.open = jest.fn();
+
+		const testingUrl = 'www.test.com';
+
+		const {getByTitle} = renderComponent({
+			initialDestinationUrl: testingUrl,
+			...defaultProps,
+		});
+
+		const checkButton = getByTitle('check-url');
+
+		fireEvent.click(checkButton);
+
+		const finalUrl = 'http://' + testingUrl;
+
+		expect(global.open).toBeCalledWith(finalUrl, '_blank');
 	});
 });

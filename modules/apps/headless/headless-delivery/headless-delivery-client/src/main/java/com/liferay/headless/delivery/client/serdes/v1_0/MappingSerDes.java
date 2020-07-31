@@ -67,28 +67,18 @@ public class MappingSerDes {
 			sb.append("\"");
 		}
 
-		if (mapping.getItemClassName() != null) {
+		if (mapping.getItemReference() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"itemClassName\": ");
+			sb.append("\"itemReference\": ");
 
 			sb.append("\"");
 
-			sb.append(_escape(mapping.getItemClassName()));
+			sb.append(_escape(mapping.getItemReference()));
 
 			sb.append("\"");
-		}
-
-		if (mapping.getItemClassPK() != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"itemClassPK\": ");
-
-			sb.append(mapping.getItemClassPK());
 		}
 
 		sb.append("}");
@@ -116,19 +106,12 @@ public class MappingSerDes {
 			map.put("fieldKey", String.valueOf(mapping.getFieldKey()));
 		}
 
-		if (mapping.getItemClassName() == null) {
-			map.put("itemClassName", null);
+		if (mapping.getItemReference() == null) {
+			map.put("itemReference", null);
 		}
 		else {
 			map.put(
-				"itemClassName", String.valueOf(mapping.getItemClassName()));
-		}
-
-		if (mapping.getItemClassPK() == null) {
-			map.put("itemClassPK", null);
-		}
-		else {
-			map.put("itemClassPK", String.valueOf(mapping.getItemClassPK()));
+				"itemReference", String.valueOf(mapping.getItemReference()));
 		}
 
 		return map;
@@ -156,15 +139,9 @@ public class MappingSerDes {
 					mapping.setFieldKey((String)jsonParserFieldValue);
 				}
 			}
-			else if (Objects.equals(jsonParserFieldName, "itemClassName")) {
+			else if (Objects.equals(jsonParserFieldName, "itemReference")) {
 				if (jsonParserFieldValue != null) {
-					mapping.setItemClassName((String)jsonParserFieldValue);
-				}
-			}
-			else if (Objects.equals(jsonParserFieldName, "itemClassPK")) {
-				if (jsonParserFieldValue != null) {
-					mapping.setItemClassPK(
-						Long.valueOf((String)jsonParserFieldValue));
+					mapping.setItemReference((Object)jsonParserFieldValue);
 				}
 			}
 			else {

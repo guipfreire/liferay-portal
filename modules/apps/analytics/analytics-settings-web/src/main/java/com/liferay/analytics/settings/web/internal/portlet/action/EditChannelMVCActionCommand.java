@@ -62,7 +62,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	property = {
 		"javax.portlet.name=" + ConfigurationAdminPortletKeys.INSTANCE_SETTINGS,
-		"mvc.command.name=/analytics/edit_channel"
+		"mvc.command.name=/analytics_settings/edit_channel"
 	},
 	service = MVCActionCommand.class
 )
@@ -238,7 +238,7 @@ public class EditChannelMVCActionCommand extends BaseAnalyticsMVCActionCommand {
 
 	private List<String> _updateTypeSettingsProperties(
 			String channelId, String json, String[] selectedGroupIds)
-		throws PortalException {
+		throws Exception {
 
 		JSONObject responseJSONObject = JSONFactoryUtil.createJSONObject(json);
 

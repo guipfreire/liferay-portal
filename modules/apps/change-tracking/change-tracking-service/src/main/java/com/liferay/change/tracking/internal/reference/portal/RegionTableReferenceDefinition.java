@@ -14,8 +14,9 @@
 
 package com.liferay.change.tracking.internal.reference.portal;
 
-import com.liferay.change.tracking.reference.TableReferenceDefinition;
-import com.liferay.change.tracking.reference.helper.TableReferenceInfoDefiner;
+import com.liferay.change.tracking.spi.reference.TableReferenceDefinition;
+import com.liferay.change.tracking.spi.reference.builder.ChildTableReferenceInfoBuilder;
+import com.liferay.change.tracking.spi.reference.builder.ParentTableReferenceInfoBuilder;
 import com.liferay.portal.kernel.model.CountryTable;
 import com.liferay.portal.kernel.model.RegionTable;
 import com.liferay.portal.kernel.service.persistence.BasePersistence;
@@ -32,20 +33,18 @@ public class RegionTableReferenceDefinition
 	implements TableReferenceDefinition<RegionTable> {
 
 	@Override
-	public void defineTableReferences(
-		TableReferenceInfoDefiner<RegionTable> tableReferenceInfoDefiner) {
+	public void defineChildTableReferences(
+		ChildTableReferenceInfoBuilder<RegionTable>
+			childTableReferenceInfoBuilder) {
+	}
 
-		tableReferenceInfoDefiner.defineSingleColumnReference(
+	@Override
+	public void defineParentTableReferences(
+		ParentTableReferenceInfoBuilder<RegionTable>
+			parentTableReferenceInfoBuilder) {
+
+		parentTableReferenceInfoBuilder.singleColumnReference(
 			RegionTable.INSTANCE.countryId, CountryTable.INSTANCE.countryId);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			RegionTable.INSTANCE.regionCode);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			RegionTable.INSTANCE.name);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			RegionTable.INSTANCE.active);
 	}
 
 	@Override

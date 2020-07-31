@@ -7,7 +7,7 @@ definition {
 	}
 
 	macro clickAdd {
-		Button.click(button = "Add");
+		Click(locator1 = "Button#ADD");
 	}
 
 	macro clickAddRow {
@@ -72,16 +72,14 @@ definition {
 		Button.click(button = "Publish");
 	}
 
-	macro clickPublishToChangeList {
-		Button.click(button = "Publish to Change List");
-	}
-
 	macro clickRemove {
 		Button.click(button = "Remove");
 	}
 
 	macro clickSave {
 		Button.click(button = "Save");
+
+		WaitForLiferayEvent.initializeLiferayEventLog();
 	}
 
 	macro clickSaveAsDraft {

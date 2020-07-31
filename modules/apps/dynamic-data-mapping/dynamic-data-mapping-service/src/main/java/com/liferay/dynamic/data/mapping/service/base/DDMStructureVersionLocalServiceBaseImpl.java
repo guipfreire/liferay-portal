@@ -18,6 +18,7 @@ import com.liferay.dynamic.data.mapping.model.DDMStructureVersion;
 import com.liferay.dynamic.data.mapping.service.DDMStructureVersionLocalService;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMStructureVersionPersistence;
 import com.liferay.petra.function.UnsafeFunction;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -77,6 +78,10 @@ public abstract class DDMStructureVersionLocalServiceBaseImpl
 	/**
 	 * Adds the ddm structure version to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMStructureVersionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param ddmStructureVersion the ddm structure version
 	 * @return the ddm structure version that was added
 	 */
@@ -107,6 +112,10 @@ public abstract class DDMStructureVersionLocalServiceBaseImpl
 	/**
 	 * Deletes the ddm structure version with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMStructureVersionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param structureVersionId the primary key of the ddm structure version
 	 * @return the ddm structure version that was removed
 	 * @throws PortalException if a ddm structure version with the primary key could not be found
@@ -123,6 +132,10 @@ public abstract class DDMStructureVersionLocalServiceBaseImpl
 	/**
 	 * Deletes the ddm structure version from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMStructureVersionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param ddmStructureVersion the ddm structure version
 	 * @return the ddm structure version that was removed
 	 */
@@ -132,6 +145,11 @@ public abstract class DDMStructureVersionLocalServiceBaseImpl
 		DDMStructureVersion ddmStructureVersion) {
 
 		return ddmStructureVersionPersistence.remove(ddmStructureVersion);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return ddmStructureVersionPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -356,6 +374,10 @@ public abstract class DDMStructureVersionLocalServiceBaseImpl
 
 	/**
 	 * Updates the ddm structure version in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMStructureVersionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param ddmStructureVersion the ddm structure version
 	 * @return the ddm structure version that was updated

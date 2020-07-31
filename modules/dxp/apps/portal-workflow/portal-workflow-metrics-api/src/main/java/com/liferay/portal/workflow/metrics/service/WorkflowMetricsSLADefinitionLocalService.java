@@ -15,6 +15,7 @@
 package com.liferay.portal.workflow.metrics.service;
 
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
@@ -72,6 +73,10 @@ public interface WorkflowMetricsSLADefinitionLocalService
 	/**
 	 * Adds the workflow metrics sla definition to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect WorkflowMetricsSLADefinitionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param workflowMetricsSLADefinition the workflow metrics sla definition
 	 * @return the workflow metrics sla definition that was added
 	 */
@@ -109,6 +114,10 @@ public interface WorkflowMetricsSLADefinitionLocalService
 	/**
 	 * Deletes the workflow metrics sla definition with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect WorkflowMetricsSLADefinitionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param workflowMetricsSLADefinitionId the primary key of the workflow metrics sla definition
 	 * @return the workflow metrics sla definition that was removed
 	 * @throws PortalException if a workflow metrics sla definition with the primary key could not be found
@@ -121,12 +130,19 @@ public interface WorkflowMetricsSLADefinitionLocalService
 	/**
 	 * Deletes the workflow metrics sla definition from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect WorkflowMetricsSLADefinitionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param workflowMetricsSLADefinition the workflow metrics sla definition
 	 * @return the workflow metrics sla definition that was removed
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	public WorkflowMetricsSLADefinition deleteWorkflowMetricsSLADefinition(
 		WorkflowMetricsSLADefinition workflowMetricsSLADefinition);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public <T> T dslQuery(DSLQuery dslQuery);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DynamicQuery dynamicQuery();
@@ -284,7 +300,8 @@ public interface WorkflowMetricsSLADefinitionLocalService
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<WorkflowMetricsSLADefinition> getWorkflowMetricsSLADefinitions(
 		long companyId, boolean active, long processId, int status, int start,
-		int end, OrderByComparator<WorkflowMetricsSLADefinition> obc);
+		int end,
+		OrderByComparator<WorkflowMetricsSLADefinition> orderByComparator);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<WorkflowMetricsSLADefinition> getWorkflowMetricsSLADefinitions(
@@ -294,6 +311,10 @@ public interface WorkflowMetricsSLADefinitionLocalService
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<WorkflowMetricsSLADefinition> getWorkflowMetricsSLADefinitions(
 		long companyId, int status);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<WorkflowMetricsSLADefinition> getWorkflowMetricsSLADefinitions(
+		long companyId, String name, long processId);
 
 	/**
 	 * Returns all the workflow metrics sla definitions matching the UUID and company.
@@ -348,6 +369,10 @@ public interface WorkflowMetricsSLADefinitionLocalService
 
 	/**
 	 * Updates the workflow metrics sla definition in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect WorkflowMetricsSLADefinitionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param workflowMetricsSLADefinition the workflow metrics sla definition
 	 * @return the workflow metrics sla definition that was updated

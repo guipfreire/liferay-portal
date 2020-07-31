@@ -87,7 +87,7 @@ public class UpgradeKaleoDefinitionVersion extends UpgradeProcess {
 		kaleoDefinition.setName(name);
 		kaleoDefinition.setTitle(title);
 		kaleoDefinition.setContent(content);
-		kaleoDefinition.setVersion(version);
+		kaleoDefinition.setVersion((version == 0) ? 1 : version);
 		kaleoDefinition.setActive(false);
 
 		return _kaleoDefinitionLocalService.addKaleoDefinition(kaleoDefinition);
@@ -174,7 +174,7 @@ public class UpgradeKaleoDefinitionVersion extends UpgradeProcess {
 	protected void initKaleoDesignerModelsResourceActions() throws Exception {
 		_resourceActions.read(
 			null, UpgradeKaleoDefinitionVersion.class.getClassLoader(),
-			"/META-INF/resource-actions/default.xml");
+			"/resource-actions/default.xml");
 
 		List<String> modelNames = _resourceActions.getPortletModelResources(
 			KaleoDesignerPortletKeys.KALEO_DESIGNER);

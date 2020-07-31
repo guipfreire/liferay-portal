@@ -22,24 +22,29 @@ DepotAdminSitesDisplayContext depotAdminSitesDisplayContext = new DepotAdminSite
 List<DepotEntryGroupRel> depotEntryGroupRels = depotAdminSitesDisplayContext.getDepotEntryGroupRels();
 %>
 
-<div class="sheet-section">
-	<h3 class="autofit-row sheet-subtitle">
-		<span class="autofit-col autofit-col-expand">
+<clay:sheet-section>
+	<clay:content-row
+		containerElement="h3"
+		cssClass="sheet-subtitle"
+	>
+		<clay:content-col
+			expand="<%= true %>"
+		>
 			<span class="heading-text"><liferay-ui:message key="connected-sites" /></span>
-		</span>
-		<span class="autofit-col">
+		</clay:content-col>
+
+		<clay:content-col>
 			<span class="heading-end">
 				<clay:button
-					elementClasses="btn-secondary"
-					id='<%= renderResponse.getNamespace() + "addConnectedSiteButton" %>'
-					label='<%= LanguageUtil.get(request, "add") %>'
-					size="sm"
-					style="secondary"
-					title='<%= LanguageUtil.get(request, "connect-to-a-site") %>'
+					displayType="secondary"
+					id='<%= liferayPortletResponse.getNamespace() + "addConnectedSiteButton" %>'
+					label="add"
+					small="<%= true %>"
+					title="connect-to-a-site"
 				/>
 			</span>
-		</span>
-	</h3>
+		</clay:content-col>
+	</clay:content-row>
 
 	<aui:input name="toGroupId" type="hidden" />
 
@@ -76,13 +81,23 @@ List<DepotEntryGroupRel> depotEntryGroupRels = depotAdminSitesDisplayContext.get
 				<liferay-ui:message key='<%= depotEntryGroupRel.isSearchable() ? "yes" : "no" %>' />
 			</liferay-ui:search-container-column-text>
 
+			<liferay-ui:search-container-column-text
+				cssClass="table-cell-content"
+				helpMessage="makes-the-asset-library-web-content-structures-available-in-the-site"
+				name="web-content-structures"
+			>
+				<liferay-ui:message key='<%= depotEntryGroupRel.isDdmStructuresAvailable() ? "yes" : "no" %>' />
+			</liferay-ui:search-container-column-text>
+
 			<liferay-ui:search-container-column-text>
 				<clay:dropdown-menu
-					defaultEventHandler="<%= DepotAdminWebKeys.CONNECTED_SITE_DROPDOWN_DEFAULT_EVENT_HANDLER %>"
+					borderless="<%= true %>"
+					displayType="secondary"
 					dropdownItems="<%= depotAdminSitesDisplayContext.getConnectedSiteDropdownItems(depotEntryGroupRel) %>"
 					icon="ellipsis-v"
-					style="secondary"
-					triggerCssClasses="btn-monospaced btn-outline-borderless btn-secondary btn-sm"
+					monospaced="<%= true %>"
+					propsTransformer="js/ConnectedSiteDropdownPropsTransformer"
+					small="<%= true %>"
 				/>
 			</liferay-ui:search-container-column-text>
 		</liferay-ui:search-container-row>
@@ -91,11 +106,6 @@ List<DepotEntryGroupRel> depotEntryGroupRels = depotAdminSitesDisplayContext.get
 			markupView="lexicon"
 		/>
 	</liferay-ui:search-container>
-
-	<liferay-frontend:component
-		componentId="<%= DepotAdminWebKeys.CONNECTED_SITE_DROPDOWN_DEFAULT_EVENT_HANDLER %>"
-		module="js/ConnectedSiteDropdownDefaultEventHandler.es"
-	/>
 
 	<aui:script require="metal-dom/src/all/dom as dom">
 		var addConnectedSiteButton = document.querySelector(
@@ -135,4 +145,4 @@ List<DepotEntryGroupRel> depotEntryGroupRels = depotAdminSitesDisplayContext.get
 			);
 		});
 	</aui:script>
-</div>
+</clay:sheet-section>

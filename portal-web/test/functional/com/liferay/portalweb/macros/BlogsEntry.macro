@@ -406,7 +406,7 @@ definition {
 			entryTitle = "${entryTitle}",
 			item = "Move to Recycle Bin");
 
-		AssertElementPresent(locator1 = "Message#SUCCESS");
+		VerifyElementPresent(locator1 = "Message#SUCCESS");
 
 		AssertElementNotPresent(locator1 = "BlogsEntry#TITLE");
 
@@ -575,7 +575,6 @@ definition {
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
-			panel = "Site Administration",
 			portlet = "Blogs");
 
 		if (IsVisible(locator1 = "Message#EMPTY_INFO", value1 = "No entries were found.")) {
@@ -586,14 +585,13 @@ definition {
 
 			Click(locator1 = "Icon#MOVE_TO_RECYCLE_BIN");
 
-			AssertElementPresent(locator1 = "Message#SUCCESS");
+			VerifyElementPresent(locator1 = "Message#SUCCESS");
 		}
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Recycle Bin",
-			panel = "Site Administration",
 			portlet = "Recycle Bin");
 
 		RecycleBin.emptyCP();
@@ -690,10 +688,20 @@ definition {
 
 		Pause(locator1 = "3000");
 
-		AssertTextEquals(
-			key_text = "Title",
-			locator1 = "TextArea#ANY",
-			value1 = "${entryTitle}");
+		var browserType = PropsUtil.get("browser.type");
+
+		if ("${browserType}" == "safari") {
+			AssertTextEquals.assertValue(
+				key_text = "Title",
+				locator1 = "TextArea#ANY",
+				value1 = "${entryTitle}");
+		}
+		else {
+			AssertTextEquals(
+				key_text = "Title",
+				locator1 = "TextArea#ANY",
+				value1 = "${entryTitle}");
+		}
 
 		if (isSet(entrySubtitle)) {
 			AssertTextEquals(
@@ -1228,6 +1236,10 @@ definition {
 			locator1 = "BlogsEntry#TITLE",
 			value1 = "${entryTitle}");
 
+		var entryViewCount = selenium.getText("BlogsEntry#ENTRY_VIEW_COUNT");
+		var entryViewCount = StringUtil.extractLast("${entryViewCount}", "-");
+		var entryViewCount = StringUtil.extractDigits("${entryViewCount}");
+
 		if ("${entryViewCount}" == "1") {
 			AssertTextEquals.assertPartialText(
 				locator1 = "BlogsEntry#ENTRY_VIEW_COUNT",
@@ -1241,11 +1253,18 @@ definition {
 
 		Navigator.gotoPage(pageName = "${pageName}");
 
-		var entryViewCount = ${entryViewCount} + 1;
+		if ("${entryViewCount}" == "1") {
+			var entryViewCount = ${entryViewCount} + 1;
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "BlogsEntry#ENTRY_VIEW_COUNT",
-			value1 = "${entryViewCount} Views");
+			AssertTextEquals.assertPartialText(
+				locator1 = "BlogsEntry#ENTRY_VIEW_COUNT",
+				value1 = "${entryViewCount} View");
+		}
+		else {
+			AssertTextEquals.assertPartialText(
+				locator1 = "BlogsEntry#ENTRY_VIEW_COUNT",
+				value1 = "${entryViewCount} Views");
+		}
 	}
 
 	macro viewWithAbstractDisplayTemplatePG {

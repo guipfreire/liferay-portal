@@ -2,6 +2,8 @@ components:
     schemas:
         App:
             properties:
+                active:
+                    type: boolean
                 appDeployments:
                     items:
                         $ref: "#/components/schemas/AppDeployment"
@@ -18,6 +20,9 @@ components:
                 dataListViewId:
                     format: int64
                     type: integer
+                dataRecordCollectionId:
+                    format: int64
+                    type: integer
                 dateCreated:
                     format: date-time
                     type: string
@@ -31,14 +36,16 @@ components:
                     additionalProperties:
                         type: object
                     type: object
+                scope:
+                    type: string
                 siteId:
                     format: int64
                     type: integer
-                status:
-                    type: string
                 userId:
                     format: int64
                     type: integer
+                version:
+                    type: string
             type: object
         AppDeployment:
             properties:
@@ -49,9 +56,6 @@ components:
                 type:
                     type: string
             type: object
-        DeploymentAction:
-            enum: [deploy, undeploy]
-            type: string
 info:
     description:
         "A Java client JAR is available for use with the group ID 'com.liferay', artifact ID
@@ -68,9 +72,31 @@ paths:
             operationId: getAppsPage
             parameters:
                 - in: query
+                  name: active
+                  schema:
+                      type: boolean
+                - in: query
+                  name: deploymentTypes
+                  schema:
+                      items:
+                          enum: [productMenu, standalone, widget]
+                          type: string
+                      type: array
+                - in: query
                   name: keywords
                   schema:
                       type: string
+                - in: query
+                  name: scope
+                  schema:
+                      type: string
+                - in: query
+                  name: userIds
+                  schema:
+                      items:
+                          format: int64
+                          type: integer
+                      type: array
                 - in: query
                   name: page
                   schema:
@@ -168,9 +194,9 @@ paths:
                     description:
                         ""
             tags: ["App"]
-    "/apps/{appId}/deployment":
+    "/apps/{appId}/deploy":
         put:
-            operationId: putAppDeployment
+            operationId: putAppDeploy
             parameters:
                 - in: path
                   name: appId
@@ -178,11 +204,21 @@ paths:
                   schema:
                       format: int64
                       type: integer
-                - in: query
-                  name: deploymentAction
+            responses:
+                200:
+                    description:
+                        "OK"
+            tags: ["App"]
+    "/apps/{appId}/undeploy":
+        put:
+            operationId: putAppUndeploy
+            parameters:
+                - in: path
+                  name: appId
                   required: true
                   schema:
-                      $ref: "#/components/schemas/DeploymentAction"
+                      format: int64
+                      type: integer
             responses:
                 200:
                     description:
@@ -200,6 +236,10 @@ paths:
                       type: integer
                 - in: query
                   name: keywords
+                  schema:
+                      type: string
+                - in: query
+                  name: scope
                   schema:
                       type: string
                 - in: query
@@ -272,6 +312,10 @@ paths:
                       type: integer
                 - in: query
                   name: keywords
+                  schema:
+                      type: string
+                - in: query
+                  name: scope
                   schema:
                       type: string
                 - in: query

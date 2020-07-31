@@ -13,26 +13,28 @@
  */
 
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import React, {useEffect, useRef, useState} from 'react';
 
 import debounceRAF from '../../core/debounceRAF';
+import {VIEWPORT_SIZES} from '../config/constants/viewportSizes';
 import {config} from '../config/index';
 import {useSelector} from '../store/index';
 import {useSelectItem} from './Controls';
+import DisabledArea from './DisabledArea';
+import GlobalContextProvider from './GlobalContext';
 import Layout from './Layout';
 import MasterLayout from './MasterLayout';
 
-export default function LayoutViewport({
-	mainItemId,
-	useMasterLayout,
-	withinMasterPage = false,
-}) {
+export default function LayoutViewport() {
 	const handleRef = useRef();
 	const [element, setElement] = useState(null);
 	const [layoutWidth, setLayoutWidth] = useState();
 	const [resizing, setResizing] = useState(false);
 	const selectItem = useSelectItem();
+	const mainItemId = useSelector((state) => state.layoutData.rootItems.main);
+	const masterLayoutData = useSelector(
+		(state) => state.masterLayout?.masterLayoutData
+	);
 	const selectedViewportSize = useSelector(
 		(state) => state.selectedViewportSize
 	);
@@ -109,9 +111,7 @@ export default function LayoutViewport({
 				`page-editor__layout-viewport--size-${selectedViewportSize}`,
 				{
 					'page-editor__layout-viewport__resizing': resizing,
-					'page-editor__layout-viewport--with-sidebar': !withinMasterPage,
-					'page-editor__layout-viewport--with-sidebar-open':
-						sidebarOpen && !withinMasterPage,
+					'page-editor__layout-viewport--with-sidebar-open': sidebarOpen,
 				}
 			)}
 		>
@@ -126,25 +126,25 @@ export default function LayoutViewport({
 				ref={setElement}
 				style={{width: layoutWidth}}
 			>
-				{useMasterLayout ? (
-					<MasterLayout />
-				) : (
-					<Layout mainItemId={mainItemId} />
-				)}
+				<GlobalContextProvider
+					useIframe={selectedViewportSize !== VIEWPORT_SIZES.desktop}
+				>
+					<DisabledArea />
+
+					{masterLayoutData ? (
+						<MasterLayout />
+					) : (
+						<Layout mainItemId={mainItemId} />
+					)}
+				</GlobalContextProvider>
 			</div>
 
-			{selectedViewportSize !== 'desktop' && (
+			{selectedViewportSize !== VIEWPORT_SIZES.desktop && (
 				<div
 					className="page-editor__layout-viewport__handle"
 					ref={handleRef}
-				></div>
+				/>
 			)}
 		</div>
 	);
 }
-
-Layout.propTypes = {
-	mainItemId: PropTypes.string.isRequired,
-	useMasterLayout: PropTypes.object,
-	withinMasterPage: PropTypes.bool,
-};

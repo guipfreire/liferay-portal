@@ -30,55 +30,80 @@ import {FLOATING_TOOLBAR_CONFIGURATIONS} from '../../config/constants/floatingTo
 import {config} from '../../config/index';
 import {useSelector} from '../../store/index';
 import {useHoverItem, useIsActive} from '../Controls';
+import {useGlobalContext} from '../GlobalContext';
+import {useUpdatedLayoutDataContext} from '../ResizeContext';
 
-export default function FloatingToolbar({
+export default React.memo(FloatingToolbar, (prevProps, nextProps) => {
+	if (
+		prevProps.item !== nextProps.item ||
+		prevProps.itemElement !== nextProps.itemElement ||
+		prevProps.onButtonClick !== nextProps.onButtonClick
+	) {
+		return false;
+	}
+
+	if (prevProps.buttons.length !== nextProps.buttons.length) {
+		return false;
+	}
+
+	return prevProps.buttons.every(
+		(button, index) => button === nextProps.buttons[index]
+	);
+});
+
+function FloatingToolbar({
 	buttons,
 	item,
-	itemRef,
+	itemElement,
 	onButtonClick = () => {},
 }) {
+	const isActive = useIsActive();
 	const isMounted = useIsMounted();
 	const [panelId, setPanelId] = useState(null);
 	const panelRef = useRef(null);
 	const hoverItem = useHoverItem();
 	const toolbarRef = useRef(null);
 	const [hidden, setHidden] = useState(true);
-	const [windowScrollPosition, setWindowScrollPosition] = useState(0);
-	const [windowWidth, setWindowWidth] = useState(0);
+
+	const [windowRect, setWindowRect] = useState({
+		globalContextWindowScrollPosition: 0,
+		globalContextWindowWidth: 0,
+		windowScrollPosition: 0,
+		windowWidth: 0,
+	});
+
+	const [show, setShow] = useState(false);
+	const updatedLayoutData = useUpdatedLayoutDataContext();
+	const globalContext = useGlobalContext();
 
 	const languageId = useSelector((state) => state.languageId);
-
-	const itemElement = itemRef.current;
-
-	const show = useIsActive()(item.itemId) && itemElement;
+	const selectedViewportSize = useSelector(
+		(state) => state.selectedViewportSize
+	);
 
 	const PanelComponent = useMemo(
-		() => FLOATING_TOOLBAR_CONFIGURATIONS[panelId] || null,
+		() =>
+			FLOATING_TOOLBAR_CONFIGURATIONS[panelId]
+				? React.memo(FLOATING_TOOLBAR_CONFIGURATIONS[panelId])
+				: null,
 		[panelId]
 	);
 
 	const alignElement = useCallback(
-		(elementRef, anchorRef, callback) => {
-			if (
-				isMounted() &&
-				show &&
-				elementRef.current &&
-				anchorRef.current &&
-				document.body.contains(anchorRef.current)
-			) {
+		(element, anchor, callback) => {
+			if (isMounted() && show && element && anchor) {
 				try {
-					Align.align(
-						elementRef.current,
-						anchorRef.current,
-						getElementAlign(
-							elementRef.current,
-							anchorRef.current,
-							config.languageDirection[languageId] === 'rtl'
-						),
-						false
-					);
+					align(element, anchor, {
+						globalContext,
+						rtl:
+							config.languageDirection?.[
+								themeDisplay?.getLanguageId()
+							] === 'rtl',
+					});
 				}
-				catch (error) {}
+				catch (error) {
+					console.error(error);
+				}
 
 				if (callback) {
 					requestAnimationFrame(() => {
@@ -92,12 +117,12 @@ export default function FloatingToolbar({
 				callback();
 			}
 		},
-		[isMounted, languageId, show]
+		[globalContext, isMounted, show]
 	);
 
 	const handleButtonClick = useCallback(
 		(buttonId, newPanelId) => {
-			onButtonClick(buttonId, itemRef);
+			onButtonClick(buttonId);
 
 			if (newPanelId) {
 				if (newPanelId === panelId) {
@@ -108,63 +133,72 @@ export default function FloatingToolbar({
 				}
 			}
 		},
-		[itemRef, onButtonClick, panelId]
+		[onButtonClick, panelId]
 	);
 
 	useEffect(() => {
-		const handleWindowResize = debounceRAF(() => {
-			setWindowWidth(window.innerWidth);
+		setShow(isActive(item.itemId) && !!itemElement);
+	}, [isActive, item.itemId, itemElement]);
+
+	useEffect(() => {
+		const handleWindowRectChanged = debounceRAF(() => {
+			setWindowRect({
+				globalContextWindowScrollPosition: globalContext.window.scrollY,
+				globalContextWindowWidth: globalContext.window.innerWidth,
+				windowScrollPosition: window.scrollY,
+				windowWidth: window.innerWidth,
+			});
 		});
 
-		const handleWindowScroll = debounceRAF(() => {
-			setWindowScrollPosition(window.scrollY);
-		});
+		globalContext.window.addEventListener(
+			'resize',
+			handleWindowRectChanged
+		);
+		globalContext.window.addEventListener(
+			'scroll',
+			handleWindowRectChanged
+		);
 
-		window.addEventListener('resize', handleWindowResize);
-		window.addEventListener('scroll', handleWindowScroll);
+		if (globalContext.window !== window) {
+			window.addEventListener('resize', handleWindowRectChanged);
+			window.addEventListener('scroll', handleWindowRectChanged);
+		}
 
 		return () => {
-			window.removeEventListener('resize', handleWindowResize);
-			window.removeEventListener('scroll', handleWindowScroll);
+			globalContext.window.removeEventListener(
+				'resize',
+				handleWindowRectChanged
+			);
+			globalContext.window.removeEventListener(
+				'scroll',
+				handleWindowRectChanged
+			);
+
+			window.removeEventListener('resize', handleWindowRectChanged);
+			window.removeEventListener('scroll', handleWindowRectChanged);
 		};
-	}, []);
+	}, [globalContext]);
 
 	useEffect(() => {
-		if (!itemRef.current) {
-			return;
-		}
-
-		const {
-			marginLeft: itemRefMarginLeft,
-			marginRight: itemRefMarginRight,
-		} = getComputedStyle(itemRef.current);
-
-		const rtl = config.languageDirection[languageId] === 'rtl';
-
-		const marginValue = rtl
-			? Math.abs(parseInt(itemRefMarginLeft, 10))
-			: parseInt(itemRefMarginRight, 10);
-
-		if (show && marginValue) {
-			toolbarRef.current.style.transform = `translate(${marginValue}px)`;
-		}
-	}, [itemRef, languageId, show]);
-
-	useEffect(() => {
-		alignElement(toolbarRef, itemRef, () => {
-			alignElement(panelRef, toolbarRef, () => {
-				setHidden(false);
-			});
+		alignElement(toolbarRef.current, itemElement, () => {
+			alignElement(
+				panelRef.current,
+				toolbarRef.current || itemElement,
+				() => {
+					setHidden(false);
+				}
+			);
 		});
 	}, [
 		alignElement,
 		item.config,
 		itemElement,
-		itemRef,
 		panelId,
+		selectedViewportSize,
+		updatedLayoutData,
 		show,
-		windowScrollPosition,
-		windowWidth,
+		languageId,
+		windowRect,
 	]);
 
 	useEffect(() => {
@@ -175,8 +209,8 @@ export default function FloatingToolbar({
 		if (sidebarElement) {
 			const handleTransitionEnd = (event) => {
 				if (event.target === sidebarElement) {
-					alignElement(toolbarRef, itemRef, () => {
-						alignElement(panelRef, toolbarRef);
+					alignElement(toolbarRef.current, itemElement, () => {
+						alignElement(panelRef.current, toolbarRef.current);
 					});
 					setHidden(false);
 				}
@@ -209,7 +243,7 @@ export default function FloatingToolbar({
 				);
 			};
 		}
-	}, [alignElement, item, itemRef]);
+	}, [alignElement, item, itemElement]);
 
 	useEffect(() => {
 		const sideNavigation =
@@ -219,8 +253,8 @@ export default function FloatingToolbar({
 			);
 
 		const handleTransitionEnd = () => {
-			alignElement(toolbarRef, itemRef, () => {
-				alignElement(panelRef, toolbarRef);
+			alignElement(toolbarRef.current, itemElement, () => {
+				alignElement(panelRef.current, toolbarRef.current);
 			});
 			setHidden(false);
 		};
@@ -254,7 +288,7 @@ export default function FloatingToolbar({
 				listener.removeListener()
 			);
 		};
-	}, [alignElement, itemRef]);
+	}, [alignElement, itemElement]);
 
 	useEffect(() => {
 		if (panelId && !show) {
@@ -263,58 +297,59 @@ export default function FloatingToolbar({
 	}, [panelId, show]);
 
 	return (
-		show &&
-		buttons.length > 0 && (
+		show && (
 			<div onClick={(event) => event.stopPropagation()}>
-				{createPortal(
-					<div
-						className={classNames(
-							'p-2',
-							'page-editor__floating-toolbar',
-							'position-fixed',
-							{
-								'page-editor__floating-toolbar--hidden': hidden,
-							}
-						)}
-						onMouseOver={(event) => {
-							event.stopPropagation();
-							hoverItem(null);
-						}}
-						ref={toolbarRef}
-					>
-						<div className="popover position-static">
-							<div className="d-flex p-2 popover-body">
-								{buttons.map((button) => (
-									<ClayButtonWithIcon
-										borderless
-										className={classNames(
-											'mx-1',
-											button.className,
-											{
-												active:
-													button.panelId === panelId,
-												'lfr-portal-tooltip':
-													button.title,
+				{(buttons.length > 0 || !panelId) &&
+					createPortal(
+						<div
+							className={classNames(
+								'p-2',
+								'page-editor__floating-toolbar',
+								'position-fixed',
+								{
+									'page-editor__floating-toolbar--hidden': hidden,
+								}
+							)}
+							onMouseOver={(event) => {
+								event.stopPropagation();
+								hoverItem(null);
+							}}
+							ref={toolbarRef}
+						>
+							<div className="popover position-static">
+								<div className="d-flex p-2 popover-body">
+									{buttons.map((button) => (
+										<ClayButtonWithIcon
+											borderless
+											className={classNames(
+												'mx-1',
+												button.className,
+												{
+													active:
+														button.panelId ===
+														panelId,
+													'lfr-portal-tooltip':
+														button.title,
+												}
+											)}
+											displayType="secondary"
+											key={button.id}
+											onClick={() =>
+												handleButtonClick(
+													button.id,
+													button.panelId
+												)
 											}
-										)}
-										displayType="secondary"
-										key={button.id}
-										onClick={() =>
-											handleButtonClick(
-												button.id,
-												button.panelId
-											)
-										}
-										small
-										symbol={button.icon}
-										title={button.title}
-									/>
-								))}
+											small
+											symbol={button.icon}
+											title={button.title}
+										/>
+									))}
+								</div>
 							</div>
-						</div>
-					</div>,
-					document.body
-				)}
+						</div>,
+						document.body
+					)}
 				{PanelComponent &&
 					createPortal(
 						<div
@@ -354,7 +389,7 @@ FloatingToolbar.propTypes = {
 		getEditableItemPropTypes(),
 		getLayoutDataItemPropTypes(),
 	]),
-	itemRef: PropTypes.shape({current: PropTypes.object}),
+	itemElement: PropTypes.object,
 	onButtonClick: PropTypes.func,
 };
 
@@ -389,102 +424,85 @@ const ELEMENT_POSITION = {
 	},
 };
 
-/**
- * Gets a suggested align of an element to an anchor
- * @param {HTMLElement|null} element
- * @param {HTMLElement|null} anchor
- * @param {boolean} rtl
- * @private
- * @return {number} Selected align
- * @review
- */
-const getElementAlign = (element, anchor, rtl) => {
-	let horizontal, vertical;
+const align = (element, anchor, {globalContext, rtl}) => {
+	const horizontal = (() => {
+		const {
+			left: wrapperLeft,
+			right: wrapperRight,
+		} = globalContext.document
+			?.getElementById('page-editor')
+			?.getBoundingClientRect() ?? {left: 0, right: 0};
 
-	try {
-		horizontal = getHorizontalPosition(anchor, element, rtl);
-		vertical = getVerticalPosition(anchor, element, horizontal);
-	}
-	catch (error) {}
+		const {
+			left: anchorLeft,
+			right: anchorRight,
+		} = anchor.getBoundingClientRect();
 
-	return ELEMENT_POSITION[vertical][horizontal];
-};
+		const {width: elementWidth} = element.getBoundingClientRect();
 
-/**
- * Gets an elements horizontal position. If the element fits at the preferred
- * position (left in rtl, right in ltr), it's placed there, otherwise it is
- * placed at the opposite.
- * @param {HTMLElement|null} element
- * @param {HTMLElement|null} anchor
- * @param {boolean} rtl
- * @private
- * @return {number} Selected horizontal position
- * @review
- */
-const getHorizontalPosition = (anchor, element, rtl) => {
-	const pageEditor = document.getElementById('page-editor');
+		if (rtl) {
+			const fitsOnLeft = anchorLeft + elementWidth < wrapperRight;
+
+			return fitsOnLeft ? 'left' : 'right';
+		}
+		else {
+			const fitsOnRight = anchorRight - elementWidth > wrapperLeft;
+
+			return fitsOnRight ? 'right' : 'left';
+		}
+	})();
+
+	const vertical = (() => {
+		const alignFits = (align, availableAlign) => {
+			try {
+				return availableAlign.includes(
+					Align.suggestAlignBestRegion(element, anchor, align)
+						.position
+				);
+			}
+			catch (error) {
+				return true;
+			}
+		};
+
+		const fallbackVertical = 'top';
+		let vertical = 'bottom';
+
+		if (
+			!alignFits(
+				ELEMENT_POSITION[vertical][horizontal],
+				ELEMENT_AVAILABLE_POSITIONS[vertical]
+			) &&
+			alignFits(
+				ELEMENT_POSITION[fallbackVertical][horizontal],
+				ELEMENT_AVAILABLE_POSITIONS[fallbackVertical]
+			)
+		) {
+			vertical = fallbackVertical;
+		}
+
+		return vertical;
+	})();
+
+	Align.align(element, anchor, ELEMENT_POSITION[vertical][horizontal], false);
 
 	const {
-		left: pageEditorLeft,
-		right: pageEditorRight,
-	} = pageEditor.getBoundingClientRect();
+		marginLeft: anchorMarginLeft,
+		marginRight: anchorMarginRight,
+	} = getComputedStyle(anchor);
 
-	const {
-		left: anchorLeft,
-		right: anchorRight,
-	} = anchor.getBoundingClientRect();
+	const margin = rtl
+		? Math.abs(parseInt(anchorMarginLeft, 10))
+		: parseInt(anchorMarginRight, 10);
 
-	const {width: elementWidth} = element.getBoundingClientRect();
+	if (globalContext.iframe && globalContext.document.contains(anchor)) {
+		const {left, top} = globalContext.iframe.getBoundingClientRect();
 
-	if (rtl) {
-		const fitsOnLeft = anchorLeft + elementWidth < pageEditorRight;
-
-		return fitsOnLeft ? 'left' : 'right';
+		element.style.transform = `translateX(${
+			left + margin
+		}px) translateY(${top}px)`;
 	}
 	else {
-		const fitsOnRight = anchorRight - elementWidth > pageEditorLeft;
-
-		return fitsOnRight ? 'right' : 'left';
+		element.style.transform = '';
 	}
-};
-
-/**
- * Gets an elements vertical position. If the element fits at bottom,
- * it's placed there, otherwise it is placed at top.
- * @param {HTMLElement|null} element
- * @param {HTMLElement|null} anchor
- * @param {string} horizontalPosition
- * @private
- * @return {number} Selected vertical position
- * @review
- */
-const getVerticalPosition = (anchor, element, horizontalPosition) => {
-	const alignFits = (align, availableAlign) => {
-		try {
-			return availableAlign.includes(
-				Align.suggestAlignBestRegion(element, anchor, align).position
-			);
-		}
-		catch (error) {
-			return true;
-		}
-	};
-
-	const fallbackVertical = 'top';
-	let vertical = 'bottom';
-
-	if (
-		!alignFits(
-			ELEMENT_POSITION[vertical][horizontalPosition],
-			ELEMENT_AVAILABLE_POSITIONS[vertical]
-		) &&
-		alignFits(
-			ELEMENT_POSITION[fallbackVertical][horizontalPosition],
-			ELEMENT_AVAILABLE_POSITIONS[fallbackVertical]
-		)
-	) {
-		vertical = fallbackVertical;
-	}
-
-	return vertical;
 };

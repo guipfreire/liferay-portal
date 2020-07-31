@@ -114,7 +114,9 @@ public abstract class BaseProcessMetricResourceTestCase {
 
 		ProcessMetricResource.Builder builder = ProcessMetricResource.builder();
 
-		processMetricResource = builder.locale(
+		processMetricResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -392,6 +394,11 @@ public abstract class BaseProcessMetricResourceTestCase {
 
 	@Test
 	public void testGraphQLGetProcessMetric() throws Exception {
+		Assert.assertTrue(true);
+	}
+
+	@Test
+	public void testGraphQLGetProcessMetricNotFound() throws Exception {
 		Assert.assertTrue(true);
 	}
 

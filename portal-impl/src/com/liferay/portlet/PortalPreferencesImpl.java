@@ -15,6 +15,7 @@
 package com.liferay.portlet;
 
 import com.liferay.petra.lang.HashUtil;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -122,17 +123,17 @@ public class PortalPreferencesImpl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof PortalPreferencesImpl)) {
+		if (!(object instanceof PortalPreferencesImpl)) {
 			return false;
 		}
 
 		PortalPreferencesImpl portalPreferencesImpl =
-			(PortalPreferencesImpl)obj;
+			(PortalPreferencesImpl)object;
 
 		if ((getOwnerId() == portalPreferencesImpl.getOwnerId()) &&
 			(getOwnerType() == portalPreferencesImpl.getOwnerType()) &&
@@ -482,11 +483,7 @@ public class PortalPreferencesImpl
 			return key;
 		}
 
-		return namespace.concat(
-			StringPool.POUND
-		).concat(
-			key
-		);
+		return StringBundler.concat(namespace, StringPool.POUND, key);
 	}
 
 	private com.liferay.portal.kernel.model.PortalPreferences _reload(

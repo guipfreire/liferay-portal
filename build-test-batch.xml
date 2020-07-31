@@ -400,8 +400,12 @@ mariadb.executable=${mariadb.executable}]]></echo>
 
 					<if>
 						<and>
-							<equals arg1="${operating.system.type}" arg2="centos" />
-							<equals arg1="${operating.system.centos.version}" arg2="8" />
+							<not>
+								<and>
+									<equals arg1="${operating.system.type}" arg2="centos" />
+									<equals arg1="${operating.system.centos.version}" arg2="7" />
+								</and>
+							</not>
 							<equals arg1="${env.DOCKER_ENABLED}" arg2="true" />
 						</and>
 						<then>
@@ -442,8 +446,12 @@ mariadb.executable=${mariadb.executable}]]></echo>
 
 					<if>
 						<and>
-							<equals arg1="${operating.system.type}" arg2="centos" />
-							<equals arg1="${operating.system.centos.version}" arg2="8" />
+							<not>
+								<and>
+									<equals arg1="${operating.system.type}" arg2="centos" />
+									<equals arg1="${operating.system.centos.version}" arg2="7" />
+								</and>
+							</not>
 							<equals arg1="${env.DOCKER_ENABLED}" arg2="true" />
 						</and>
 						<then>
@@ -659,6 +667,9 @@ mariadb.executable=${mariadb.executable}]]></echo>
 					<equals arg1="${app.server.type}" arg2="tomcat" />
 					<equals arg1="${test.batch.code.coverage}" arg2="true" />
 					<not>
+						<contains string="${test.batch.name}" substring="functional" />
+					</not>
+					<not>
 						<os family="windows" />
 					</not>
 				</and>
@@ -869,27 +880,15 @@ mariadb.executable=${mariadb.executable}]]></echo>
 		<attribute name="suite.name" />
 
 		<sequential>
-			<get-testcase-property property.name="hot.deploy.osgi.app.includes" />
 			<propertycopy from="search.engine[@{suite.name}]" name="suite.search.engine" silent="true" />
 
 			<if>
-				<and>
-					<not>
-						<equals arg1="${hot.deploy.osgi.app.includes}" arg2="portal-search-elasticsearch7" />
-					</not>
-					<equals arg1="${suite.search.engine}" arg2="elasticsearch7" />
-				</and>
+				<equals arg1="${suite.search.engine}" arg2="solr" />
 				<then>
-					<ant antfile="build-test-elasticsearch7.xml" inheritAll="false" target="deploy-elasticsearch7" />
-				</then>
-				<elseif>
-					<equals arg1="${suite.search.engine}" arg2="solr" />
-					<then>
-						<property name="com.liferay.portal.search.solr7.test.unit.started" value="true" />
+					<property name="com.liferay.portal.search.solr7.test.unit.started" value="true" />
 
-						<ant antfile="build-test-solr.xml" target="prepare-solr-suite" />
-					</then>
-				</elseif>
+					<ant antfile="build-test-solr.xml" target="set-up-solr" />
+				</then>
 			</if>
 		</sequential>
 	</macrodef>
@@ -1045,6 +1044,7 @@ app.server.type=@{app.server.type}]]></echo>
 
 	<macrodef name="prepare-test-environment">
 		<attribute default="tomcat" name="app.server.type" />
+		<attribute default="${app.server.@{app.server.type}.version}" name="app.server.version" />
 		<attribute default="true" name="setup.testable.tomcat" />
 
 		<sequential>
@@ -1060,10 +1060,16 @@ app.server.type=@{app.server.type}]]></echo>
 				src="liferay-portal-source.tar.gz"
 			/>
 
+			<local name="bundle.src.file.name" />
+
+			<condition else="liferay-portal-bundle-@{app.server.type}.tar.gz" property="bundle.src.file.name" value="liferay-portal-bundle-@{app.server.type}-@{app.server.version}.tar.gz">
+				<available file="liferay-portal-bundle-@{app.server.type}-@{app.server.version}.tar.gz" />
+			</condition>
+
 			<untar
 				compression="gzip"
 				dest="."
-				src="liferay-portal-bundle-@{app.server.type}.tar.gz"
+				src="${bundle.src.file.name}"
 			/>
 
 			<chmod
@@ -1620,12 +1626,16 @@ app.server.type=@{app.server.type}]]></echo>
 							</then>
 							<elseif>
 								<and>
-									<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+									<or>
+										<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+										<available file="liferay-portal-bundle-${app.server.type}-${app.server.version}.tar.gz" />
+									</or>
 									<available file="liferay-portal-source.tar.gz" />
 								</and>
 								<then>
 									<prepare-test-environment
 										app.server.type="${app.server.type}"
+										app.server.version="${app.server.version}"
 										setup.testable.tomcat="@{setup.testable.tomcat}"
 									/>
 								</then>
@@ -2696,6 +2706,9 @@ log.sanitizer.enabled=false</echo>
 		<attribute default="" name="test.sql.zip.url" />
 
 		<sequential>
+			<var name="app.server.type" value="@{app.server.type}" />
+			<var name="app.server.version" value="@{app.server.version}" />
+
 			<run-batch-test tomcat.gc.log="true">
 				<test-action>
 					<database-test-run-test database.type="@{database.type}" database.version="@{database.version}" stop.app.server="true">
@@ -2848,7 +2861,10 @@ log.sanitizer.enabled=false</echo>
 						</then>
 						<elseif>
 							<and>
-								<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+								<or>
+									<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+									<available file="liferay-portal-bundle-${app.server.type}-${app.server.version}.tar.gz" />
+								</or>
 								<available file="liferay-portal-source.tar.gz" />
 							</and>
 							<then>
@@ -3115,10 +3131,17 @@ log.sanitizer.enabled=false</echo>
 	</macrodef>
 
 	<macrodef name="setup-test-environment">
+		<attribute default="${app.server.${app.server.type}.version}" name="app.server.version" />
+
 		<sequential>
+			<var name="app.server.version" value="@{app.server.version}" />
+
 			<if>
 				<and>
-					<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+					<or>
+						<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+						<available file="liferay-portal-bundle-${app.server.type}-${app.server.version}.tar.gz" />
+					</or>
 					<available file="liferay-portal-source.tar.gz" />
 				</and>
 				<then>
@@ -3487,6 +3510,8 @@ log.sanitizer.enabled=false</echo>
 	</target>
 
 	<target name="blade-samples-jdk8">
+		<propertycopy from="app.server.${app.server.type}.version" name="app.server.version" />
+
 		<run-batch-test>
 			<test-action>
 				<execute dir="${blade.samples.dir}">
@@ -3520,7 +3545,10 @@ log.sanitizer.enabled=false</echo>
 					</elseif>
 					<elseif>
 						<and>
-							<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+							<or>
+								<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+								<available file="liferay-portal-bundle-${app.server.type}-${app.server.version}.tar.gz" />
+							</or>
 							<available file="liferay-portal-source.tar.gz" />
 						</and>
 						<then>
@@ -3690,6 +3718,10 @@ log.sanitizer.enabled=false</echo>
 
 	<target name="empty-temp-dir-jdk8">
 		<run-empty-temp-dir-test />
+	</target>
+
+	<target name="functional-alpine3-tomcat90-mysql57-jdk8">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
 	<target name="functional-bundle-jboss-db2111-jdk8">
@@ -3982,6 +4014,66 @@ log.sanitizer.enabled=false</echo>
 		/>
 	</target>
 
+	<target name="functional-bundle-tomcat-postgresql121-jdk8">
+		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
+
+		<run-functional-test
+			app.server.type="tomcat"
+			database.type="postgresql"
+			database.version="12.1"
+			setup.proxy="false"
+			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
+			test.fix.pack.base.url="${test.fix.pack.base.url}"
+			test.license.xml.url="${test.license.xml.url}"
+			test.plugin.zip.url="${test.plugin.zip.url}"
+			test.plugins.war.zip.url="${test.plugins.war.zip.url}"
+			test.portal.bundle.version="${test.portal.bundle.version}"
+			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
+			test.portal.lpkg.name="${test.portal.lpkg.name}"
+			test.sql.zip.url="${test.sql.zip.url}"
+		/>
+	</target>
+
+	<target name="functional-bundle-tomcat-sqlserver2017-jdk8">
+		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
+
+		<run-functional-test
+			app.server.type="tomcat"
+			database.type="sqlserver"
+			database.version="2017"
+			setup.proxy="false"
+			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
+			test.fix.pack.base.url="${test.fix.pack.base.url}"
+			test.license.xml.url="${test.license.xml.url}"
+			test.plugin.zip.url="${test.plugin.zip.url}"
+			test.plugins.war.zip.url="${test.plugins.war.zip.url}"
+			test.portal.bundle.version="${test.portal.bundle.version}"
+			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
+			test.portal.lpkg.name="${test.portal.lpkg.name}"
+			test.sql.zip.url="${test.sql.zip.url}"
+		/>
+	</target>
+
+	<target name="functional-bundle-tomcat-sqlserver2019-jdk8">
+		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
+
+		<run-functional-test
+			app.server.type="tomcat"
+			database.type="sqlserver"
+			database.version="2019"
+			setup.proxy="false"
+			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
+			test.fix.pack.base.url="${test.fix.pack.base.url}"
+			test.license.xml.url="${test.license.xml.url}"
+			test.plugin.zip.url="${test.plugin.zip.url}"
+			test.plugins.war.zip.url="${test.plugins.war.zip.url}"
+			test.portal.bundle.version="${test.portal.bundle.version}"
+			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
+			test.portal.lpkg.name="${test.portal.lpkg.name}"
+			test.sql.zip.url="${test.sql.zip.url}"
+		/>
+	</target>
+
 	<target name="functional-bundle-tomcat-sybase160-jdk8">
 		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
 
@@ -4022,6 +4114,25 @@ log.sanitizer.enabled=false</echo>
 	<target name="functional-bundle-weblogic-mysql57-jdk8">
 		<run-functional-test
 			app.server.type="weblogic"
+			database.type="mysql"
+			database.version="5.7"
+			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
+			test.fix.pack.base.url="${test.fix.pack.base.url}"
+			test.license.xml.url="${test.license.xml.url}"
+			test.plugin.zip.url="${test.plugin.zip.url}"
+			test.plugins.war.zip.url="${test.plugins.war.zip.url}"
+			test.portal.bundle.dependencies.zip.url="${test.portal.bundle.dependencies.zip.url}"
+			test.portal.bundle.osgi.zip.url="${test.portal.bundle.osgi.zip.url}"
+			test.portal.bundle.tools.zip.url="${test.portal.bundle.tools.zip.url}"
+			test.portal.bundle.war.url="${test.portal.bundle.war.url}"
+			test.portal.lpkg.name="${test.portal.lpkg.name}"
+			test.sql.zip.url="${test.sql.zip.url}"
+		/>
+	</target>
+
+	<target name="functional-bundle-websphere-mysql57-jdk8">
+		<run-functional-test
+			app.server.type="websphere"
 			database.type="mysql"
 			database.version="5.7"
 			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
@@ -4100,6 +4211,14 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
+	<target name="functional-orcllinux6-tomcat90-mysql57-jdk8">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-orcllinux7-tomcat90-mysql57-jdk8">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
 	<target name="functional-smoke-bundle-tomcat-mysql56-jdk8">
 		<antcall target="functional-bundle-tomcat-mysql56-jdk8" />
 	</target>
@@ -4112,12 +4231,18 @@ log.sanitizer.enabled=false</echo>
 		<antcall target="functional-bundle-tomcat-mysql57-jdk11_open" />
 	</target>
 
-	<target name="functional-smoke-jboss71-mysql57-jdk8">
+	<target name="functional-smoke-jboss72-mysql57-jdk8">
 		<run-functional-test app.server.type="jboss" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
-	<target name="functional-smoke-jboss71-mysql57-jdk11_open">
+	<target name="functional-smoke-jboss72-mysql57-jdk11_open">
 		<run-functional-test app.server.type="jboss" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-jboss73-mysql57-jdk8">
+		<set-app-server-version-number app.server.type="jboss" app.server.version="7.3.0" />
+
+		<run-functional-test app.server.type="jboss" app.server.version="7.3.0" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
 	</target>
 
 	<target name="functional-smoke-tcserver40-mysql57-jdk8">
@@ -4252,6 +4377,18 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="wildfly" database.type="mariadb" test.portal.log.assert="true" />
 	</target>
 
+	<target name="functional-smoke-wildfly170-mariadb102-jdk8">
+		<set-app-server-version-number app.server.type="wildfly" app.server.version="17.0.0" />
+
+		<run-functional-test app.server.type="wildfly" app.server.version="17.0.0" database.type="mariadb" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-smoke-wildfly170-mariadb102-jdk11_open">
+		<set-app-server-version-number app.server.type="wildfly" app.server.version="17.0.0" />
+
+		<run-functional-test app.server.type="wildfly" app.server.version="17.0.0" database.type="mariadb" test.portal.log.assert="true" />
+	</target>
+
 	<target name="functional-tomcat90-db2111-jdk8">
 		<run-functional-test app.server.type="tomcat" database.type="db2" />
 	</target>
@@ -4368,11 +4505,23 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="tomcat" database.type="sybase" />
 	</target>
 
-	<target name="functional-upgrade-jboss71-mysql57-jdk8">
+	<target name="functional-ubuntu14-tomcat90-mysql57-jdk8">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-ubuntu16-tomcat90-mysql57-jdk8">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-ubuntu18-tomcat90-mysql57-jdk8">
+		<run-functional-test app.server.type="tomcat" database.type="mysql" database.version="5.7" test.portal.log.assert="true" />
+	</target>
+
+	<target name="functional-upgrade-jboss72-mysql57-jdk8">
 		<run-functional-test app.server.type="jboss" database.type="mysql" database.version="5.7" />
 	</target>
 
-	<target name="functional-upgrade-jboss71-mysql57-jdk11_open">
+	<target name="functional-upgrade-jboss72-mysql57-jdk11_open">
 		<run-functional-test app.server.type="jboss" database.type="mysql" database.version="5.7" />
 	</target>
 
@@ -4500,6 +4649,10 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="wildfly" database.type="mariadb" />
 	</target>
 
+	<target name="functional-weblogic122-mysql57-jdk8">
+		<run-functional-test app.server.type="weblogic" database.type="mysql" />
+	</target>
+
 	<target name="functional-weblogic122-oracle122-jdk8">
 		<run-functional-test app.server.type="weblogic" database.type="oracle" />
 	</target>
@@ -4508,8 +4661,16 @@ log.sanitizer.enabled=false</echo>
 		<run-functional-test app.server.type="weblogic" database.type="oracle" database.version="19.3.0.0.0" />
 	</target>
 
+	<target name="functional-websphere90-mysql57-jdk8">
+		<run-functional-test app.server.type="websphere" database.type="mysql" />
+	</target>
+
 	<target name="functional-wildfly160-mariadb102-jdk8">
 		<run-functional-test app.server.type="wildfly" database.type="mariadb" />
+	</target>
+
+	<target name="functional-wildfly160-mysql57-jdk8">
+		<run-functional-test app.server.type="wildfly" database.type="mysql" />
 	</target>
 
 	<target name="gogo-shell-client-jdk8">
@@ -4563,7 +4724,7 @@ log.sanitizer.enabled=false</echo>
 						<dirset
 							dir="modules/sdk"
 							excludes="${gradle.plugins.test.excludes}"
-							includes="gradle-plugins-*"
+							includes="gradle-plugins*"
 						/>
 					</path>
 					<sequential>
@@ -4573,7 +4734,9 @@ log.sanitizer.enabled=false</echo>
 								substring="gradleTest"
 							/>
 							<then>
-								<gradle-execute dir="@{gradle.plugin.dir}" task="gradleTest" />
+								<gradle-execute dir="@{gradle.plugin.dir}" task="gradleTest">
+									<arg value="-Pplugins.sdk.version=${build.sdk.version}" />
+								</gradle-execute>
 							</then>
 						</if>
 					</sequential>
@@ -4684,6 +4847,14 @@ log.sanitizer.enabled=false</echo>
 
 	<target name="legacy-functional-bundle-tomcat-postgresql10">
 		<run-legacy-database-dump database.type="postgresql" />
+	</target>
+
+	<target name="legacy-functional-bundle-tomcat-sqlserver2017">
+		<run-legacy-database-dump database.type="sqlserver" database.version="2017" />
+	</target>
+
+	<target name="legacy-functional-bundle-tomcat-sqlserver2019">
+		<run-legacy-database-dump database.type="sqlserver" database.version="2019" />
 	</target>
 
 	<target name="legacy-functional-bundle-tomcat-sybase160">
@@ -5063,6 +5234,63 @@ log.sanitizer.enabled=false</echo>
 		/>
 	</target>
 
+	<target name="modules-integration-bundle-postgresql121-jdk8">
+		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
+
+		<run-modules-integration-test
+			database.type="postgresql"
+			database.version="12.1"
+			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
+			test.fix.pack.base.url="${test.fix.pack.base.url}"
+			test.license.xml.url="${test.license.xml.url}"
+			test.portal.bundle.dependencies.zip.url="${test.portal.bundle.dependencies.zip.url}"
+			test.portal.bundle.osgi.zip.url="${test.portal.bundle.osgi.zip.url}"
+			test.portal.bundle.tools.zip.url="${test.portal.bundle.tools.zip.url}"
+			test.portal.bundle.version="${test.portal.bundle.version}"
+			test.portal.bundle.war.url="${test.portal.bundle.war.url}"
+			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
+			test.sql.zip.url="${test.sql.zip.url}"
+		/>
+	</target>
+
+	<target name="modules-integration-bundle-sqlserver2017-jdk8">
+		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
+
+		<run-modules-integration-test
+			database.type="sqlserver"
+			database.version="2017"
+			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
+			test.fix.pack.base.url="${test.fix.pack.base.url}"
+			test.license.xml.url="${test.license.xml.url}"
+			test.portal.bundle.dependencies.zip.url="${test.portal.bundle.dependencies.zip.url}"
+			test.portal.bundle.osgi.zip.url="${test.portal.bundle.osgi.zip.url}"
+			test.portal.bundle.tools.zip.url="${test.portal.bundle.tools.zip.url}"
+			test.portal.bundle.version="${test.portal.bundle.version}"
+			test.portal.bundle.war.url="${test.portal.bundle.war.url}"
+			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
+			test.sql.zip.url="${test.sql.zip.url}"
+		/>
+	</target>
+
+	<target name="modules-integration-bundle-sqlserver2019-jdk8">
+		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
+
+		<run-modules-integration-test
+			database.type="sqlserver"
+			database.version="2019"
+			test.build.fix.pack.zip.url="${test.build.fix.pack.zip.url}"
+			test.fix.pack.base.url="${test.fix.pack.base.url}"
+			test.license.xml.url="${test.license.xml.url}"
+			test.portal.bundle.dependencies.zip.url="${test.portal.bundle.dependencies.zip.url}"
+			test.portal.bundle.osgi.zip.url="${test.portal.bundle.osgi.zip.url}"
+			test.portal.bundle.tools.zip.url="${test.portal.bundle.tools.zip.url}"
+			test.portal.bundle.version="${test.portal.bundle.version}"
+			test.portal.bundle.war.url="${test.portal.bundle.war.url}"
+			test.portal.bundle.zip.url="${test.portal.bundle.zip.url}"
+			test.sql.zip.url="${test.sql.zip.url}"
+		/>
+	</target>
+
 	<target name="modules-integration-bundle-sybase160-jdk8">
 		<set-tomcat-version-number liferay.portal.bundle="${test.portal.bundle.version}" />
 
@@ -5211,6 +5439,8 @@ log.sanitizer.enabled=false</echo>
 	</target>
 
 	<target name="modules-semantic-versioning-jdk8">
+		<propertycopy from="app.server.${app.server.type}.version" name="app.server.version" />
+
 		<run-batch-test>
 			<test-action>
 				<loadresource property="modules.baseline.task.groups">
@@ -5269,14 +5499,23 @@ log.sanitizer.enabled=false</echo>
 
 				<if>
 					<and>
-						<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+						<or>
+							<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+							<available file="liferay-portal-bundle-${app.server.type}-${app.server.version}.tar.gz" />
+						</or>
 						<available file="liferay-portal-source.tar.gz" />
 					</and>
 					<then>
+						<local name="bundle.src.file.name" />
+
+						<condition else="liferay-portal-bundle-${app.server.type}.tar.gz" property="bundle.src.file.name" value="liferay-portal-bundle-${app.server.type}-${app.server.version}.tar.gz">
+							<available file="liferay-portal-bundle-${app.server.type}-${app.server.version}.tar.gz" />
+						</condition>
+
 						<untar
 							compression="gzip"
 							dest="."
-							src="liferay-portal-bundle-${app.server.type}.tar.gz"
+							src="${bundle.src.file.name}"
 						/>
 
 						<antcall inheritAll="false" target="compile" />
@@ -5603,6 +5842,7 @@ ${output.content}</echo>
 			<test-action>
 				<sequential>
 					<ant dir="${release.tool.dir}" inheritAll="false" target="dist" useNativeBasedir="true">
+						<property name="override.decrement.module.bnd.versions" value="true" />
 						<property name="project.release.dir.native" value="${release.tool.dir}" />
 					</ant>
 				</sequential>
@@ -5693,6 +5933,8 @@ ${output.content}</echo>
 	</target>
 
 	<target name="portal-startup-space-in-path-jdk8">
+		<propertycopy from="app.server.${app.server.type}.version" name="app.server.version" />
+
 		<sequential>
 			<run-batch-test>
 				<test-action>
@@ -5777,7 +6019,10 @@ ${output.content}</echo>
 						</then>
 						<elseif>
 							<and>
-								<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+								<or>
+									<available file="liferay-portal-bundle-${app.server.type}.tar.gz" />
+									<available file="liferay-portal-bundle-${app.server.type}-${app.server.version}.tar.gz" />
+								</or>
 								<available file="liferay-portal-source.tar.gz" />
 							</and>
 							<then>
@@ -5925,6 +6170,107 @@ ${output.content}</echo>
 
 	<target name="release-osgi-state-lpkg-test-jdk8">
 		<run-release-osgi-state-lpkg-test />
+	</target>
+
+	<target name="rest-builder-jdk8">
+		<run-batch-test>
+			<test-action>
+				<if>
+					<available file="modules/util/portal-tools-rest-builder" />
+					<then>
+						<gradle-execute dir="modules/util/portal-tools-rest-builder" task="deploy">
+							<arg value="clean" />
+						</gradle-execute>
+					</then>
+				</if>
+
+				<exec executable="git">
+					<arg value="add" />
+					<arg value="--all" />
+				</exec>
+
+				<record action="start" name="${project.dir}/build.rest.output.txt" />
+
+				<if>
+					<isset property="modules.test.class.group" />
+					<then>
+						<loadresource property="modules.build.rest.tasks">
+							<filterchain>
+								<tokenfilter>
+									<replaceregex flags="g" pattern="(\S+ )" replace="\0," />
+								</tokenfilter>
+							</filterchain>
+							<propertyresource name="modules.test.class.group" />
+						</loadresource>
+
+						<for list="${modules.build.rest.tasks}" param="modules.build.rest.task" trim="true">
+							<sequential>
+								<echo>Executing Gradle tasks: @{modules.build.rest.task}</echo>
+
+								<gradle-execute dir="modules" forcedcacheenabled="false" task="@{modules.build.rest.task}">
+									<arg value="-DbuildREST.skipReadOnly=${build.rest.skip.read.only}" />
+									<arg value="-Pcom.liferay.portal.tools.rest.builder.ignore.local=false" />
+								</gradle-execute>
+							</sequential>
+						</for>
+					</then>
+					<else>
+						<echo>Executing Gradle tasks: @{modules.build.rest.task}</echo>
+
+						<gradle-execute dir="modules" forcedcacheenabled="false" task="buildREST">
+							<arg value="-DbuildREST.skipReadOnly=${build.rest.skip.read.only}" />
+							<arg value="-Pcom.liferay.portal.tools.rest.builder.ignore.local=false" />
+						</gradle-execute>
+					</else>
+				</if>
+
+				<record action="stop" name="${project.dir}/build.rest.output.txt" />
+
+				<loadfile
+					property="build.rest.output.txt.content"
+					srcfile="${project.dir}/build.rest.output.txt"
+				/>
+
+				<delete file="${project.dir}/build.rest.output.txt" />
+
+				<if>
+					<contains string="${build.rest.output.txt.content}" substring="Writing " />
+					<then>
+						<exec executable="git" output="${project.dir}/build.rest.diff.txt">
+							<arg value="diff" />
+							<arg value="--" />
+							<arg value="." />
+							<arg value=":!*/packageinfo" />
+						</exec>
+
+						<loadfile
+							property="build.rest.diff.txt.content"
+							srcfile="${project.dir}/build.rest.diff.txt"
+						/>
+
+						<delete file="${project.dir}/build.rest.diff.txt" />
+
+						<if>
+							<isset property="build.rest.diff.txt.content" />
+							<then>
+								<echo message="${build.rest.diff.txt.content}" />
+
+								<fail>
+.
+
+Detected build REST changes. See above build REST log for more
+information. Make sure to commit in all build REST results.
+								</fail>
+							</then>
+						</if>
+					</then>
+				</if>
+			</test-action>
+
+			<test-set-up>
+				<setup-test-environment />
+			</test-set-up>
+		</run-batch-test>
 	</target>
 
 	<target name="ruby-sass-compiler-jdk8">
@@ -6187,7 +6533,10 @@ information. Make sure to commit in all build services results.
 				<var name="format.current.branch" value="true" />
 
 				<if>
-					<contains string="${git.diff}" substring="modules${file.separator}util${file.separator}source-formatter" />
+					<or>
+						<contains string="${git.diff}" substring="modules${file.separator}util${file.separator}source-formatter" />
+						<contains string="${git.diff}" substring="source-formatter.properties" />
+					</or>
 					<then>
 						<var name="format.current.branch" value="false" />
 
@@ -6213,8 +6562,9 @@ information. Make sure to commit in all build services results.
 					<property name="format.current.branch" value="${format.current.branch}" />
 					<property name="show.documentation" value="false" />
 					<property name="source.auto.fix" value="false" />
+					<property name="source.fail.on.auto.fix" value="true" />
+					<property name="source.fail.on.has.warning" value="true" />
 					<property name="source.print.errors" value="false" />
-					<property name="source.throw.exception" value="true" />
 					<property name="source.use.properties" value="false" />
 				</ant>
 			</test-action>
@@ -6242,9 +6592,10 @@ information. Make sure to commit in all build services results.
 				<ant dir="portal-impl" target="format-source-all">
 					<property name="show.documentation" value="false" />
 					<property name="source.auto.fix" value="false" />
+					<property name="source.fail.on.auto.fix" value="true" />
+					<property name="source.fail.on.has.warning" value="true" />
 					<property if:true="${liferay.releng.public}" name="source.formatter.excludes" value="modules/private/**" />
 					<property name="source.print.errors" value="false" />
-					<property name="source.throw.exception" value="true" />
 					<property name="source.use.properties" value="false" />
 				</ant>
 			</test-action>

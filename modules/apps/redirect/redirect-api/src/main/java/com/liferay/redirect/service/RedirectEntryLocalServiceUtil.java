@@ -66,8 +66,24 @@ public class RedirectEntryLocalServiceUtil {
 			serviceContext);
 	}
 
+	public static com.liferay.redirect.model.RedirectEntry addRedirectEntry(
+			long groupId, String destinationURL, java.util.Date expirationDate,
+			String groupBaseURL, boolean permanent, String sourceURL,
+			boolean updateChainedRedirectEntries,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().addRedirectEntry(
+			groupId, destinationURL, expirationDate, groupBaseURL, permanent,
+			sourceURL, updateChainedRedirectEntries, serviceContext);
+	}
+
 	/**
 	 * Adds the redirect entry to the database. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RedirectEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param redirectEntry the redirect entry
 	 * @return the redirect entry that was added
@@ -76,12 +92,6 @@ public class RedirectEntryLocalServiceUtil {
 		com.liferay.redirect.model.RedirectEntry redirectEntry) {
 
 		return getService().addRedirectEntry(redirectEntry);
-	}
-
-	public static boolean checkRedirectionChain(
-		long groupId, String destinationURL) {
-
-		return getService().checkRedirectionChain(groupId, destinationURL);
 	}
 
 	/**
@@ -120,6 +130,10 @@ public class RedirectEntryLocalServiceUtil {
 	/**
 	 * Deletes the redirect entry with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RedirectEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param redirectEntryId the primary key of the redirect entry
 	 * @return the redirect entry that was removed
 	 * @throws PortalException if a redirect entry with the primary key could not be found
@@ -134,6 +148,10 @@ public class RedirectEntryLocalServiceUtil {
 	/**
 	 * Deletes the redirect entry from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RedirectEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param redirectEntry the redirect entry
 	 * @return the redirect entry that was removed
 	 */
@@ -141,6 +159,12 @@ public class RedirectEntryLocalServiceUtil {
 		com.liferay.redirect.model.RedirectEntry redirectEntry) {
 
 		return getService().deleteRedirectEntry(redirectEntry);
+	}
+
+	public static <T> T dslQuery(
+		com.liferay.petra.sql.dsl.query.DSLQuery dslQuery) {
+
+		return getService().dslQuery(dslQuery);
 	}
 
 	public static com.liferay.portal.kernel.dao.orm.DynamicQuery
@@ -321,17 +345,16 @@ public class RedirectEntryLocalServiceUtil {
 		getRedirectEntries(
 			long groupId, int start, int end,
 			com.liferay.portal.kernel.util.OrderByComparator
-				<com.liferay.redirect.model.RedirectEntry> obc) {
+				<com.liferay.redirect.model.RedirectEntry> orderByComparator) {
 
-		return getService().getRedirectEntries(groupId, start, end, obc);
+		return getService().getRedirectEntries(
+			groupId, start, end, orderByComparator);
 	}
 
 	public static java.util.List<com.liferay.redirect.model.RedirectEntry>
-		getRedirectEntriesByGroupIdAndDestinationURL(
-			long groupId, String destinationURL) {
+		getRedirectEntries(long groupId, String destinationURL) {
 
-		return getService().getRedirectEntriesByGroupIdAndDestinationURL(
-			groupId, destinationURL);
+		return getService().getRedirectEntries(groupId, destinationURL);
 	}
 
 	/**
@@ -420,8 +443,24 @@ public class RedirectEntryLocalServiceUtil {
 			sourceURL);
 	}
 
+	public static com.liferay.redirect.model.RedirectEntry updateRedirectEntry(
+			long redirectEntryId, String destinationURL,
+			java.util.Date expirationDate, String groupBaseURL,
+			boolean permanent, String sourceURL,
+			boolean updateChainedRedirectEntries)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().updateRedirectEntry(
+			redirectEntryId, destinationURL, expirationDate, groupBaseURL,
+			permanent, sourceURL, updateChainedRedirectEntries);
+	}
+
 	/**
 	 * Updates the redirect entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RedirectEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param redirectEntry the redirect entry
 	 * @return the redirect entry that was updated

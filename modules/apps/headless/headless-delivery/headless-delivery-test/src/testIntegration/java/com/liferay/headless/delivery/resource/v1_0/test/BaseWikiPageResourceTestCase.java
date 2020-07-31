@@ -119,7 +119,9 @@ public abstract class BaseWikiPageResourceTestCase {
 
 		WikiPageResource.Builder builder = WikiPageResource.builder();
 
-		wikiPageResource = builder.locale(
+		wikiPageResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -690,6 +692,26 @@ public abstract class BaseWikiPageResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/wikiPage"))));
+	}
+
+	@Test
+	public void testGraphQLGetWikiPageNotFound() throws Exception {
+		Long irrelevantWikiPageId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"wikiPage",
+						new HashMap<String, Object>() {
+							{
+								put("wikiPageId", irrelevantWikiPageId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

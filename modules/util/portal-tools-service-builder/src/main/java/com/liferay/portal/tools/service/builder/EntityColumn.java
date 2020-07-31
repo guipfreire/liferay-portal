@@ -132,16 +132,16 @@ public class EntityColumn implements Cloneable, Comparable<EntityColumn> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof EntityColumn)) {
+		if (!(object instanceof EntityColumn)) {
 			return false;
 		}
 
-		EntityColumn entityColumn = (EntityColumn)obj;
+		EntityColumn entityColumn = (EntityColumn)object;
 
 		if (_name.equals(entityColumn.getName())) {
 			return true;
@@ -407,10 +407,14 @@ public class EntityColumn implements Cloneable, Comparable<EntityColumn> {
 			return true;
 		}
 
-		if (!includeWrappers) {
-			return false;
+		if (includeWrappers && isPrimitiveTypeWrapper()) {
+			return true;
 		}
 
+		return false;
+	}
+
+	public boolean isPrimitiveTypeWrapper() {
 		if (_type.equals("Boolean")) {
 			return true;
 		}

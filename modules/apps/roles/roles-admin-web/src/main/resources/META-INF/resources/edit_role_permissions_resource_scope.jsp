@@ -25,7 +25,7 @@ Role role = (Role)objArray[0];
 String target = (String)objArray[3];
 Boolean supportsFilterByGroup = (Boolean)objArray[5];
 long[] groupIdsArray = (long[])objArray[7];
-List groupNames = (List)objArray[8];
+List<String> groupNames = (List<String>)objArray[8];
 String portletId = (String)objArray[9];
 %>
 
@@ -51,12 +51,17 @@ String portletId = (String)objArray[9];
 
 			PortletURL itemSelectorURL = itemSelector.getItemSelectorURL(RequestBackedPortletURLFactoryUtil.create(liferayPortletRequest), liferayPortletResponse.getNamespace() + "selectGroup", groupItemSelectorCriterion);
 
-			Map<String, Object> data = HashMapBuilder.<String, Object>put("itemSelectorURL", itemSelectorURL.toString()).put("target", target).build();
+			Map<String, Object> props = HashMapBuilder.<String, Object>put(
+				"itemSelectorURL",
+				itemSelectorURL.toString()
+			).put(
+				"target", target
+			).build();
 		%>
 
 			<react:component
-				data="<%= data %>"
 				module="js/GroupLabels.es"
+				props="<%= props %>"
 			/>
 
 		<%

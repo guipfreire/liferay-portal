@@ -12,6 +12,7 @@
  * details.
  */
 
+import ClayLayout from '@clayui/layout';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, {useMemo} from 'react';
@@ -20,28 +21,45 @@ import {
 	LayoutDataPropTypes,
 	getLayoutDataItemPropTypes,
 } from '../../../prop-types/index';
-import {LAYOUT_DATA_ITEM_DEFAULT_CONFIGURATIONS} from '../../config/constants/layoutDataItemDefaultConfigurations';
 import {LAYOUT_DATA_ITEM_TYPES} from '../../config/constants/layoutDataItemTypes';
 import {useSelector} from '../../store/index';
+import {getResponsiveConfig} from '../../utils/getResponsiveConfig';
+import {useCustomRowContext} from '../ResizeContext';
 
 const Row = React.forwardRef(({children, className, item, layoutData}, ref) => {
+	const customRow = useCustomRowContext();
+	const selectedViewportSize = useSelector(
+		(state) => state.selectedViewportSize
+	);
+
+	const itemConfig = getResponsiveConfig(item.config, selectedViewportSize);
+	const {modulesPerRow, reverseOrder} = itemConfig;
+
 	const rowContent = (
-		<div
-			className={classNames(className, 'row', {
-				empty: !item.children.some(
-					(childId) => layoutData.items[childId].children.length
-				),
-				'no-gutters': !(typeof item.config.gutters === 'boolean'
-					? item.config.gutters
-					: LAYOUT_DATA_ITEM_DEFAULT_CONFIGURATIONS[item.type]),
+		<ClayLayout.Row
+			className={classNames(className, {
+				empty:
+					item.config.numberOfColumns === modulesPerRow &&
+					!item.children.some(
+						(childId) => layoutData.items[childId].children.length
+					),
+				'flex-column': customRow && modulesPerRow === 1,
+				'flex-column-reverse':
+					item.config.numberOfColumns === 2 &&
+					modulesPerRow === 1 &&
+					reverseOrder,
+
+				'no-gutters': !item.config.gutters,
 			})}
 			ref={ref}
 		>
 			{children}
-		</div>
+		</ClayLayout.Row>
 	);
 
-	const masterLayoutData = useSelector((state) => state.masterLayoutData);
+	const masterLayoutData = useSelector(
+		(state) => state.masterLayout?.masterLayoutData
+	);
 
 	const masterParent = useMemo(() => {
 		const dropZone =
@@ -56,7 +74,9 @@ const Row = React.forwardRef(({children, className, item, layoutData}, ref) => {
 	);
 
 	return shouldAddContainer ? (
-		<div className="container-fluid p-0">{rowContent}</div>
+		<ClayLayout.ContainerFluid className="p-0" size={false}>
+			{rowContent}
+		</ClayLayout.ContainerFluid>
 	) : (
 		rowContent
 	);

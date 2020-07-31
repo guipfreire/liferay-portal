@@ -16,6 +16,7 @@ import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
+import com.liferay.portal.vulcan.util.ObjectMapperUtil;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -74,64 +75,33 @@ import javax.xml.bind.annotation.XmlRootElement;
 @GraphQLName("${schemaName}")
 @JsonFilter("Liferay.Vulcan")
 <#if schema.requiredPropertySchemaNames?has_content>
-	@Schema(requiredProperties =
-		{
-			<#list schema.requiredPropertySchemaNames as requiredProperty>
-				"${requiredProperty}"
-				<#if requiredProperty_has_next>
-					,
-				</#if>
-			</#list>
-		}
+	@Schema(
+		requiredProperties =
+			{
+				<#list schema.requiredPropertySchemaNames as requiredProperty>
+					"${requiredProperty}"
+					<#if requiredProperty_has_next>
+						,
+					</#if>
+				</#list>
+			}
+
+		<#if schema.description??>
+			, description = "${schema.description}"
+		</#if>
 	)
 </#if>
 @XmlRootElement(name = "${schemaName}")
 public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoParentClassName}</#if> {
-	<#assign enumSchemas = freeMarkerTool.getDTOEnumSchemas(openAPIYAML, schema) />
 
-	<#list enumSchemas?keys as enumName>
-		@GraphQLName("${enumName}")
-		public static enum ${enumName} {
+	public static ${schemaName} toDTO(String json) {
+		return ObjectMapperUtil.readValue(${schemaName}.class, json);
+	}
 
-			<#list enumSchemas[enumName].enumValues as enumValue>
-				${freeMarkerTool.getEnumFieldName(enumValue)}("${enumValue}")
-
-				<#if enumValue_has_next>
-					,
-				</#if>
-			</#list>;
-
-			@JsonCreator
-			public static ${enumName} create(String value) {
-				for (${enumName} ${freeMarkerTool.getSchemaVarName(enumName)} : values()) {
-					if (Objects.equals(${freeMarkerTool.getSchemaVarName(enumName)}.getValue(), value)) {
-						return ${freeMarkerTool.getSchemaVarName(enumName)};
-					}
-				}
-
-				return null;
-			}
-
-			@JsonValue
-			public String getValue() {
-				return _value;
-			}
-
-			@Override
-			public String toString() {
-				return _value;
-			}
-
-			private ${enumName}(String value) {
-				_value = value;
-			}
-
-			private final String _value;
-
-		}
-	</#list>
-
-	<#assign properties = freeMarkerTool.getDTOProperties(configYAML, openAPIYAML, schema) />
+	<#assign
+		enumSchemas = freeMarkerTool.getDTOEnumSchemas(openAPIYAML, schema)
+		properties = freeMarkerTool.getDTOProperties(configYAML, openAPIYAML, schema)
+	/>
 
 	<#list properties?keys as propertyName>
 		<#assign
@@ -345,10 +315,62 @@ public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoPare
 	@Schema(defaultValue = "${configYAML.apiPackagePath}.dto.${escapedVersion}.${schemaName}", name = "x-class-name")
 	public String xClassName;
 
+	<#list enumSchemas?keys as enumName>
+		@GraphQLName("${enumName}")
+		public static enum ${enumName} {
+
+		<#list enumSchemas[enumName].enumValues as enumValue>
+			${freeMarkerTool.getEnumFieldName(enumValue)}("${enumValue}")
+
+			<#if enumValue_has_next>
+				,
+			</#if>
+		</#list>;
+
+		@JsonCreator
+		public static ${enumName} create(String value) {
+			for (${enumName} ${freeMarkerTool.getSchemaVarName(enumName)} : values()) {
+				if (Objects.equals(${freeMarkerTool.getSchemaVarName(enumName)}.getValue(), value)) {
+					return ${freeMarkerTool.getSchemaVarName(enumName)};
+				}
+			}
+
+			return null;
+		}
+
+		@JsonValue
+		public String getValue() {
+			return _value;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private ${enumName}(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+		}
+	</#list>
+
 	private static String _escape(Object object) {
 		String string = String.valueOf(object);
 
 		return string.replaceAll("\"", "\\\\\"");
+	}
+
+	private static boolean _isArray(Object value) {
+		if (value == null) {
+			return false;
+		}
+
+		Class<?> clazz = value.getClass();
+
+		return clazz.isArray();
 	}
 
 	private static String _toJSON(Map<String, ?> map) {
@@ -369,9 +391,7 @@ public class ${schemaName} <#if dtoParentClassName?has_content>extends ${dtoPare
 
 			Object value = entry.getValue();
 
-			Class<?> clazz = value.getClass();
-
-			if (clazz.isArray()) {
+			if (_isArray(value)) {
 				sb.append("[");
 
 				Object[] valueArray = (Object[]) value;

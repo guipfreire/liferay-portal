@@ -41,6 +41,10 @@ public class DDMStructureLayoutLocalServiceUtil {
 	/**
 	 * Adds the ddm structure layout to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMStructureLayoutLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param ddmStructureLayout the ddm structure layout
 	 * @return the ddm structure layout that was added
 	 */
@@ -104,6 +108,10 @@ public class DDMStructureLayoutLocalServiceUtil {
 	/**
 	 * Deletes the ddm structure layout from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMStructureLayoutLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param ddmStructureLayout the ddm structure layout
 	 * @return the ddm structure layout that was removed
 	 */
@@ -117,6 +125,10 @@ public class DDMStructureLayoutLocalServiceUtil {
 
 	/**
 	 * Deletes the ddm structure layout with the primary key from the database. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMStructureLayoutLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param structureLayoutId the primary key of the ddm structure layout
 	 * @return the ddm structure layout that was removed
@@ -161,6 +173,12 @@ public class DDMStructureLayoutLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		getService().deleteStructureLayout(structureLayoutId);
+	}
+
+	public static <T> T dslQuery(
+		com.liferay.petra.sql.dsl.query.DSLQuery dslQuery) {
+
+		return getService().dslQuery(dslQuery);
 	}
 
 	public static com.liferay.portal.kernel.dao.orm.DynamicQuery
@@ -531,6 +549,10 @@ public class DDMStructureLayoutLocalServiceUtil {
 
 	/**
 	 * Updates the ddm structure layout in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMStructureLayoutLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param ddmStructureLayout the ddm structure layout
 	 * @return the ddm structure layout that was updated

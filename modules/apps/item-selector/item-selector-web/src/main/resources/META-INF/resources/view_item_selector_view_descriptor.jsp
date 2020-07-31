@@ -19,9 +19,9 @@
 <%
 ItemSelectorViewDescriptorRendererDisplayContext itemSelectorViewDescriptorRendererDisplayContext = (ItemSelectorViewDescriptorRendererDisplayContext)request.getAttribute(ItemSelectorViewDescriptorRendererDisplayContext.class.getName());
 
-ItemSelectorViewDescriptor itemSelectorViewDescriptor = itemSelectorViewDescriptorRendererDisplayContext.getItemSelectorViewDescriptor();
+ItemSelectorViewDescriptor<Object> itemSelectorViewDescriptor = itemSelectorViewDescriptorRendererDisplayContext.getItemSelectorViewDescriptor();
 
-SearchContainer searchContainer = itemSelectorViewDescriptor.getSearchContainer();
+SearchContainer<Object> searchContainer = itemSelectorViewDescriptor.getSearchContainer();
 %>
 
 <c:if test="<%= itemSelectorViewDescriptor.isShowManagementToolbar() %>">
@@ -30,7 +30,10 @@ SearchContainer searchContainer = itemSelectorViewDescriptor.getSearchContainer(
 	/>
 </c:if>
 
-<div class="container-fluid container-fluid-max-xl item-selector lfr-item-viewer" id="<portlet:namespace />entriesContainer">
+<clay:container-fluid
+	cssClass="item-selector lfr-item-viewer"
+	id='<%= liferayPortletResponse.getNamespace() + "entriesContainer" %>'
+>
 	<c:if test="<%= itemSelectorViewDescriptor.isShowBreadcrumb() %>">
 		<liferay-site-navigation:breadcrumb
 			breadcrumbEntries="<%= itemSelectorViewDescriptorRendererDisplayContext.getBreadcrumbEntries(currentURLObj) %>"
@@ -105,14 +108,14 @@ SearchContainer searchContainer = itemSelectorViewDescriptor.getSearchContainer(
 							%>
 
 							<c:choose>
-								<c:when test="<%= Validator.isNull(itemDescriptor.getUserName()) %>">
+								<c:when test="<%= Validator.isNotNull(itemDescriptor.getUserName()) %>">
 									<span class="text-default">
 										<liferay-ui:message arguments="<%= new String[] {itemDescriptor.getUserName(), modifiedDateDescription} %>" key="x-modified-x-ago" />
 									</span>
 								</c:when>
 								<c:otherwise>
 									<span class="text-default">
-										<liferay-ui:message arguments="<%= new String[] {modifiedDateDescription} %>" key="modified-x-ago" />
+										<liferay-ui:message arguments="<%= modifiedDateDescription %>" key="modified-x-ago" />
 									</span>
 								</c:otherwise>
 							</c:choose>
@@ -136,7 +139,7 @@ SearchContainer searchContainer = itemSelectorViewDescriptor.getSearchContainer(
 			searchContainer="<%= searchContainer %>"
 		/>
 	</liferay-ui:search-container>
-</div>
+</clay:container-fluid>
 
 <aui:script require="metal-dom/src/all/dom as dom">
 	var selectItemHandler = dom.delegate(

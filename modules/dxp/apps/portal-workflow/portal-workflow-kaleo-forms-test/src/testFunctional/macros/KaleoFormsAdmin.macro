@@ -23,7 +23,7 @@ definition {
 				locator1 = "IFrame#IFRAME_TITLE",
 				value1 = "New Field Set");
 
-			SelectFrame(locator1 = "IFrame#DIALOG");
+			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 			PortletEntry.inputName(name = "${kfFieldSetName}");
 		}
@@ -80,7 +80,7 @@ definition {
 			locator1 = "KaleoFormsAdminEditProcess#ADD_WORKFLOW_BUTTON",
 			value1 = "Add Workflow");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		PortletEntry.inputTitle(title = "${workflowDefinitionTitle}");
 	}
@@ -95,6 +95,8 @@ definition {
 				locator1 = "Message#INFO",
 				value1 = "Updating the field set or workflow will cause loss of data.");
 		}
+
+		WaitForLiferayEvent.initializeLiferayEventLog();
 
 		LexiconEntry.gotoEntryMenuItem(
 			menuItem = "Assign Form",
@@ -157,6 +159,8 @@ definition {
 			value1 = "${kfFormName}");
 
 		SelectFrame(value1 = "relative=top");
+
+		WaitForLiferayEvent.initializeLiferayEventLog();
 	}
 
 	macro chooseWorkflow {
@@ -192,6 +196,12 @@ definition {
 		KaleoFormsAdmin.viewSelectedWorkflow(
 			edit = "${edit}",
 			workflowDefinitionTitle = "${workflowDefinitionTitle}");
+	}
+
+	macro closeWorkflowModal {
+		SelectFrame(value1 = "relative=top");
+
+		Click(locator1 = "KaleoFormsAdmin#CLOSE_BUTTON");
 	}
 
 	macro deactivateWorkflow {
@@ -305,7 +315,7 @@ definition {
 			locator1 = "IFrame#IFRAME_TITLE",
 			value1 = "Edit Field Set");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		PortletEntry.inputName(name = "${kfFieldSetNameEdit}");
 	}
@@ -333,7 +343,7 @@ definition {
 			menuItem = "Edit Form",
 			rowEntry = "${kfFormName}");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		PortletEntry.inputName(name = "${kfFormNameEdit}");
 
@@ -383,7 +393,7 @@ definition {
 			menuItem = "Edit",
 			rowEntry = "${workflowDefinitionTitle}");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		PortletEntry.inputTitle(title = "${workflowDefinitionTitleEdit}");
 	}
@@ -394,6 +404,8 @@ definition {
 		AssertTextEquals(
 			locator1 = "KaleoFormsAdminEditProcess#WORKFLOW_TABLE_TITLE",
 			value1 = "${workflowDefinitionTitle}");
+
+		WaitForLiferayEvent.initializeLiferayEventLog();
 
 		LexiconEntry.gotoEntryMenuItem(
 			menuItem = "Edit",
@@ -480,15 +492,17 @@ definition {
 
 		SelectFrame(value1 = "relative=top");
 
-		Click(locator1 = "Icon#CLOSE");
+		Click(locator1 = "KaleoFormsAdmin#CLOSE_BUTTON");
 	}
 
 	macro reactivateInactiveWorkflowDefinition {
+		WaitForLiferayEvent.initializeLiferayEventLog();
+
 		LexiconEntry.gotoEntryMenuItemNoError(
 			menuItem = "Edit",
 			rowEntry = "${workflowDefinitionTitle}");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		KaleoFormsAdmin.publishWorkflow();
 	}
@@ -508,9 +522,11 @@ definition {
 
 		SelectFrame(value1 = "relative=top");
 
-		if (IsElementPresent(locator1 = "IFrame#DIALOG")) {
+		if (IsElementPresent(locator1 = "IFrame#MODAL_BODY")) {
 			Click(locator1 = "Icon#CLOSE");
 		}
+
+		WaitForLiferayEvent.initializeLiferayEventLog();
 	}
 
 	macro saveForm {
@@ -560,7 +576,6 @@ definition {
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
-			panel = "Site Administration",
 			portlet = "Kaleo Forms Admin");
 
 		while (IsElementPresent(locator1 = "Icon#BODY_VERTICAL_ELLIPSIS")) {
@@ -595,7 +610,7 @@ definition {
 			menuItem = "Edit Form",
 			rowEntry = "${kfFormNameEdit}");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		AssertTextEquals(
 			locator1 = "DDMEditStructure#NAME_FIELD",

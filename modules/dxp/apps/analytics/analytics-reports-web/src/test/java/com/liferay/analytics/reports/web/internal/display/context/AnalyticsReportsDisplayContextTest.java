@@ -15,8 +15,9 @@
 package com.liferay.analytics.reports.web.internal.display.context;
 
 import com.liferay.analytics.reports.info.item.AnalyticsReportsInfoItem;
-import com.liferay.analytics.reports.web.internal.configuration.AnalyticsReportsConfiguration;
 import com.liferay.analytics.reports.web.internal.data.provider.AnalyticsReportsDataProvider;
+import com.liferay.analytics.reports.web.internal.model.CountrySearchKeywords;
+import com.liferay.analytics.reports.web.internal.model.SearchKeyword;
 import com.liferay.analytics.reports.web.internal.model.TrafficSource;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -84,9 +85,9 @@ public class AnalyticsReportsDisplayContextTest {
 
 		AnalyticsReportsDisplayContext analyticsReportsDisplayContext =
 			new AnalyticsReportsDisplayContext(
-				_getAnalyticsReportsConfiguration(true, false),
 				_getAnalyticsReportsDataProvider(
-					RandomTestUtil.randomInt(), RandomTestUtil.randomDouble(),
+					null, RandomTestUtil.randomInt(),
+					RandomTestUtil.randomDouble(), null,
 					RandomTestUtil.randomInt(), RandomTestUtil.randomDouble(),
 					false),
 				_getAnalyticsReportsItem(), null, null, new PortalImpl(),
@@ -108,51 +109,28 @@ public class AnalyticsReportsDisplayContextTest {
 			DateTimeFormatter.ISO_DATE.format(
 				localDate.minus(7, ChronoUnit.DAYS)),
 			defaultTimeRange.get("startDate"));
-
-		Assert.assertTrue((Boolean)context.get("readsEnabled"));
-	}
-
-	@Test
-	public void testGetContextWithReadsDisabled() {
-		AnalyticsReportsDisplayContext analyticsReportsDisplayContext =
-			new AnalyticsReportsDisplayContext(
-				_getAnalyticsReportsConfiguration(false, false),
-				_getAnalyticsReportsDataProvider(
-					RandomTestUtil.randomInt(), RandomTestUtil.randomDouble(),
-					RandomTestUtil.randomInt(), RandomTestUtil.randomDouble(),
-					false),
-				_getAnalyticsReportsItem(), null, null, new PortalImpl(),
-				_getRenderResponse(), _getResourceBundle(),
-				_getThemeDisplay(_getLayout()));
-
-		Map<String, Object> data = analyticsReportsDisplayContext.getData();
-
-		Map<String, Object> context = (Map<String, Object>)data.get("context");
-
-		Assert.assertFalse((Boolean)context.get("readsEnabled"));
 	}
 
 	@Test
 	public void testGetPropsWithInvalidAnalyticsConnection() {
-		int organicTrafficAmount = RandomTestUtil.randomInt();
+		long organicTrafficAmount = RandomTestUtil.randomInt();
 		double organicTrafficShare = RandomTestUtil.randomDouble();
 
-		int paidTrafficAmount = RandomTestUtil.randomInt();
+		long paidTrafficAmount = RandomTestUtil.randomInt();
 		double paidTrafficShare = RandomTestUtil.randomDouble();
 
 		AnalyticsReportsDataProvider analyticsReportsDataProvider =
 			_getAnalyticsReportsDataProvider(
-				organicTrafficAmount, organicTrafficShare, paidTrafficAmount,
-				paidTrafficShare, false);
+				null, organicTrafficAmount, organicTrafficShare, null,
+				paidTrafficAmount, paidTrafficShare, false);
 
-		AnalyticsReportsInfoItem analyticsReportsInfoItem =
+		AnalyticsReportsInfoItem<Object> analyticsReportsInfoItem =
 			_getAnalyticsReportsItem();
 
 		Layout layout = _getLayout();
 
 		AnalyticsReportsDisplayContext analyticsReportsDisplayContext =
 			new AnalyticsReportsDisplayContext(
-				_getAnalyticsReportsConfiguration(false, true),
 				analyticsReportsDataProvider, analyticsReportsInfoItem, null,
 				null, new PortalImpl(), _getRenderResponse(),
 				_getResourceBundle(), _getThemeDisplay(layout));
@@ -164,9 +142,9 @@ public class AnalyticsReportsDisplayContextTest {
 		Assert.assertEquals(
 			analyticsReportsInfoItem.getAuthorName(null),
 			props.get("authorName"));
-
-		Assert.assertEquals(layout.getPublishDate(), props.get("publishDate"));
-
+		Assert.assertEquals(
+			analyticsReportsInfoItem.getPublishDate(null),
+			props.get("publishDate"));
 		Assert.assertEquals(
 			analyticsReportsInfoItem.getTitle(null, LocaleUtil.US),
 			props.get("title"));
@@ -195,61 +173,35 @@ public class AnalyticsReportsDisplayContextTest {
 	}
 
 	@Test
-	public void testGetPropsWithTrafficSourcesDisabled() {
-		int organicTrafficAmount = RandomTestUtil.randomInt();
-		double organicTrafficShare = RandomTestUtil.randomDouble();
-
-		int paidTrafficAmount = RandomTestUtil.randomInt();
-		double paidTrafficShare = RandomTestUtil.randomDouble();
-
-		AnalyticsReportsDataProvider analyticsReportsDataProvider =
-			_getAnalyticsReportsDataProvider(
-				organicTrafficAmount, organicTrafficShare, paidTrafficAmount,
-				paidTrafficShare, false);
-
-		AnalyticsReportsInfoItem analyticsReportsInfoItem =
-			_getAnalyticsReportsItem();
-
-		Layout layout = _getLayout();
-
-		AnalyticsReportsDisplayContext analyticsReportsDisplayContext =
-			new AnalyticsReportsDisplayContext(
-				_getAnalyticsReportsConfiguration(false, false),
-				analyticsReportsDataProvider, analyticsReportsInfoItem, null,
-				null, new PortalImpl(), _getRenderResponse(),
-				_getResourceBundle(), _getThemeDisplay(layout));
-
-		Map<String, Object> data = analyticsReportsDisplayContext.getData();
-
-		Map<String, Object> props = (Map<String, Object>)data.get("props");
-
-		JSONArray trafficSourcesJSONArray = (JSONArray)props.get(
-			"trafficSources");
-
-		Assert.assertEquals("[]", trafficSourcesJSONArray.toJSONString());
-	}
-
-	@Test
 	public void testGetPropsWithValidAnalyticsConnection() {
-		int organicTrafficAmount = RandomTestUtil.randomInt();
+		long organicTrafficAmount = RandomTestUtil.randomInt();
 		double organicTrafficShare = RandomTestUtil.randomDouble();
 
-		int paidTrafficAmount = RandomTestUtil.randomInt();
+		long paidTrafficAmount = RandomTestUtil.randomInt();
 		double paidTrafficShare = RandomTestUtil.randomDouble();
+
+		SearchKeyword organicSearchKeyword = new SearchKeyword(
+			RandomTestUtil.randomString(), RandomTestUtil.randomInt(),
+			RandomTestUtil.randomInt(), RandomTestUtil.randomInt());
+
+		SearchKeyword paidSearchKeyword = new SearchKeyword(
+			RandomTestUtil.randomString(), RandomTestUtil.randomInt(),
+			RandomTestUtil.randomInt(), RandomTestUtil.randomInt());
 
 		AnalyticsReportsDataProvider analyticsReportsDataProvider =
 			_getAnalyticsReportsDataProvider(
-				organicTrafficAmount, organicTrafficShare, paidTrafficAmount,
+				Collections.singletonList(organicSearchKeyword),
+				organicTrafficAmount, organicTrafficShare,
+				Collections.singletonList(paidSearchKeyword), paidTrafficAmount,
 				paidTrafficShare, true);
 
-		AnalyticsReportsInfoItem analyticsReportsInfoItem =
+		AnalyticsReportsInfoItem<Object> analyticsReportsInfoItem =
 			_getAnalyticsReportsItem();
 
 		Layout layout = _getLayout();
 
 		AnalyticsReportsDisplayContext analyticsReportsDisplayContext =
 			new AnalyticsReportsDisplayContext(
-				_getAnalyticsReportsConfiguration(false, true),
 				analyticsReportsDataProvider, analyticsReportsInfoItem, null,
 				null, new PortalImpl(), _getRenderResponse(),
 				_getResourceBundle(), _getThemeDisplay(layout));
@@ -262,7 +214,9 @@ public class AnalyticsReportsDisplayContextTest {
 			analyticsReportsInfoItem.getAuthorName(null),
 			props.get("authorName"));
 
-		Assert.assertEquals(layout.getPublishDate(), props.get("publishDate"));
+		Assert.assertEquals(
+			analyticsReportsInfoItem.getPublishDate(null),
+			props.get("publishDate"));
 
 		Assert.assertEquals(
 			analyticsReportsInfoItem.getTitle(null, LocaleUtil.US),
@@ -274,6 +228,29 @@ public class AnalyticsReportsDisplayContextTest {
 		Assert.assertEquals(
 			JSONUtil.putAll(
 				JSONUtil.put(
+					"countryKeywords",
+					JSONUtil.putAll(
+						JSONUtil.put(
+							"countryCode", "us"
+						).put(
+							"countryName", "United States"
+						).put(
+							"keywords",
+							JSONUtil.putAll(
+								JSONUtil.put(
+									"keyword", paidSearchKeyword.getKeyword()
+								).put(
+									"position", paidSearchKeyword.getPosition()
+								).put(
+									"searchVolume",
+									paidSearchKeyword.getSearchVolume()
+								).put(
+									"traffic",
+									Math.toIntExact(
+										paidSearchKeyword.getTraffic())
+								))
+						))
+				).put(
 					"helpMessage", _titles.get(_MESSAGE_KEY_HELP_PAID)
 				).put(
 					"name", _TITLE_KEY_PAID
@@ -282,9 +259,33 @@ public class AnalyticsReportsDisplayContextTest {
 				).put(
 					"title", _titles.get(_TITLE_KEY_PAID)
 				).put(
-					"value", paidTrafficAmount
+					"value", Math.toIntExact(paidTrafficAmount)
 				),
 				JSONUtil.put(
+					"countryKeywords",
+					JSONUtil.putAll(
+						JSONUtil.put(
+							"countryCode", "us"
+						).put(
+							"countryName", "United States"
+						).put(
+							"keywords",
+							JSONUtil.putAll(
+								JSONUtil.put(
+									"keyword", organicSearchKeyword.getKeyword()
+								).put(
+									"position",
+									organicSearchKeyword.getPosition()
+								).put(
+									"searchVolume",
+									organicSearchKeyword.getSearchVolume()
+								).put(
+									"traffic",
+									Math.toIntExact(
+										organicSearchKeyword.getTraffic())
+								))
+						))
+				).put(
 					"helpMessage", _titles.get(_MESSAGE_KEY_HELP_ORGANIC)
 				).put(
 					"name", _TITLE_KEY_ORGANIC
@@ -293,33 +294,16 @@ public class AnalyticsReportsDisplayContextTest {
 				).put(
 					"title", _titles.get(_TITLE_KEY_ORGANIC)
 				).put(
-					"value", organicTrafficAmount
+					"value", Math.toIntExact(organicTrafficAmount)
 				)
 			).toJSONString(),
 			trafficSourcesJSONArray.toJSONString());
 	}
 
-	private AnalyticsReportsConfiguration _getAnalyticsReportsConfiguration(
-		boolean readsEnabled, boolean trafficSourcesEnabled) {
-
-		return new AnalyticsReportsConfiguration() {
-
-			@Override
-			public boolean readsEnabled() {
-				return readsEnabled;
-			}
-
-			@Override
-			public boolean trafficSourcesEnabled() {
-				return trafficSourcesEnabled;
-			}
-
-		};
-	}
-
 	private AnalyticsReportsDataProvider _getAnalyticsReportsDataProvider(
-		int organicTrafficAmount, double organicTrafficShare,
-		int paidTrafficAmount, double paidTrafficShare,
+		List<SearchKeyword> organicSearchKeywords, long organicTrafficAmount,
+		double organicTrafficShare, List<SearchKeyword> paidSearchKeywords,
+		long paidTrafficAmount, double paidTrafficShare,
 		boolean validAnalyticsConnection) {
 
 		return new AnalyticsReportsDataProvider(Mockito.mock(Http.class)) {
@@ -330,9 +314,15 @@ public class AnalyticsReportsDisplayContextTest {
 
 				return Arrays.asList(
 					new TrafficSource(
+						Collections.singletonList(
+							new CountrySearchKeywords(
+								"us", organicSearchKeywords)),
 						_TITLE_KEY_ORGANIC, organicTrafficAmount,
 						organicTrafficShare),
 					new TrafficSource(
+						Collections.singletonList(
+							new CountrySearchKeywords(
+								"us", paidSearchKeywords)),
 						_TITLE_KEY_PAID, paidTrafficAmount, paidTrafficShare));
 			}
 
@@ -344,7 +334,7 @@ public class AnalyticsReportsDisplayContextTest {
 		};
 	}
 
-	private AnalyticsReportsInfoItem _getAnalyticsReportsItem() {
+	private AnalyticsReportsInfoItem<Object> _getAnalyticsReportsItem() {
 		String authorName = StringUtil.randomString();
 		Date publishDate = RandomTestUtil.nextDate();
 		String title = StringUtil.randomString();

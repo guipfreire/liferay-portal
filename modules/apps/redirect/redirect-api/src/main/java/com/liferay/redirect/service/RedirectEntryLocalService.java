@@ -15,6 +15,7 @@
 package com.liferay.redirect.service;
 
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
@@ -80,16 +81,25 @@ public interface RedirectEntryLocalService
 			boolean permanent, String sourceURL, ServiceContext serviceContext)
 		throws PortalException;
 
+	@Indexable(type = IndexableType.REINDEX)
+	public RedirectEntry addRedirectEntry(
+			long groupId, String destinationURL, Date expirationDate,
+			String groupBaseURL, boolean permanent, String sourceURL,
+			boolean updateChainedRedirectEntries, ServiceContext serviceContext)
+		throws PortalException;
+
 	/**
 	 * Adds the redirect entry to the database. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RedirectEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param redirectEntry the redirect entry
 	 * @return the redirect entry that was added
 	 */
 	@Indexable(type = IndexableType.REINDEX)
 	public RedirectEntry addRedirectEntry(RedirectEntry redirectEntry);
-
-	public boolean checkRedirectionChain(long groupId, String destinationURL);
 
 	/**
 	 * @throws PortalException
@@ -116,6 +126,10 @@ public interface RedirectEntryLocalService
 	/**
 	 * Deletes the redirect entry with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RedirectEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param redirectEntryId the primary key of the redirect entry
 	 * @return the redirect entry that was removed
 	 * @throws PortalException if a redirect entry with the primary key could not be found
@@ -127,11 +141,18 @@ public interface RedirectEntryLocalService
 	/**
 	 * Deletes the redirect entry from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RedirectEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param redirectEntry the redirect entry
 	 * @return the redirect entry that was removed
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	public RedirectEntry deleteRedirectEntry(RedirectEntry redirectEntry);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public <T> T dslQuery(DSLQuery dslQuery);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DynamicQuery dynamicQuery();
@@ -261,10 +282,11 @@ public interface RedirectEntryLocalService
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<RedirectEntry> getRedirectEntries(
-		long groupId, int start, int end, OrderByComparator<RedirectEntry> obc);
+		long groupId, int start, int end,
+		OrderByComparator<RedirectEntry> orderByComparator);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public List<RedirectEntry> getRedirectEntriesByGroupIdAndDestinationURL(
+	public List<RedirectEntry> getRedirectEntries(
 		long groupId, String destinationURL);
 
 	/**
@@ -334,8 +356,19 @@ public interface RedirectEntryLocalService
 			boolean permanent, String sourceURL)
 		throws PortalException;
 
+	@Indexable(type = IndexableType.REINDEX)
+	public RedirectEntry updateRedirectEntry(
+			long redirectEntryId, String destinationURL, Date expirationDate,
+			String groupBaseURL, boolean permanent, String sourceURL,
+			boolean updateChainedRedirectEntries)
+		throws PortalException;
+
 	/**
 	 * Updates the redirect entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RedirectEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param redirectEntry the redirect entry
 	 * @return the redirect entry that was updated

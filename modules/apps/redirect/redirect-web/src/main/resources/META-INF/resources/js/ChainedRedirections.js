@@ -12,17 +12,16 @@
  * details.
  */
 
-/* Copy cat
-/Users/jorgegonzalez/projects/liferay-community/liferay-portal/modules/apps/document-library/document-library-web/src/main/resources/META-INF/resources/document_library/js/checkin/Checkin.es.js
-*/
-
 import {useModal} from '@clayui/modal';
 import PropTypes from 'prop-types';
 import React, {useState} from 'react';
 
 import ChainedRedirectionsModal from './ChainedRedirectionsModal';
 
-function ChainedRedirections({portletNamespace, ...restProps}) {
+export default function ChainedRedirections({portletNamespace, ...restProps}) {
+	const [redirectEntryChainCause, setRedirectEntryChainCause] = useState(
+		null
+	);
 	const [showModal, setShowModal] = useState(false);
 	const [callback, setCallback] = useState();
 	const BRIDGE_COMPONENT_ID = `${portletNamespace}RedirectsChainedRedirections`;
@@ -39,8 +38,9 @@ function ChainedRedirections({portletNamespace, ...restProps}) {
 		Liferay.component(
 			BRIDGE_COMPONENT_ID,
 			{
-				open: (callback) => {
+				open: (redirectEntryChainCause, callback) => {
 					setCallback(() => callback);
+					setRedirectEntryChainCause(redirectEntryChainCause);
 					setShowModal(true);
 				},
 			},
@@ -58,6 +58,7 @@ function ChainedRedirections({portletNamespace, ...restProps}) {
 					callback={callback}
 					observer={observer}
 					onModalClose={onClose}
+					redirectEntryChainCause={redirectEntryChainCause}
 				/>
 			)}
 		</>
@@ -67,12 +68,3 @@ function ChainedRedirections({portletNamespace, ...restProps}) {
 ChainedRedirections.propTypes = {
 	portletNamespace: PropTypes.string.isRequired,
 };
-
-export default function (props) {
-	return (
-		<ChainedRedirections
-			{...props}
-			portletNamespace={`_${props.portletNamespace}_`}
-		/>
-	);
-}

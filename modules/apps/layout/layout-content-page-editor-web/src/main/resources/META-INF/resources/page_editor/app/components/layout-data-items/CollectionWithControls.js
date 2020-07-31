@@ -12,64 +12,59 @@
  * details.
  */
 
-import React, {useCallback} from 'react';
+import React from 'react';
 
+import useSetRef from '../../../core/hooks/useSetRef';
 import {
 	LayoutDataPropTypes,
 	getLayoutDataItemPropTypes,
 } from '../../../prop-types/index';
 import {LAYOUT_DATA_FLOATING_TOOLBAR_BUTTONS} from '../../config/constants/layoutDataFloatingToolbarButtons';
-import selectSegmentsExperienceId from '../../selectors/selectSegmentsExperienceId';
-import {useDispatch, useSelector} from '../../store/index';
-import duplicateItem from '../../thunks/duplicateItem';
-import {useSelectItem} from '../Controls';
+import selectCanUpdateItemConfiguration from '../../selectors/selectCanUpdateItemConfiguration';
+import selectShowFloatingToolbar from '../../selectors/selectShowFloatingToolbar';
+import {useSelector} from '../../store/index';
+import {useIsActive} from '../Controls';
 import Topper from '../Topper';
 import FloatingToolbar from '../floating-toolbar/FloatingToolbar';
 import Collection from './Collection';
 
 const CollectionWithControls = React.forwardRef(
 	({children, item, layoutData}, ref) => {
-		const dispatch = useDispatch();
-		const selectItem = useSelectItem();
-		const segmentsExperienceId = useSelector(selectSegmentsExperienceId);
+		const canUpdateItemConfiguration = useSelector(
+			selectCanUpdateItemConfiguration
+		);
+		const isActive = useIsActive();
+
+		const showFloatingToolbar = useSelector(selectShowFloatingToolbar);
+
+		const [setRef, itemElement] = useSetRef(ref);
 
 		const buttons = [];
 
-		buttons.push(
-			LAYOUT_DATA_FLOATING_TOOLBAR_BUTTONS.duplicateItem,
-			LAYOUT_DATA_FLOATING_TOOLBAR_BUTTONS.collectionConfiguration
-		);
-
-		const handleButtonClick = useCallback(
-			(id) => {
-				if (
-					id === LAYOUT_DATA_FLOATING_TOOLBAR_BUTTONS.duplicateItem.id
-				) {
-					dispatch(
-						duplicateItem({
-							itemId: item.itemId,
-							segmentsExperienceId,
-							selectItem,
-						})
-					);
-				}
-			},
-			[dispatch, item.itemId, segmentsExperienceId, selectItem]
-		);
+		if (canUpdateItemConfiguration) {
+			buttons.push(
+				LAYOUT_DATA_FLOATING_TOOLBAR_BUTTONS.collectionConfiguration
+			);
+		}
 
 		return (
-			<Topper item={item} itemRef={ref} layoutData={layoutData}>
+			<Topper
+				item={item}
+				itemElement={itemElement}
+				layoutData={layoutData}
+			>
 				<>
-					<Collection item={item} ref={ref}>
+					<Collection item={item} ref={setRef}>
 						{children}
 					</Collection>
 
-					<FloatingToolbar
-						buttons={buttons}
-						item={item}
-						itemRef={ref}
-						onButtonClick={handleButtonClick}
-					/>
+					{isActive(item.itemId) && showFloatingToolbar && (
+						<FloatingToolbar
+							buttons={buttons}
+							item={item}
+							itemElement={itemElement}
+						/>
+					)}
 				</>
 			</Topper>
 		);

@@ -38,15 +38,7 @@ List<Map<String, Object>> vocabularies = (List<Map<String, Object>>)data.get("vo
 						<label>
 							<%= vocabulary.get("title") %>
 
-							<c:if test='<%= Validator.isNotNull(vocabulary.get("group")) %>'>
-								<%= StringPool.BLANK + "(" + vocabulary.get("group") + ")" %>
-							</c:if>
-
-							<%
-							boolean required = GetterUtil.getBoolean(vocabulary.get("required"));
-							%>
-
-							<c:if test="<%= required %>">
+							<c:if test='<%= GetterUtil.getBoolean(vocabulary.get("required")) %>'>
 								<span class="reference-mark">
 									<clay:icon
 										symbol="asterisk"
@@ -78,7 +70,7 @@ List<Map<String, Object>> vocabularies = (List<Map<String, Object>>)data.get("vo
 										%>
 
 											<clay:label
-												closeable="<%= true %>"
+												dismissible="<%= true %>"
 												label="<%= selectedItemLabel %>"
 											/>
 
@@ -111,7 +103,7 @@ List<Map<String, Object>> vocabularies = (List<Map<String, Object>>)data.get("vo
 	</div>
 
 	<react:component
-		data="<%= data %>"
 		module="asset_categories_selector/AssetCategoriesSelectorTag.es"
+		props="<%= data %>"
 	/>
 </div>

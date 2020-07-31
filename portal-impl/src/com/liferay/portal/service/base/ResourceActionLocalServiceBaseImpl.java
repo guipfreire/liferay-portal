@@ -14,6 +14,7 @@
 
 package com.liferay.portal.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -74,6 +75,10 @@ public abstract class ResourceActionLocalServiceBaseImpl
 	/**
 	 * Adds the resource action to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ResourceActionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param resourceAction the resource action
 	 * @return the resource action that was added
 	 */
@@ -100,6 +105,10 @@ public abstract class ResourceActionLocalServiceBaseImpl
 	/**
 	 * Deletes the resource action with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ResourceActionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param resourceActionId the primary key of the resource action
 	 * @return the resource action that was removed
 	 * @throws PortalException if a resource action with the primary key could not be found
@@ -115,6 +124,10 @@ public abstract class ResourceActionLocalServiceBaseImpl
 	/**
 	 * Deletes the resource action from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ResourceActionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param resourceAction the resource action
 	 * @return the resource action that was removed
 	 */
@@ -122,6 +135,11 @@ public abstract class ResourceActionLocalServiceBaseImpl
 	@Override
 	public ResourceAction deleteResourceAction(ResourceAction resourceAction) {
 		return resourceActionPersistence.remove(resourceAction);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return resourceActionPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -335,6 +353,10 @@ public abstract class ResourceActionLocalServiceBaseImpl
 
 	/**
 	 * Updates the resource action in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ResourceActionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param resourceAction the resource action
 	 * @return the resource action that was updated

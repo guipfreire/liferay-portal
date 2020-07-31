@@ -39,10 +39,7 @@ public class DepotRoleTypeContributor implements RoleTypeContributor {
 
 	@Override
 	public String[] getExcludedRoleNames() {
-		return new String[] {
-			DepotRolesConstants.ASSET_LIBRARY_ADMINISTRATOR,
-			DepotRolesConstants.ASSET_LIBRARY_OWNER
-		};
+		return _EXCLUDED_ROLE_NAMES;
 	}
 
 	@Override
@@ -98,6 +95,9 @@ public class DepotRoleTypeContributor implements RoleTypeContributor {
 			Objects.equals(
 				role.getName(), DepotRolesConstants.ASSET_LIBRARY_MEMBER) ||
 			Objects.equals(
+				role.getName(),
+				DepotRolesConstants.ASSET_LIBRARY_CONNECTED_SITE_MEMBER) ||
+			Objects.equals(
 				role.getName(), DepotRolesConstants.ASSET_LIBRARY_OWNER)) {
 
 			return false;
@@ -109,13 +109,20 @@ public class DepotRoleTypeContributor implements RoleTypeContributor {
 	@Override
 	public boolean isAutomaticallyAssigned(Role role) {
 		if (Objects.equals(
-				role.getName(), DepotRolesConstants.ASSET_LIBRARY_MEMBER)) {
+				role.getName(), DepotRolesConstants.ASSET_LIBRARY_MEMBER) ||
+			Objects.equals(
+				role.getName(),
+				DepotRolesConstants.ASSET_LIBRARY_CONNECTED_SITE_MEMBER)) {
 
 			return true;
 		}
 
 		return false;
 	}
+
+	private static final String[] _EXCLUDED_ROLE_NAMES = {
+		DepotRolesConstants.ASSET_LIBRARY_OWNER
+	};
 
 	@Reference
 	private Language _language;

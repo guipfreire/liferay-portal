@@ -118,7 +118,9 @@ public abstract class BaseDataRecordResourceTestCase {
 
 		DataRecordResource.Builder builder = DataRecordResource.builder();
 
-		dataRecordResource = builder.locale(
+		dataRecordResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -837,6 +839,26 @@ public abstract class BaseDataRecordResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/dataRecord"))));
+	}
+
+	@Test
+	public void testGraphQLGetDataRecordNotFound() throws Exception {
+		Long irrelevantDataRecordId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"dataRecord",
+						new HashMap<String, Object>() {
+							{
+								put("dataRecordId", irrelevantDataRecordId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

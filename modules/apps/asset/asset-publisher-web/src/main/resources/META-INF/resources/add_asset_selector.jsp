@@ -20,7 +20,7 @@
 String redirect = PortalUtil.getLayoutFullURL(layout, themeDisplay);
 %>
 
-<div class="container-fluid-1280">
+<clay:container-fluid>
 	<aui:fieldset-group markupView="lexicon">
 		<aui:fieldset>
 
@@ -101,11 +101,11 @@ String redirect = PortalUtil.getLayoutFullURL(layout, themeDisplay);
 	</aui:fieldset-group>
 
 	<aui:button-row>
-		<aui:button onClick='<%= renderResponse.getNamespace() + "addAssetEntry();" %>' primary="<%= true %>" value="add" />
+		<aui:button onClick='<%= liferayPortletResponse.getNamespace() + "addAssetEntry();" %>' primary="<%= true %>" value="add" />
 
 		<aui:button href="<%= redirect %>" type="cancel" />
 	</aui:button-row>
-</div>
+</clay:container-fluid>
 
 <aui:script>
 	function <portlet:namespace />addAssetEntry() {

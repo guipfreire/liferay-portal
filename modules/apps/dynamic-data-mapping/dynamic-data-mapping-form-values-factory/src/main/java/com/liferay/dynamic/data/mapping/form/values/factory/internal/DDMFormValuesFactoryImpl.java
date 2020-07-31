@@ -16,7 +16,7 @@ package com.liferay.dynamic.data.mapping.form.values.factory.internal;
 
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldValueRequestParameterRetriever;
 import com.liferay.dynamic.data.mapping.form.field.type.DefaultDDMFormFieldValueRequestParameterRetriever;
-import com.liferay.dynamic.data.mapping.form.renderer.DDMFormRendererConstants;
+import com.liferay.dynamic.data.mapping.form.renderer.constants.DDMFormRendererConstants;
 import com.liferay.dynamic.data.mapping.form.values.factory.DDMFormValuesFactory;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
@@ -40,14 +40,19 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.portlet.PortletRequest;
 
@@ -359,11 +364,9 @@ public class DDMFormValuesFactoryImpl implements DDMFormValuesFactory {
 			return ddmFormField.getName();
 		}
 
-		return parentDDMFormFieldParameterName.concat(
-			StringPool.POUND
-		).concat(
-			ddmFormField.getName()
-		);
+		return StringBundler.concat(
+			parentDDMFormFieldParameterName, StringPool.POUND,
+			ddmFormField.getName());
 	}
 
 	protected String getDDMFormFieldParameterValue(
@@ -434,15 +437,14 @@ public class DDMFormValuesFactoryImpl implements DDMFormValuesFactory {
 		int i = 0;
 
 		for (DDMFormField ddmFormField : ddmFormFields) {
-			Set<String> entryKeys = getEntryKeys(
-				ddmFormFieldValuesMap, StringPool.BLANK,
-				ddmFormField.getName());
+			Collection<String> entryKeys = _sort(
+				getEntryKeys(
+					ddmFormFieldValuesMap, StringPool.BLANK,
+					ddmFormField.getName()));
 
 			for (String entryKey : entryKeys) {
 				DDMFormFieldValue ddmFormFieldValue = ddmFormFieldValuesMap.get(
 					entryKey);
-
-				int index = i + getDDMFormFieldValueIndex(entryKey);
 
 				setNestedDDMFormFieldValues(
 					ddmFormFieldValuesMap,
@@ -450,10 +452,8 @@ public class DDMFormValuesFactoryImpl implements DDMFormValuesFactory {
 					entryKey);
 
 				setDDMFormFieldValueAtIndex(
-					ddmFormFieldValues, ddmFormFieldValue, index);
+					ddmFormFieldValues, ddmFormFieldValue, i++);
 			}
-
-			i = ddmFormFieldValues.size();
 		}
 
 		return ddmFormFieldValues;
@@ -480,11 +480,9 @@ public class DDMFormValuesFactoryImpl implements DDMFormValuesFactory {
 			return StringPool.BLANK;
 		}
 
-		return parentEntryKey.concat(
-			DDMFormRendererConstants.DDM_FORM_FIELDS_SEPARATOR
-		).concat(
-			fieldNameFilter
-		);
+		return StringBundler.concat(
+			parentEntryKey, DDMFormRendererConstants.DDM_FORM_FIELDS_SEPARATOR,
+			fieldNameFilter);
 	}
 
 	protected Set<String> getEntryKeys(
@@ -503,7 +501,8 @@ public class DDMFormValuesFactoryImpl implements DDMFormValuesFactory {
 
 			DDMFormFieldValue ddmFormFieldValue = entry.getValue();
 
-			if (key.startsWith(entryKeyPrefix) &&
+			if ((key.startsWith(entryKeyPrefix) ||
+				 key.startsWith(fieldNameFilter)) &&
 				Objects.equals(ddmFormFieldValue.getName(), fieldNameFilter)) {
 
 				entryKeys.add(key);
@@ -675,15 +674,14 @@ public class DDMFormValuesFactoryImpl implements DDMFormValuesFactory {
 		int i = 0;
 
 		for (DDMFormField nestedDDMFormField : nestedDDMFormFields) {
-			Set<String> entryKeys = getEntryKeys(
-				ddmFormFieldValuesMap, parentEntryKey,
-				nestedDDMFormField.getName());
+			Collection<String> entryKeys = _sort(
+				getEntryKeys(
+					ddmFormFieldValuesMap, parentEntryKey,
+					nestedDDMFormField.getName()));
 
 			for (String entryKey : entryKeys) {
 				DDMFormFieldValue ddmFormFieldValue = ddmFormFieldValuesMap.get(
 					entryKey);
-
-				int index = i + getDDMFormFieldValueIndex(entryKey);
 
 				setNestedDDMFormFieldValues(
 					ddmFormFieldValuesMap,
@@ -692,14 +690,31 @@ public class DDMFormValuesFactoryImpl implements DDMFormValuesFactory {
 
 				setDDMFormFieldValueAtIndex(
 					parentDDMFormFieldValue.getNestedDDMFormFieldValues(),
-					ddmFormFieldValue, index);
+					ddmFormFieldValue, i++);
 			}
-
-			List<DDMFormFieldValue> parentNestedDDMFormFieldValues =
-				parentDDMFormFieldValue.getNestedDDMFormFieldValues();
-
-			i = parentNestedDDMFormFieldValues.size();
 		}
+	}
+
+	private Collection<String> _sort(Set<String> entryKeys) {
+		Stream<String> entryKeysStream = entryKeys.stream();
+
+		Map<Integer, String> entryKeysMap = entryKeysStream.collect(
+			Collectors.toMap(
+				this::getDDMFormFieldValueIndex, Function.identity()));
+
+		Set<Map.Entry<Integer, String>> set = entryKeysMap.entrySet();
+
+		Stream<Map.Entry<Integer, String>> stream = set.stream();
+
+		entryKeysMap = stream.sorted(
+			Map.Entry.comparingByKey()
+		).collect(
+			Collectors.toMap(
+				Map.Entry::getKey, Map.Entry::getValue,
+				(oldValue, newValue) -> oldValue, LinkedHashMap::new)
+		);
+
+		return entryKeysMap.values();
 	}
 
 	private static final int _DDM_FORM_FIELD_INDEX_INDEX = 2;

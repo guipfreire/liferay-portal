@@ -41,7 +41,9 @@ public class DataDefinitionTestUtil {
 		DataDefinitionResource.Builder builder =
 			DataDefinitionResource.builder();
 
-		DataDefinitionResource dataDefinitionResource = builder.locale(
+		DataDefinitionResource dataDefinitionResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 
@@ -60,8 +62,17 @@ public class DataDefinitionTestUtil {
 			PortalUtil.getClassNameId(
 				"com.liferay.app.builder.model.AppBuilderApp"),
 			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-			_read("test-structured-content-structure.json"),
+			read("test-structured-content-structure.json"),
 			StorageType.JSON.getValue());
+	}
+
+	public static String read(String fileName) throws Exception {
+		Class<?> clazz = DataDefinitionTestUtil.class;
+
+		InputStream inputStream = clazz.getResourceAsStream(
+			"dependencies/" + fileName);
+
+		return StringUtil.read(inputStream);
 	}
 
 	private static DataDefinition _randomDataDefinition(long groupId)
@@ -108,15 +119,6 @@ public class DataDefinitionTestUtil {
 			).build());
 
 		return dataDefinition;
-	}
-
-	private static String _read(String fileName) throws Exception {
-		Class<?> clazz = DataDefinitionTestUtil.class;
-
-		InputStream inputStream = clazz.getResourceAsStream(
-			"dependencies/" + fileName);
-
-		return StringUtil.read(inputStream);
 	}
 
 }

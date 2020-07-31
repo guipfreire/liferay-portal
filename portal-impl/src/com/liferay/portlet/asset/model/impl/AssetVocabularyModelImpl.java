@@ -88,7 +88,8 @@ public class AssetVocabularyModelImpl
 		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
 		{"modifiedDate", Types.TIMESTAMP}, {"name", Types.VARCHAR},
 		{"title", Types.VARCHAR}, {"description", Types.VARCHAR},
-		{"settings_", Types.VARCHAR}, {"lastPublishDate", Types.TIMESTAMP}
+		{"settings_", Types.VARCHAR}, {"visibilityType", Types.INTEGER},
+		{"lastPublishDate", Types.TIMESTAMP}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
@@ -110,11 +111,12 @@ public class AssetVocabularyModelImpl
 		TABLE_COLUMNS_MAP.put("title", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("description", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("settings_", Types.VARCHAR);
+		TABLE_COLUMNS_MAP.put("visibilityType", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table AssetVocabulary (mvccVersion LONG default 0 not null,ctCollectionId LONG default 0 not null,uuid_ VARCHAR(75) null,externalReferenceCode VARCHAR(75) null,vocabularyId LONG not null,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name VARCHAR(75) null,title STRING null,description STRING null,settings_ STRING null,lastPublishDate DATE null,primary key (vocabularyId, ctCollectionId))";
+		"create table AssetVocabulary (mvccVersion LONG default 0 not null,ctCollectionId LONG default 0 not null,uuid_ VARCHAR(75) null,externalReferenceCode VARCHAR(75) null,vocabularyId LONG not null,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name VARCHAR(75) null,title STRING null,description STRING null,settings_ STRING null,visibilityType INTEGER,lastPublishDate DATE null,primary key (vocabularyId, ctCollectionId))";
 
 	public static final String TABLE_SQL_DROP = "drop table AssetVocabulary";
 
@@ -130,20 +132,23 @@ public class AssetVocabularyModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.entity.cache.enabled.com.liferay.asset.kernel.model.AssetVocabulary"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean ENTITY_CACHE_ENABLED = true;
 
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.finder.cache.enabled.com.liferay.asset.kernel.model.AssetVocabulary"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean FINDER_CACHE_ENABLED = true;
 
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.column.bitmask.enabled.com.liferay.asset.kernel.model.AssetVocabulary"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean COLUMN_BITMASK_ENABLED = true;
 
 	public static final long COMPANYID_COLUMN_BITMASK = 1L;
 
@@ -183,6 +188,7 @@ public class AssetVocabularyModelImpl
 		model.setTitle(soapModel.getTitle());
 		model.setDescription(soapModel.getDescription());
 		model.setSettings(soapModel.getSettings());
+		model.setVisibilityType(soapModel.getVisibilityType());
 		model.setLastPublishDate(soapModel.getLastPublishDate());
 
 		return model;
@@ -266,9 +272,6 @@ public class AssetVocabularyModelImpl
 				attributeName,
 				attributeGetterFunction.apply((AssetVocabulary)this));
 		}
-
-		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
-		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
 
 		return attributes;
 	}
@@ -416,6 +419,12 @@ public class AssetVocabularyModelImpl
 		attributeSetterBiConsumers.put(
 			"settings",
 			(BiConsumer<AssetVocabulary, String>)AssetVocabulary::setSettings);
+		attributeGetterFunctions.put(
+			"visibilityType", AssetVocabulary::getVisibilityType);
+		attributeSetterBiConsumers.put(
+			"visibilityType",
+			(BiConsumer<AssetVocabulary, Integer>)
+				AssetVocabulary::setVisibilityType);
 		attributeGetterFunctions.put(
 			"lastPublishDate", AssetVocabulary::getLastPublishDate);
 		attributeSetterBiConsumers.put(
@@ -888,6 +897,17 @@ public class AssetVocabularyModelImpl
 
 	@JSON
 	@Override
+	public int getVisibilityType() {
+		return _visibilityType;
+	}
+
+	@Override
+	public void setVisibilityType(int visibilityType) {
+		_visibilityType = visibilityType;
+	}
+
+	@JSON
+	@Override
 	public Date getLastPublishDate() {
 		return _lastPublishDate;
 	}
@@ -1043,6 +1063,7 @@ public class AssetVocabularyModelImpl
 		assetVocabularyImpl.setTitle(getTitle());
 		assetVocabularyImpl.setDescription(getDescription());
 		assetVocabularyImpl.setSettings(getSettings());
+		assetVocabularyImpl.setVisibilityType(getVisibilityType());
 		assetVocabularyImpl.setLastPublishDate(getLastPublishDate());
 
 		assetVocabularyImpl.resetOriginalValues();
@@ -1064,16 +1085,16 @@ public class AssetVocabularyModelImpl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof AssetVocabulary)) {
+		if (!(object instanceof AssetVocabulary)) {
 			return false;
 		}
 
-		AssetVocabulary assetVocabulary = (AssetVocabulary)obj;
+		AssetVocabulary assetVocabulary = (AssetVocabulary)object;
 
 		long primaryKey = assetVocabulary.getPrimaryKey();
 
@@ -1090,11 +1111,19 @@ public class AssetVocabularyModelImpl
 		return (int)getPrimaryKey();
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isEntityCacheEnabled() {
 		return ENTITY_CACHE_ENABLED;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isFinderCacheEnabled() {
 		return FINDER_CACHE_ENABLED;
@@ -1221,6 +1250,8 @@ public class AssetVocabularyModelImpl
 			assetVocabularyCacheModel.settings = null;
 		}
 
+		assetVocabularyCacheModel.visibilityType = getVisibilityType();
+
 		Date lastPublishDate = getLastPublishDate();
 
 		if (lastPublishDate != null) {
@@ -1329,6 +1360,7 @@ public class AssetVocabularyModelImpl
 	private String _description;
 	private String _descriptionCurrentLanguageId;
 	private String _settings;
+	private int _visibilityType;
 	private Date _lastPublishDate;
 	private long _columnBitmask;
 	private AssetVocabulary _escapedModel;

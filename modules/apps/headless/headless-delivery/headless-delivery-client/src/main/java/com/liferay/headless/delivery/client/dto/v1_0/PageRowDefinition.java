@@ -28,6 +28,10 @@ import javax.annotation.Generated;
 @Generated("")
 public class PageRowDefinition implements Cloneable {
 
+	public static PageRowDefinition toDTO(String json) {
+		return PageRowDefinitionSerDes.toDTO(json);
+	}
+
 	public Boolean getGutters() {
 		return gutters;
 	}
@@ -49,6 +53,27 @@ public class PageRowDefinition implements Cloneable {
 
 	protected Boolean gutters;
 
+	public Integer getModulesPerRow() {
+		return modulesPerRow;
+	}
+
+	public void setModulesPerRow(Integer modulesPerRow) {
+		this.modulesPerRow = modulesPerRow;
+	}
+
+	public void setModulesPerRow(
+		UnsafeSupplier<Integer, Exception> modulesPerRowUnsafeSupplier) {
+
+		try {
+			modulesPerRow = modulesPerRowUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Integer modulesPerRow;
+
 	public Integer getNumberOfColumns() {
 		return numberOfColumns;
 	}
@@ -69,6 +94,91 @@ public class PageRowDefinition implements Cloneable {
 	}
 
 	protected Integer numberOfColumns;
+
+	public Boolean getReverseOrder() {
+		return reverseOrder;
+	}
+
+	public void setReverseOrder(Boolean reverseOrder) {
+		this.reverseOrder = reverseOrder;
+	}
+
+	public void setReverseOrder(
+		UnsafeSupplier<Boolean, Exception> reverseOrderUnsafeSupplier) {
+
+		try {
+			reverseOrder = reverseOrderUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Boolean reverseOrder;
+
+	public RowViewportConfig getRowViewportConfig() {
+		return rowViewportConfig;
+	}
+
+	public void setRowViewportConfig(RowViewportConfig rowViewportConfig) {
+		this.rowViewportConfig = rowViewportConfig;
+	}
+
+	public void setRowViewportConfig(
+		UnsafeSupplier<RowViewportConfig, Exception>
+			rowViewportConfigUnsafeSupplier) {
+
+		try {
+			rowViewportConfig = rowViewportConfigUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected RowViewportConfig rowViewportConfig;
+
+	public RowViewport[] getRowViewports() {
+		return rowViewports;
+	}
+
+	public void setRowViewports(RowViewport[] rowViewports) {
+		this.rowViewports = rowViewports;
+	}
+
+	public void setRowViewports(
+		UnsafeSupplier<RowViewport[], Exception> rowViewportsUnsafeSupplier) {
+
+		try {
+			rowViewports = rowViewportsUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected RowViewport[] rowViewports;
+
+	public String getVerticalAlignment() {
+		return verticalAlignment;
+	}
+
+	public void setVerticalAlignment(String verticalAlignment) {
+		this.verticalAlignment = verticalAlignment;
+	}
+
+	public void setVerticalAlignment(
+		UnsafeSupplier<String, Exception> verticalAlignmentUnsafeSupplier) {
+
+		try {
+			verticalAlignment = verticalAlignmentUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String verticalAlignment;
 
 	@Override
 	public PageRowDefinition clone() throws CloneNotSupportedException {

@@ -53,6 +53,7 @@ import org.junit.runner.RunWith;
 public class DataLayoutResourceTest extends BaseDataLayoutResourceTestCase {
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 
@@ -147,6 +148,31 @@ public class DataLayoutResourceTest extends BaseDataLayoutResourceTestCase {
 
 	@Override
 	@Test
+	public void testGraphQLGetSiteDataLayoutByContentTypeByDataLayoutKeyNotFound()
+		throws Exception {
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"dataLayoutByContentTypeByDataLayoutKey",
+						HashMapBuilder.<String, Object>put(
+							"contentType", "\"native-object\""
+						).put(
+							"dataLayoutKey",
+							"\"" + RandomTestUtil.randomString() + "\""
+						).put(
+							"siteKey",
+							"\"" + irrelevantGroup.getGroupId() + "\""
+						).build(),
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
+	}
+
+	@Override
+	@Test
 	public void testPostDataDefinitionDataLayout() throws Exception {
 		super.testPostDataDefinitionDataLayout();
 
@@ -165,9 +191,12 @@ public class DataLayoutResourceTest extends BaseDataLayoutResourceTestCase {
 
 		// MustNotDuplicateFieldName
 
-		DataDefinitionResource dataDefinitionResource =
-			DataDefinitionResource.builder(
-			).build();
+		DataDefinitionResource.Builder builder =
+			DataDefinitionResource.builder();
+
+		DataDefinitionResource dataDefinitionResource = builder.authentication(
+			"test@liferay.com", "test"
+		).build();
 
 		DataDefinition dataDefinition =
 			dataDefinitionResource.postSiteDataDefinitionByContentType(

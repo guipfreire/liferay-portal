@@ -121,7 +121,9 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 		TaxonomyVocabularyResource.Builder builder =
 			TaxonomyVocabularyResource.builder();
 
-		taxonomyVocabularyResource = builder.locale(
+		taxonomyVocabularyResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -723,6 +725,28 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/taxonomyVocabulary"))));
+	}
+
+	@Test
+	public void testGraphQLGetTaxonomyVocabularyNotFound() throws Exception {
+		Long irrelevantTaxonomyVocabularyId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"taxonomyVocabulary",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"taxonomyVocabularyId",
+									irrelevantTaxonomyVocabularyId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

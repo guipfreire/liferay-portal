@@ -15,6 +15,7 @@
 package com.liferay.portal.tools.service.builder.test.service.base;
 
 import com.liferay.petra.io.AutoDeleteFileInputStream;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -82,6 +83,10 @@ public abstract class LazyBlobEntityLocalServiceBaseImpl
 	/**
 	 * Adds the lazy blob entity to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect LazyBlobEntityLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param lazyBlobEntity the lazy blob entity
 	 * @return the lazy blob entity that was added
 	 */
@@ -108,6 +113,10 @@ public abstract class LazyBlobEntityLocalServiceBaseImpl
 	/**
 	 * Deletes the lazy blob entity with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect LazyBlobEntityLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param lazyBlobEntityId the primary key of the lazy blob entity
 	 * @return the lazy blob entity that was removed
 	 * @throws PortalException if a lazy blob entity with the primary key could not be found
@@ -123,6 +132,10 @@ public abstract class LazyBlobEntityLocalServiceBaseImpl
 	/**
 	 * Deletes the lazy blob entity from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect LazyBlobEntityLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param lazyBlobEntity the lazy blob entity
 	 * @return the lazy blob entity that was removed
 	 */
@@ -130,6 +143,11 @@ public abstract class LazyBlobEntityLocalServiceBaseImpl
 	@Override
 	public LazyBlobEntity deleteLazyBlobEntity(LazyBlobEntity lazyBlobEntity) {
 		return lazyBlobEntityPersistence.remove(lazyBlobEntity);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return lazyBlobEntityPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -373,6 +391,10 @@ public abstract class LazyBlobEntityLocalServiceBaseImpl
 
 	/**
 	 * Updates the lazy blob entity in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect LazyBlobEntityLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param lazyBlobEntity the lazy blob entity
 	 * @return the lazy blob entity that was updated

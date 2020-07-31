@@ -121,7 +121,9 @@ public abstract class BaseBlogPostingResourceTestCase {
 
 		BlogPostingResource.Builder builder = BlogPostingResource.builder();
 
-		blogPostingResource = builder.locale(
+		blogPostingResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -312,6 +314,26 @@ public abstract class BaseBlogPostingResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/blogPosting"))));
+	}
+
+	@Test
+	public void testGraphQLGetBlogPostingNotFound() throws Exception {
+		Long irrelevantBlogPostingId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"blogPosting",
+						new HashMap<String, Object>() {
+							{
+								put("blogPostingId", irrelevantBlogPostingId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

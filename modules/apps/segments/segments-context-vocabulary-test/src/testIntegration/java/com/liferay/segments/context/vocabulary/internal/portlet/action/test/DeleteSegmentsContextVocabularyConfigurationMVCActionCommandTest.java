@@ -24,13 +24,9 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
-import java.io.IOException;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Locale;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -43,8 +39,6 @@ import org.junit.runner.RunWith;
 
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-
-import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * @author Cristina González
@@ -73,8 +67,14 @@ public class DeleteSegmentsContextVocabularyConfigurationMVCActionCommandTest {
 		Configuration configuration = _addConfiguration();
 
 		try {
+			MockLiferayPortletActionRequest mockLiferayPortletActionRequest =
+				new MockLiferayPortletActionRequest();
+
+			mockLiferayPortletActionRequest.setParameter(
+				"pid", configuration.getPid());
+
 			_deleteMVCActionCommand.processAction(
-				new MockActionRequest(configuration.getPid()), null);
+				mockLiferayPortletActionRequest, null);
 
 			configuration = _configurationAdmin.getConfiguration(
 				configuration.getPid(), StringPool.QUESTION);
@@ -86,7 +86,7 @@ public class DeleteSegmentsContextVocabularyConfigurationMVCActionCommandTest {
 		}
 	}
 
-	private Configuration _addConfiguration() throws IOException {
+	private Configuration _addConfiguration() throws Exception {
 		Configuration configuration =
 			_configurationAdmin.createFactoryConfiguration(
 				"com.liferay.segments.context.vocabulary.internal." +
@@ -114,34 +114,5 @@ public class DeleteSegmentsContextVocabularyConfigurationMVCActionCommandTest {
 		filter = "mvc.command.name=/delete_segments_context_vocabulary_configuration"
 	)
 	private MVCActionCommand _deleteMVCActionCommand;
-
-	private class MockActionRequest extends MockLiferayPortletActionRequest {
-
-		public MockActionRequest(String pid) {
-			_httpServletRequest = new MockHttpServletRequest() {
-				{
-					setParameter("pid", pid);
-				}
-			};
-		}
-
-		@Override
-		public HttpServletRequest getHttpServletRequest() {
-			return _httpServletRequest;
-		}
-
-		@Override
-		public HttpServletRequest getOriginalHttpServletRequest() {
-			return _httpServletRequest;
-		}
-
-		@Override
-		public String getParameter(String name) {
-			return _httpServletRequest.getParameter(name);
-		}
-
-		private final HttpServletRequest _httpServletRequest;
-
-	}
 
 }

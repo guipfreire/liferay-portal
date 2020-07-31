@@ -12,149 +12,159 @@
  * details.
  */
 
-import ClayButton from '@clayui/button';
-import ClayLoadingIndicator from '@clayui/loading-indicator';
-import {ClayPaginationWithBasicItems} from '@clayui/pagination';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import {useQuery} from '@apollo/client';
+import React, {useContext, useEffect, useState} from 'react';
 import {withRouter} from 'react-router-dom';
 
 import {AppContext} from '../../AppContext.es';
+import PaginatedList from '../../components/PaginatedList.es';
 import QuestionRow from '../../components/QuestionRow.es';
 import UserIcon from '../../components/UserIcon.es';
-import {getUserActivity} from '../../utils/client.es';
+import useQueryParams from '../../hooks/useQueryParams.es';
+import {getUserActivityQuery} from '../../utils/client.es';
+import {historyPushWithSlug} from '../../utils/utils.es';
 import NavigationBar from '../NavigationBar.es';
 
 export default withRouter(
 	({
+		history,
+		location,
 		match: {
 			params: {creatorId},
 		},
 	}) => {
 		const context = useContext(AppContext);
+		const historyPushParser = historyPushWithSlug(history.push);
+		const queryParams = useQueryParams(location);
 		const siteKey = context.siteKey;
-		const defaultPostsNumber = 0;
-		const defaultRank = context.defaultRank;
-
-		const [creatorInfo, setCreatorInfo] = useState({});
-		const [loading, setLoading] = useState(true);
 		const [page, setPage] = useState(1);
-		const [questions, setQuestions] = useState([]);
+		const [pageSize, setPageSize] = useState(20);
 
 		useEffect(() => {
-			getUserActivity(siteKey, creatorId)
-				.then((questions) => {
-					const creatorBasicInfo = questions.items[0].creator;
-					const creatorStatistics =
-						questions.items[0].creatorStatistics;
-					const creatorInfo = {
-						id: creatorId,
-						image: creatorBasicInfo.image,
-						name: creatorBasicInfo.name,
-						postsNumber: creatorStatistics.postsNumber,
-						rank: creatorStatistics.rank,
-					};
-					setCreatorInfo(creatorInfo);
-					setQuestions(questions);
-					setLoading(false);
-				})
-				.catch((_) => {
-					setLoading(false);
-					setCreatorInfo(getCreatorDefaultInfo(creatorId));
-				});
-		}, [creatorId, getCreatorDefaultInfo, siteKey]);
+			const pageNumber = queryParams.get('page') || 1;
+			setPage(isNaN(pageNumber) ? 1 : parseInt(pageNumber, 10));
+		}, [queryParams]);
 
-		const getCreatorDefaultInfo = useCallback(
-			(creatorId) => ({
+		useEffect(() => {
+			setPageSize(queryParams.get('pagesize') || 20);
+		}, [queryParams]);
+
+		const {data, loading} = useQuery(getUserActivityQuery, {
+			variables: {
+				filter: `creatorId eq ${creatorId}`,
+				page,
+				pageSize,
+				siteKey,
+			},
+		});
+
+		let creatorInfo = {
+			id: creatorId,
+			image: null,
+			name: decodeURI(
+				JSON.parse(`"${Liferay.ThemeDisplay.getUserName()}"`)
+			),
+			postsNumber: 0,
+			rank: context.defaultRank,
+		};
+
+		if (
+			data &&
+			data.messageBoardThreads.items &&
+			data.messageBoardThreads.items.length
+		) {
+			const {
+				creator,
+				creatorStatistics,
+			} = data.messageBoardThreads.items[0];
+
+			creatorInfo = {
 				id: creatorId,
-				image: null,
-				name: decodeURI(
-					JSON.parse(`"${Liferay.ThemeDisplay.getUserName()}"`)
-				),
-				postsNumber: defaultPostsNumber,
-				rank: defaultRank,
-			}),
-			[defaultPostsNumber, defaultRank]
-		);
+				image: creator.image,
+				name: creator.name,
+				postsNumber: creatorStatistics.postsNumber,
+				rank: creatorStatistics.rank,
+			};
+		}
+
+		const changePage = (page, pageSize) => {
+			historyPushParser(
+				`/activity/${creatorId}?page=${page}&pagesize=${pageSize}`
+			);
+		};
 
 		return (
 			<>
 				<NavigationBar />
-				<PageHeader />
-				<Questions />
+
+				<section className="questions-section questions-section-list">
+					<div className="questions-container">
+						<div className="c-p-5 row">
+							<PageHeader />
+							<Questions />
+						</div>
+					</div>
+				</section>
 			</>
 		);
 
 		function PageHeader() {
 			return (
-				<>
-					<div className="d-flex flex-row justify-content-between">
-						<div className="d-flex">
+				<div className="c-mt-3 c-mx-auto c-px-0 col-xl-10">
+					<div className="d-flex flex-row">
+						<div className="c-mt-3">
 							<UserIcon
 								fullName={creatorInfo.name}
 								portraitURL={creatorInfo.image}
+								size="xl"
 								userId={String(creatorInfo.id)}
 							/>
-							<div className="c-ml-3 flex-column">
-								<div>
-									<span className="h3">
-										Rank: {creatorInfo.rank}
-									</span>
-								</div>
-								<div>
-									<span className="h3">
-										{creatorInfo.name}
-									</span>
-								</div>
-								<div>
-									<span className="h3">
-										Posts: {creatorInfo.postsNumber}
-									</span>
-								</div>
+						</div>
+						<div className="c-ml-4 flex-column">
+							<div>
+								<span className="small">
+									Rank: {creatorInfo.rank}
+								</span>
+							</div>
+							<div>
+								<strong className="h2">
+									{creatorInfo.name}
+								</strong>
+							</div>
+							<div>
+								<span className="small">
+									Posts: {creatorInfo.postsNumber}
+								</span>
 							</div>
 						</div>
-						<div>
-							<ClayButton
-								className="d-none"
-								displayType="secondary"
-							>
-								Manage Subscriptions
-							</ClayButton>
-						</div>
 					</div>
-					<div>
-						<h1>Latest Questions Asked</h1>
+					<div className="border-bottom c-mt-5">
+						<h2>Latest Questions Asked</h2>
 					</div>
-				</>
+				</div>
 			);
 		}
 
 		function Questions() {
 			return (
-				<>
-					{loading ? (
-						<ClayLoadingIndicator />
-					) : (
-						questions.items &&
-						questions.items.map((question) => (
+				<div className="c-mx-auto c-px-0 col-xl-10">
+					<PaginatedList
+						activeDelta={pageSize}
+						activePage={page}
+						changeDelta={(pageSize) => changePage(page, pageSize)}
+						changePage={(page) => changePage(page, pageSize)}
+						data={data && data.messageBoardThreads}
+						loading={loading}
+					>
+						{(question) => (
 							<QuestionRow
 								key={question.id}
 								question={question}
-							/>
-						))
-					)}
-
-					{!!questions.totalCount &&
-						questions.totalCount > questions.pageSize && (
-							<ClayPaginationWithBasicItems
-								activePage={page}
-								ellipsisBuffer={2}
-								onPageChange={setPage}
-								totalPages={Math.ceil(
-									questions.totalCount / questions.pageSize
-								)}
+								showSectionLabel={true}
 							/>
 						)}
-				</>
+					</PaginatedList>
+				</div>
 			);
 		}
 	}

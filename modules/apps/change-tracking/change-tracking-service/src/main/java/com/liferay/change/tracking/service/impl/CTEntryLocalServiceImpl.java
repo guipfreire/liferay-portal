@@ -16,9 +16,14 @@ package com.liferay.change.tracking.service.impl;
 
 import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.model.CTCollection;
+import com.liferay.change.tracking.model.CTCollectionTable;
 import com.liferay.change.tracking.model.CTEntry;
+import com.liferay.change.tracking.model.CTEntryTable;
 import com.liferay.change.tracking.service.base.CTEntryLocalServiceBaseImpl;
+import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
+import com.liferay.portal.kernel.change.tracking.CTAware;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -42,6 +47,7 @@ import org.osgi.service.component.annotations.Component;
 	property = "model.class.name=com.liferay.change.tracking.model.CTEntry",
 	service = AopService.class
 )
+@CTAware
 public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 
 	@Override
@@ -145,9 +151,40 @@ public class CTEntryLocalServiceImpl extends CTEntryLocalServiceBaseImpl {
 			return ctCollection.getCtCollectionId();
 		}
 
-		return ctEntryFinder.findByMCNI_MCPK_SD(
-			ctEntry.getModelClassNameId(), ctEntry.getModelClassPK(),
-			ctCollection.getStatusDate());
+		DSLQuery dslQuery = DSLQueryFactoryUtil.select(
+			CTEntryTable.INSTANCE.ctCollectionId
+		).from(
+			CTEntryTable.INSTANCE
+		).innerJoinON(
+			CTCollectionTable.INSTANCE,
+			CTCollectionTable.INSTANCE.ctCollectionId.eq(
+				CTEntryTable.INSTANCE.ctCollectionId
+			).and(
+				CTCollectionTable.INSTANCE.status.eq(
+					WorkflowConstants.STATUS_APPROVED)
+			)
+		).where(
+			CTEntryTable.INSTANCE.modelClassNameId.eq(
+				ctEntry.getModelClassNameId()
+			).and(
+				CTEntryTable.INSTANCE.modelClassPK.eq(ctEntry.getModelClassPK())
+			).and(
+				CTCollectionTable.INSTANCE.statusDate.gt(
+					ctCollection.getStatusDate())
+			)
+		).orderBy(
+			CTCollectionTable.INSTANCE.statusDate.ascending()
+		).limit(
+			0, 1
+		);
+
+		List<Long> ctCollectionIds = ctEntryPersistence.dslQuery(dslQuery);
+
+		if (ctCollectionIds.isEmpty()) {
+			return CTConstants.CT_COLLECTION_ID_PRODUCTION;
+		}
+
+		return ctCollectionIds.get(0);
 	}
 
 	@Override

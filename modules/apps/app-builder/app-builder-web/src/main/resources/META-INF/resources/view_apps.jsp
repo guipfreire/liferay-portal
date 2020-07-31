@@ -21,13 +21,26 @@
 </liferay-util:html-top>
 
 <div id="<portlet:namespace />-app-builder-root">
+	<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" var="baseResourceURL" />
+
 	<react:component
-		data='<%=
+		module="js/pages/apps/index.es"
+		props='<%=
 			HashMapBuilder.<String, Object>put(
+				"appsTabs", request.getAttribute(AppBuilderWebKeys.APPS_TABS)
+			).put(
 				"basePortletURL", String.valueOf(renderResponse.createRenderURL())
 			).put(
+				"baseResourceURL", String.valueOf(baseResourceURL)
+			).put(
+				"defaultDelta", PropsValues.SEARCH_CONTAINER_PAGE_DEFAULT_DELTA
+			).put(
+				"deltaValues", PropsValues.SEARCH_CONTAINER_PAGE_DELTA_VALUES
+			).put(
 				"pathFriendlyURLPublic", PortalUtil.getPathFriendlyURLPublic()
-			).build() %>'
-		module="js/pages/apps/index.es"
+			).put(
+				"userId", themeDisplay.getUserId()
+			).build()
+		%>'
 	/>
 </div>

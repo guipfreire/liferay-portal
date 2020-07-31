@@ -19,15 +19,13 @@ import aQute.bnd.version.VersionRange;
 
 import com.liferay.project.templates.extensions.ProjectTemplateCustomizer;
 import com.liferay.project.templates.extensions.ProjectTemplatesArgs;
-import com.liferay.project.templates.extensions.ProjectTemplatesConstants;
+import com.liferay.project.templates.extensions.constants.ProjectTemplatesConstants;
 import com.liferay.project.templates.extensions.util.FileUtil;
 import com.liferay.project.templates.extensions.util.ProjectTemplatesUtil;
 import com.liferay.project.templates.extensions.util.Validator;
 import com.liferay.project.templates.extensions.util.WorkspaceUtil;
 
 import java.io.File;
-
-import java.net.MalformedURLException;
 
 import java.util.Iterator;
 import java.util.List;
@@ -186,7 +184,7 @@ public class ProjectGenerator {
 
 	private ProjectTemplateCustomizer _getProjectTemplateCustomizer(
 			String templateName)
-		throws MalformedURLException {
+		throws Exception {
 
 		ServiceLoader<ProjectTemplateCustomizer> serviceLoader =
 			ServiceLoader.load(ProjectTemplateCustomizer.class);

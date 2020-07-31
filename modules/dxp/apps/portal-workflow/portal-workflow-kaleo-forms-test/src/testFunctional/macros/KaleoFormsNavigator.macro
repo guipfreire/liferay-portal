@@ -1,6 +1,10 @@
 definition {
 
 	macro gotoManageFieldSets {
+		ProductMenu.gotoPortlet(
+			category = "Content &amp; Data",
+			portlet = "Kaleo Forms Admin");
+
 		LexiconEntry.gotoHeaderMenuItem(menuItem = "Manage Field Sets");
 
 		AssertTextEquals(

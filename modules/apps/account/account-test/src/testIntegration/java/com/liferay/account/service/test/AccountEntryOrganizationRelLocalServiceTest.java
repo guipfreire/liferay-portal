@@ -22,9 +22,9 @@ import com.liferay.account.model.AccountEntryOrganizationRel;
 import com.liferay.account.model.AccountEntryOrganizationRelModel;
 import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.account.service.AccountEntryOrganizationRelLocalService;
+import com.liferay.account.service.test.util.AccountEntryTestUtil;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.portal.kernel.exception.NoSuchOrganizationException;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.OrganizationTestUtil;
@@ -255,7 +255,7 @@ public class AccountEntryOrganizationRelLocalServiceTest {
 
 	private void _testSetAccountEntryOrganizationRels(
 			List<Organization> organizations)
-		throws PortalException {
+		throws Exception {
 
 		_accountEntryOrganizationRelLocalService.
 			setAccountEntryOrganizationRels(

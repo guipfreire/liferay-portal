@@ -14,9 +14,9 @@
 
 package com.liferay.change.tracking.internal.reference.portal;
 
-import com.liferay.asset.kernel.model.AssetEntryTable;
-import com.liferay.change.tracking.reference.TableReferenceDefinition;
-import com.liferay.change.tracking.reference.helper.TableReferenceInfoDefiner;
+import com.liferay.change.tracking.spi.reference.TableReferenceDefinition;
+import com.liferay.change.tracking.spi.reference.builder.ChildTableReferenceInfoBuilder;
+import com.liferay.change.tracking.spi.reference.builder.ParentTableReferenceInfoBuilder;
 import com.liferay.portal.kernel.model.ClassNameTable;
 import com.liferay.portal.kernel.model.CompanyTable;
 import com.liferay.portal.kernel.model.CountryTable;
@@ -27,8 +27,6 @@ import com.liferay.portal.kernel.model.ListTypeTable;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.OrganizationTable;
 import com.liferay.portal.kernel.model.RegionTable;
-import com.liferay.portal.kernel.model.ResourcePermissionTable;
-import com.liferay.portal.kernel.model.UserTable;
 import com.liferay.portal.kernel.service.persistence.BasePersistence;
 import com.liferay.portal.kernel.service.persistence.OrganizationPersistence;
 
@@ -43,17 +41,11 @@ public class OrganizationTableReferenceDefinition
 	implements TableReferenceDefinition<OrganizationTable> {
 
 	@Override
-	public void defineTableReferences(
-		TableReferenceInfoDefiner<OrganizationTable>
-			tableReferenceInfoDefiner) {
+	public void defineChildTableReferences(
+		ChildTableReferenceInfoBuilder<OrganizationTable>
+			childTableReferenceInfoBuilder) {
 
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.uuid);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.externalReferenceCode);
-
-		tableReferenceInfoDefiner.defineReferenceInnerJoin(
+		childTableReferenceInfoBuilder.referenceInnerJoin(
 			fromStep -> fromStep.from(
 				GroupTable.INSTANCE
 			).innerJoinON(
@@ -68,48 +60,8 @@ public class OrganizationTableReferenceDefinition
 					ClassNameTable.INSTANCE.value.eq(
 						Organization.class.getName())
 				)
-			));
-
-		tableReferenceInfoDefiner.defineSingleColumnReference(
-			OrganizationTable.INSTANCE.companyId,
-			CompanyTable.INSTANCE.companyId);
-
-		tableReferenceInfoDefiner.defineSingleColumnReference(
-			OrganizationTable.INSTANCE.userId, UserTable.INSTANCE.userId);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.userName);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.createDate);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.modifiedDate);
-
-		tableReferenceInfoDefiner.defineParentColumnReference(
-			OrganizationTable.INSTANCE.organizationId,
-			OrganizationTable.INSTANCE.parentOrganizationId);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.treePath);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.name);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.type);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.recursable);
-
-		tableReferenceInfoDefiner.defineSingleColumnReference(
-			OrganizationTable.INSTANCE.regionId, RegionTable.INSTANCE.regionId);
-
-		tableReferenceInfoDefiner.defineSingleColumnReference(
-			OrganizationTable.INSTANCE.countryId,
-			CountryTable.INSTANCE.countryId);
-
-		tableReferenceInfoDefiner.defineReferenceInnerJoin(
+			)
+		).referenceInnerJoin(
 			fromStep -> fromStep.from(
 				ListTypeTable.INSTANCE
 			).innerJoinON(
@@ -120,46 +72,35 @@ public class OrganizationTableReferenceDefinition
 					ListTypeTable.INSTANCE.type.eq(
 						ListTypeConstants.ORGANIZATION_STATUS)
 				)
-			));
+			)
+		).singleColumnReference(
+			OrganizationTable.INSTANCE.logoId, ImageTable.INSTANCE.imageId
+		).assetEntryReference(
+			OrganizationTable.INSTANCE.organizationId, Organization.class
+		).resourcePermissionReference(
+			OrganizationTable.INSTANCE.organizationId, Organization.class
+		).systemEventReference(
+			OrganizationTable.INSTANCE.organizationId, Organization.class
+		);
+	}
 
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			OrganizationTable.INSTANCE.comments);
+	@Override
+	public void defineParentTableReferences(
+		ParentTableReferenceInfoBuilder<OrganizationTable>
+			parentTableReferenceInfoBuilder) {
 
-		tableReferenceInfoDefiner.defineSingleColumnReference(
-			OrganizationTable.INSTANCE.logoId, ImageTable.INSTANCE.imageId);
-
-		tableReferenceInfoDefiner.defineReferenceInnerJoin(
-			fromStep -> fromStep.from(
-				ResourcePermissionTable.INSTANCE
-			).innerJoinON(
-				OrganizationTable.INSTANCE,
-				OrganizationTable.INSTANCE.companyId.eq(
-					ResourcePermissionTable.INSTANCE.companyId
-				).and(
-					ResourcePermissionTable.INSTANCE.name.eq(
-						Organization.class.getName())
-				).and(
-					ResourcePermissionTable.INSTANCE.primKeyId.eq(
-						OrganizationTable.INSTANCE.organizationId)
-				)
-			));
-
-		tableReferenceInfoDefiner.defineReferenceInnerJoin(
-			fromStep -> fromStep.from(
-				AssetEntryTable.INSTANCE
-			).innerJoinON(
-				OrganizationTable.INSTANCE,
-				OrganizationTable.INSTANCE.organizationId.eq(
-					AssetEntryTable.INSTANCE.classPK)
-			).innerJoinON(
-				ClassNameTable.INSTANCE,
-				ClassNameTable.INSTANCE.classNameId.eq(
-					AssetEntryTable.INSTANCE.classNameId
-				).and(
-					ClassNameTable.INSTANCE.value.eq(
-						Organization.class.getName())
-				)
-			));
+		parentTableReferenceInfoBuilder.singleColumnReference(
+			OrganizationTable.INSTANCE.companyId,
+			CompanyTable.INSTANCE.companyId
+		).parentColumnReference(
+			OrganizationTable.INSTANCE.organizationId,
+			OrganizationTable.INSTANCE.parentOrganizationId
+		).singleColumnReference(
+			OrganizationTable.INSTANCE.regionId, RegionTable.INSTANCE.regionId
+		).singleColumnReference(
+			OrganizationTable.INSTANCE.countryId,
+			CountryTable.INSTANCE.countryId
+		);
 	}
 
 	@Override

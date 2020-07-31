@@ -27,6 +27,7 @@ const Table = ({
 	columns,
 	forwardRef,
 	items,
+	noActionsMessage,
 }) => {
 	return (
 		<div ref={forwardRef}>
@@ -51,14 +52,15 @@ const Table = ({
 					</Row>
 				</Head>
 				<Body>
-					{items.map((item) => (
-						<Row key={item.id}>
+					{items.map((item, index) => (
+						<Row key={index}>
 							{checkable && (
 								<Cell>
 									<ClayCheckbox
 										checked={false}
 										disabled={false}
 										indeterminate={false}
+										onChange={() => {}}
 									/>
 								</Cell>
 							)}
@@ -77,7 +79,11 @@ const Table = ({
 							))}
 							{actions && (
 								<Cell>
-									<DropDown actions={actions} item={item} />
+									<DropDown
+										actions={actions}
+										item={item}
+										noActionsMessage={noActionsMessage}
+									/>
 								</Cell>
 							)}
 						</Row>

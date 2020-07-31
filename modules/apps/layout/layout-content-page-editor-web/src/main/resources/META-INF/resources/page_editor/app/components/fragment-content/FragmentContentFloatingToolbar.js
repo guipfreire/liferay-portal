@@ -127,14 +127,14 @@ export default function FragmentContentFloatingToolbar({
 				buttons={floatingToolbarButtons}
 				item={{
 					editableId: editable.editableId,
-					editableType: editable.type,
 					fragmentEntryLinkId,
 					itemId: getEditableUniqueId(
 						fragmentEntryLinkId,
 						editable.editableId
 					),
+					type: editable.type,
 				}}
-				itemRef={{current: editable.element}}
+				itemElement={editable.element}
 				onButtonClick={handleButtonClick}
 			/>
 		)

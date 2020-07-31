@@ -122,6 +122,10 @@ public class ExpandoColumnPersistenceTest {
 
 		ExpandoColumn newExpandoColumn = _persistence.create(pk);
 
+		newExpandoColumn.setMvccVersion(RandomTestUtil.nextLong());
+
+		newExpandoColumn.setCtCollectionId(RandomTestUtil.nextLong());
+
 		newExpandoColumn.setCompanyId(RandomTestUtil.nextLong());
 
 		newExpandoColumn.setTableId(RandomTestUtil.nextLong());
@@ -139,6 +143,12 @@ public class ExpandoColumnPersistenceTest {
 		ExpandoColumn existingExpandoColumn = _persistence.findByPrimaryKey(
 			newExpandoColumn.getPrimaryKey());
 
+		Assert.assertEquals(
+			existingExpandoColumn.getMvccVersion(),
+			newExpandoColumn.getMvccVersion());
+		Assert.assertEquals(
+			existingExpandoColumn.getCtCollectionId(),
+			newExpandoColumn.getCtCollectionId());
 		Assert.assertEquals(
 			existingExpandoColumn.getColumnId(),
 			newExpandoColumn.getColumnId());
@@ -209,8 +219,9 @@ public class ExpandoColumnPersistenceTest {
 
 	protected OrderByComparator<ExpandoColumn> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create(
-			"ExpandoColumn", "columnId", true, "companyId", true, "tableId",
-			true, "name", true, "type", true);
+			"ExpandoColumn", "mvccVersion", true, "ctCollectionId", true,
+			"columnId", true, "companyId", true, "tableId", true, "name", true,
+			"type", true);
 	}
 
 	@Test
@@ -447,6 +458,10 @@ public class ExpandoColumnPersistenceTest {
 		long pk = RandomTestUtil.nextLong();
 
 		ExpandoColumn expandoColumn = _persistence.create(pk);
+
+		expandoColumn.setMvccVersion(RandomTestUtil.nextLong());
+
+		expandoColumn.setCtCollectionId(RandomTestUtil.nextLong());
 
 		expandoColumn.setCompanyId(RandomTestUtil.nextLong());
 

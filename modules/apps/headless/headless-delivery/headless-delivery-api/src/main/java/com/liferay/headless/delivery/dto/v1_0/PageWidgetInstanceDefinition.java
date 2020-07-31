@@ -22,6 +22,7 @@ import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
+import com.liferay.portal.vulcan.util.ObjectMapperUtil;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -46,22 +47,28 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "PageWidgetInstanceDefinition")
 public class PageWidgetInstanceDefinition {
 
-	@Schema
-	@Valid
-	public Widget getWidget() {
-		return widget;
+	public static PageWidgetInstanceDefinition toDTO(String json) {
+		return ObjectMapperUtil.readValue(
+			PageWidgetInstanceDefinition.class, json);
 	}
 
-	public void setWidget(Widget widget) {
-		this.widget = widget;
+	@Schema
+	@Valid
+	public WidgetInstance getWidgetInstance() {
+		return widgetInstance;
+	}
+
+	public void setWidgetInstance(WidgetInstance widgetInstance) {
+		this.widgetInstance = widgetInstance;
 	}
 
 	@JsonIgnore
-	public void setWidget(
-		UnsafeSupplier<Widget, Exception> widgetUnsafeSupplier) {
+	public void setWidgetInstance(
+		UnsafeSupplier<WidgetInstance, Exception>
+			widgetInstanceUnsafeSupplier) {
 
 		try {
-			widget = widgetUnsafeSupplier.get();
+			widgetInstance = widgetInstanceUnsafeSupplier.get();
 		}
 		catch (RuntimeException re) {
 			throw re;
@@ -73,67 +80,7 @@ public class PageWidgetInstanceDefinition {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Widget widget;
-
-	@Schema
-	@Valid
-	public Map<String, Object> getWidgetConfig() {
-		return widgetConfig;
-	}
-
-	public void setWidgetConfig(Map<String, Object> widgetConfig) {
-		this.widgetConfig = widgetConfig;
-	}
-
-	@JsonIgnore
-	public void setWidgetConfig(
-		UnsafeSupplier<Map<String, Object>, Exception>
-			widgetConfigUnsafeSupplier) {
-
-		try {
-			widgetConfig = widgetConfigUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Map<String, Object> widgetConfig;
-
-	@Schema
-	@Valid
-	public WidgetPermission[] getWidgetPermissions() {
-		return widgetPermissions;
-	}
-
-	public void setWidgetPermissions(WidgetPermission[] widgetPermissions) {
-		this.widgetPermissions = widgetPermissions;
-	}
-
-	@JsonIgnore
-	public void setWidgetPermissions(
-		UnsafeSupplier<WidgetPermission[], Exception>
-			widgetPermissionsUnsafeSupplier) {
-
-		try {
-			widgetPermissions = widgetPermissionsUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected WidgetPermission[] widgetPermissions;
+	protected WidgetInstance widgetInstance;
 
 	@Override
 	public boolean equals(Object object) {
@@ -164,44 +111,14 @@ public class PageWidgetInstanceDefinition {
 
 		sb.append("{");
 
-		if (widget != null) {
+		if (widgetInstance != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"widget\": ");
+			sb.append("\"widgetInstance\": ");
 
-			sb.append(String.valueOf(widget));
-		}
-
-		if (widgetConfig != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"widgetConfig\": ");
-
-			sb.append(_toJSON(widgetConfig));
-		}
-
-		if (widgetPermissions != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"widgetPermissions\": ");
-
-			sb.append("[");
-
-			for (int i = 0; i < widgetPermissions.length; i++) {
-				sb.append(String.valueOf(widgetPermissions[i]));
-
-				if ((i + 1) < widgetPermissions.length) {
-					sb.append(", ");
-				}
-			}
-
-			sb.append("]");
+			sb.append(String.valueOf(widgetInstance));
 		}
 
 		sb.append("}");
@@ -219,6 +136,16 @@ public class PageWidgetInstanceDefinition {
 		String string = String.valueOf(object);
 
 		return string.replaceAll("\"", "\\\\\"");
+	}
+
+	private static boolean _isArray(Object value) {
+		if (value == null) {
+			return false;
+		}
+
+		Class<?> clazz = value.getClass();
+
+		return clazz.isArray();
 	}
 
 	private static String _toJSON(Map<String, ?> map) {
@@ -239,9 +166,7 @@ public class PageWidgetInstanceDefinition {
 
 			Object value = entry.getValue();
 
-			Class<?> clazz = value.getClass();
-
-			if (clazz.isArray()) {
+			if (_isArray(value)) {
 				sb.append("[");
 
 				Object[] valueArray = (Object[])value;

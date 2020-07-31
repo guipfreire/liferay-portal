@@ -66,6 +66,7 @@ public class RatingsStatsModelImpl
 	public static final String TABLE_NAME = "RatingsStats";
 
 	public static final Object[][] TABLE_COLUMNS = {
+		{"mvccVersion", Types.BIGINT}, {"ctCollectionId", Types.BIGINT},
 		{"statsId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
 		{"classNameId", Types.BIGINT}, {"classPK", Types.BIGINT},
@@ -77,6 +78,8 @@ public class RatingsStatsModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("ctCollectionId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("statsId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
@@ -89,7 +92,7 @@ public class RatingsStatsModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table RatingsStats (statsId LONG not null primary key,companyId LONG,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,totalEntries INTEGER,totalScore DOUBLE,averageScore DOUBLE)";
+		"create table RatingsStats (mvccVersion LONG default 0 not null,ctCollectionId LONG default 0 not null,statsId LONG not null,companyId LONG,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,totalEntries INTEGER,totalScore DOUBLE,averageScore DOUBLE,primary key (statsId, ctCollectionId))";
 
 	public static final String TABLE_SQL_DROP = "drop table RatingsStats";
 
@@ -105,20 +108,23 @@ public class RatingsStatsModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.entity.cache.enabled.com.liferay.ratings.kernel.model.RatingsStats"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean ENTITY_CACHE_ENABLED = true;
 
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.finder.cache.enabled.com.liferay.ratings.kernel.model.RatingsStats"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean FINDER_CACHE_ENABLED = true;
 
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.column.bitmask.enabled.com.liferay.ratings.kernel.model.RatingsStats"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean COLUMN_BITMASK_ENABLED = true;
 
 	public static final long CLASSNAMEID_COLUMN_BITMASK = 1L;
 
@@ -181,9 +187,6 @@ public class RatingsStatsModelImpl
 				attributeName,
 				attributeGetterFunction.apply((RatingsStats)this));
 		}
-
-		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
-		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
 
 		return attributes;
 	}
@@ -257,6 +260,16 @@ public class RatingsStatsModelImpl
 		Map<String, BiConsumer<RatingsStats, ?>> attributeSetterBiConsumers =
 			new LinkedHashMap<String, BiConsumer<RatingsStats, ?>>();
 
+		attributeGetterFunctions.put(
+			"mvccVersion", RatingsStats::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<RatingsStats, Long>)RatingsStats::setMvccVersion);
+		attributeGetterFunctions.put(
+			"ctCollectionId", RatingsStats::getCtCollectionId);
+		attributeSetterBiConsumers.put(
+			"ctCollectionId",
+			(BiConsumer<RatingsStats, Long>)RatingsStats::setCtCollectionId);
 		attributeGetterFunctions.put("statsId", RatingsStats::getStatsId);
 		attributeSetterBiConsumers.put(
 			"statsId",
@@ -302,6 +315,26 @@ public class RatingsStatsModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@Override
+	public long getCtCollectionId() {
+		return _ctCollectionId;
+	}
+
+	@Override
+	public void setCtCollectionId(long ctCollectionId) {
+		_ctCollectionId = ctCollectionId;
 	}
 
 	@Override
@@ -480,6 +513,8 @@ public class RatingsStatsModelImpl
 	public Object clone() {
 		RatingsStatsImpl ratingsStatsImpl = new RatingsStatsImpl();
 
+		ratingsStatsImpl.setMvccVersion(getMvccVersion());
+		ratingsStatsImpl.setCtCollectionId(getCtCollectionId());
 		ratingsStatsImpl.setStatsId(getStatsId());
 		ratingsStatsImpl.setCompanyId(getCompanyId());
 		ratingsStatsImpl.setCreateDate(getCreateDate());
@@ -511,16 +546,16 @@ public class RatingsStatsModelImpl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof RatingsStats)) {
+		if (!(object instanceof RatingsStats)) {
 			return false;
 		}
 
-		RatingsStats ratingsStats = (RatingsStats)obj;
+		RatingsStats ratingsStats = (RatingsStats)object;
 
 		long primaryKey = ratingsStats.getPrimaryKey();
 
@@ -537,11 +572,19 @@ public class RatingsStatsModelImpl
 		return (int)getPrimaryKey();
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isEntityCacheEnabled() {
 		return ENTITY_CACHE_ENABLED;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isFinderCacheEnabled() {
 		return FINDER_CACHE_ENABLED;
@@ -569,6 +612,10 @@ public class RatingsStatsModelImpl
 	public CacheModel<RatingsStats> toCacheModel() {
 		RatingsStatsCacheModel ratingsStatsCacheModel =
 			new RatingsStatsCacheModel();
+
+		ratingsStatsCacheModel.mvccVersion = getMvccVersion();
+
+		ratingsStatsCacheModel.ctCollectionId = getCtCollectionId();
 
 		ratingsStatsCacheModel.statsId = getStatsId();
 
@@ -675,6 +722,8 @@ public class RatingsStatsModelImpl
 
 	}
 
+	private long _mvccVersion;
+	private long _ctCollectionId;
 	private long _statsId;
 	private long _companyId;
 	private Date _createDate;

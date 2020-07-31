@@ -107,7 +107,9 @@ public abstract class BaseSiteResourceTestCase {
 
 		SiteResource.Builder builder = SiteResource.builder();
 
-		siteResource = builder.locale(
+		siteResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -242,6 +244,29 @@ public abstract class BaseSiteResourceTestCase {
 	}
 
 	@Test
+	public void testGraphQLGetSiteByFriendlyUrlPathNotFound() throws Exception {
+		String irrelevantFriendlyUrlPath =
+			"\"" + RandomTestUtil.randomString() + "\"";
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"byFriendlyUrlPath",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"friendlyUrlPath",
+									irrelevantFriendlyUrlPath);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
+	}
+
+	@Test
 	public void testGetSite() throws Exception {
 		Site postSite = testGetSite_addSite();
 
@@ -275,6 +300,26 @@ public abstract class BaseSiteResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/site"))));
+	}
+
+	@Test
+	public void testGraphQLGetSiteNotFound() throws Exception {
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"site",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"siteKey",
+									"\"" + irrelevantGroup.getGroupId() + "\"");
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	protected Site testGraphQLSite_addSite() throws Exception {

@@ -586,8 +586,8 @@ public class AssetListEntryLocalServiceImpl
 		Class<?> clazz = assetRendererFactory.getClass();
 
 		if (assetRendererFactory instanceof AssetRendererFactoryWrapper) {
-			AssetRendererFactoryWrapper assetRendererFactoryWrapper =
-				(AssetRendererFactoryWrapper)assetRendererFactory;
+			AssetRendererFactoryWrapper<?> assetRendererFactoryWrapper =
+				(AssetRendererFactoryWrapper<?>)assetRendererFactory;
 
 			clazz = assetRendererFactoryWrapper.getWrappedClass();
 		}
@@ -732,7 +732,7 @@ public class AssetListEntryLocalServiceImpl
 	}
 
 	private boolean _isSupportsItemSubtypes(String assetEntryType) {
-		AssetRendererFactory assetRendererFactory =
+		AssetRendererFactory<?> assetRendererFactory =
 			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
 				assetEntryType);
 

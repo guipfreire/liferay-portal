@@ -29,29 +29,23 @@ import com.liferay.headless.admin.user.client.serdes.v1_0.PostalAddressSerDes;
 import com.liferay.headless.admin.user.client.serdes.v1_0.UserAccountSerDes;
 import com.liferay.headless.admin.user.client.serdes.v1_0.WebUrlSerDes;
 import com.liferay.petra.function.UnsafeTriConsumer;
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
-import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
-import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
+import com.liferay.portal.kernel.test.rule.DataGuard;
 import com.liferay.portal.kernel.test.util.OrganizationTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
-import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.odata.entity.EntityField;
 import com.liferay.portal.test.rule.Inject;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -68,6 +62,7 @@ import org.junit.runner.RunWith;
 /**
  * @author Javier Gamarra
  */
+@DataGuard(scope = DataGuard.Scope.METHOD)
 @RunWith(Arquillian.class)
 public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 
@@ -84,33 +79,10 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 		_userLocalService.deleteGroupUser(
 			testGroup.getGroupId(), _testUser.getUserId());
 
-		// See LPS-94496 for why we have to delete all users except for the
-		// test user
-
-		List<User> users = _userLocalService.getUsers(
-			PortalUtil.getDefaultCompanyId(), false,
-			WorkflowConstants.STATUS_APPROVED, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS, null);
-
-		for (User user : users) {
-			if (user.getUserId() != _testUser.getUserId()) {
-				_userLocalService.deleteUser(user);
-			}
-		}
-
 		Indexer<User> indexer = IndexerRegistryUtil.nullSafeGetIndexer(
 			_testUser.getModelClassName());
 
-		List<Company> companies = CompanyLocalServiceUtil.getCompanies();
-
-		for (Company company : companies) {
-			IndexWriterHelperUtil.deleteEntityDocuments(
-				indexer.getSearchEngineId(), company.getCompanyId(),
-				_testUser.getModelClassName(), true);
-
-			indexer.reindex(
-				new String[] {String.valueOf(company.getCompanyId())});
-		}
+		indexer.reindex(_testUser);
 	}
 
 	@Override
@@ -162,6 +134,7 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 	}
 
 	@Override
+	@Test
 	public void testGetUserAccountsPageWithPagination() throws Exception {
 		UserAccount userAccount1 = testGetUserAccountsPage_addUserAccount(
 			randomUserAccount());
@@ -280,20 +253,20 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 			userAccount2.getUserAccountContactInformation();
 
 		Assert.assertEquals(
-			userAccountContactInformation1.getFacebook(),
-			userAccountContactInformation2.getFacebook());
+			StringUtil.lowerCase(userAccountContactInformation1.getFacebook()),
+			StringUtil.lowerCase(userAccountContactInformation2.getFacebook()));
 		Assert.assertEquals(
-			userAccountContactInformation1.getJabber(),
-			userAccountContactInformation2.getJabber());
+			StringUtil.lowerCase(userAccountContactInformation1.getJabber()),
+			StringUtil.lowerCase(userAccountContactInformation2.getJabber()));
 		Assert.assertEquals(
-			userAccountContactInformation1.getSkype(),
-			userAccountContactInformation2.getSkype());
+			StringUtil.lowerCase(userAccountContactInformation1.getSkype()),
+			StringUtil.lowerCase(userAccountContactInformation2.getSkype()));
 		Assert.assertEquals(
-			userAccountContactInformation1.getSms(),
-			userAccountContactInformation2.getSms());
+			StringUtil.lowerCase(userAccountContactInformation1.getSms()),
+			StringUtil.lowerCase(userAccountContactInformation2.getSms()));
 		Assert.assertEquals(
-			userAccountContactInformation1.getTwitter(),
-			userAccountContactInformation2.getTwitter());
+			StringUtil.lowerCase(userAccountContactInformation1.getTwitter()),
+			StringUtil.lowerCase(userAccountContactInformation2.getTwitter()));
 
 		_assertUserAccountContactInformation(
 			userAccountContactInformation1, userAccountContactInformation2,
@@ -312,7 +285,7 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 
 	@Override
 	protected String[] getAdditionalAssertFieldNames() {
-		return new String[] {"familyName", "givenName"};
+		return new String[] {"alternateName", "familyName", "givenName"};
 	}
 
 	@Override
@@ -340,6 +313,13 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 			_randomUserAccountContactInformation());
 
 		return userAccount;
+	}
+
+	@Override
+	protected UserAccount testDeleteUserAccount_addUserAccount()
+		throws Exception {
+
+		return _addUserAccount(testGroup.getGroupId(), randomUserAccount());
 	}
 
 	@Override
@@ -404,6 +384,13 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 	}
 
 	@Override
+	protected UserAccount testPatchUserAccount_addUserAccount()
+		throws Exception {
+
+		return _addUserAccount(testGroup.getGroupId(), randomUserAccount());
+	}
+
+	@Override
 	protected UserAccount testPostUserAccount_addUserAccount(
 			UserAccount userAccount)
 		throws Exception {
@@ -411,12 +398,15 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 		return _addUserAccount(testGroup.getGroupId(), userAccount);
 	}
 
+	@Override
+	protected UserAccount testPutUserAccount_addUserAccount() throws Exception {
+		return _addUserAccount(testGroup.getGroupId(), randomUserAccount());
+	}
+
 	private UserAccount _addUserAccount(long siteId, UserAccount userAccount)
 		throws Exception {
 
 		userAccount = userAccountResource.postUserAccount(userAccount);
-
-		_users.add(_userLocalService.getUser(userAccount.getId()));
 
 		_userLocalService.addGroupUser(siteId, userAccount.getId());
 
@@ -513,7 +503,7 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 				setPostalAddresses(
 					new PostalAddress[] {_randomPostalAddress()});
 				setSkype(RandomTestUtil.randomString());
-				setSms(RandomTestUtil.randomString());
+				setSms(RandomTestUtil.randomString() + "@liferay.com");
 				setTelephones(new Phone[] {_randomPhone()});
 				setTwitter(RandomTestUtil.randomString());
 				setWebUrls(new WebUrl[] {_randomWebUrl()});
@@ -531,15 +521,10 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 		};
 	}
 
-	@DeleteAfterTestRun
 	private Organization _organization;
-
 	private User _testUser;
 
 	@Inject
 	private UserLocalService _userLocalService;
-
-	@DeleteAfterTestRun
-	private final List<User> _users = new ArrayList<>();
 
 }

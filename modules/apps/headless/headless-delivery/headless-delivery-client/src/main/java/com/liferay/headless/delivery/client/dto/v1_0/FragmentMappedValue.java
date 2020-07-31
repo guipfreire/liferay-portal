@@ -28,17 +28,45 @@ import javax.annotation.Generated;
 @Generated("")
 public class FragmentMappedValue implements Cloneable {
 
-	public FragmentInlineValue getDefaultValue() {
+	public static FragmentMappedValue toDTO(String json) {
+		return FragmentMappedValueSerDes.toDTO(json);
+	}
+
+	public FragmentInlineValue getDefaultFragmentInlineValue() {
+		return defaultFragmentInlineValue;
+	}
+
+	public void setDefaultFragmentInlineValue(
+		FragmentInlineValue defaultFragmentInlineValue) {
+
+		this.defaultFragmentInlineValue = defaultFragmentInlineValue;
+	}
+
+	public void setDefaultFragmentInlineValue(
+		UnsafeSupplier<FragmentInlineValue, Exception>
+			defaultFragmentInlineValueUnsafeSupplier) {
+
+		try {
+			defaultFragmentInlineValue =
+				defaultFragmentInlineValueUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected FragmentInlineValue defaultFragmentInlineValue;
+
+	public DefaultValue getDefaultValue() {
 		return defaultValue;
 	}
 
-	public void setDefaultValue(FragmentInlineValue defaultValue) {
+	public void setDefaultValue(DefaultValue defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 
 	public void setDefaultValue(
-		UnsafeSupplier<FragmentInlineValue, Exception>
-			defaultValueUnsafeSupplier) {
+		UnsafeSupplier<DefaultValue, Exception> defaultValueUnsafeSupplier) {
 
 		try {
 			defaultValue = defaultValueUnsafeSupplier.get();
@@ -48,7 +76,7 @@ public class FragmentMappedValue implements Cloneable {
 		}
 	}
 
-	protected FragmentInlineValue defaultValue;
+	protected DefaultValue defaultValue;
 
 	public Mapping getMapping() {
 		return mapping;

@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.service;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
@@ -66,6 +67,10 @@ public interface RecentLayoutRevisionLocalService
 	/**
 	 * Adds the recent layout revision to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RecentLayoutRevisionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param recentLayoutRevision the recent layout revision
 	 * @return the recent layout revision that was added
 	 */
@@ -99,6 +104,10 @@ public interface RecentLayoutRevisionLocalService
 	/**
 	 * Deletes the recent layout revision with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RecentLayoutRevisionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param recentLayoutRevisionId the primary key of the recent layout revision
 	 * @return the recent layout revision that was removed
 	 * @throws PortalException if a recent layout revision with the primary key could not be found
@@ -111,6 +120,10 @@ public interface RecentLayoutRevisionLocalService
 	/**
 	 * Deletes the recent layout revision from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RecentLayoutRevisionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param recentLayoutRevision the recent layout revision
 	 * @return the recent layout revision that was removed
 	 */
@@ -121,6 +134,9 @@ public interface RecentLayoutRevisionLocalService
 	public void deleteRecentLayoutRevisions(long layoutRevisionId);
 
 	public void deleteUserRecentLayoutRevisions(long userId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public <T> T dslQuery(DSLQuery dslQuery);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DynamicQuery dynamicQuery();
@@ -254,6 +270,10 @@ public interface RecentLayoutRevisionLocalService
 
 	/**
 	 * Updates the recent layout revision in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RecentLayoutRevisionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param recentLayoutRevision the recent layout revision
 	 * @return the recent layout revision that was updated

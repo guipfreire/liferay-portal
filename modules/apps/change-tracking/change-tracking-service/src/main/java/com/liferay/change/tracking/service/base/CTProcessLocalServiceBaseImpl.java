@@ -16,10 +16,9 @@ package com.liferay.change.tracking.service.base;
 
 import com.liferay.change.tracking.model.CTProcess;
 import com.liferay.change.tracking.service.CTProcessLocalService;
-import com.liferay.change.tracking.service.persistence.CTCollectionFinder;
 import com.liferay.change.tracking.service.persistence.CTCollectionPersistence;
-import com.liferay.change.tracking.service.persistence.CTProcessFinder;
 import com.liferay.change.tracking.service.persistence.CTProcessPersistence;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -76,6 +75,10 @@ public abstract class CTProcessLocalServiceBaseImpl
 	/**
 	 * Adds the ct process to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect CTProcessLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param ctProcess the ct process
 	 * @return the ct process that was added
 	 */
@@ -102,6 +105,10 @@ public abstract class CTProcessLocalServiceBaseImpl
 	/**
 	 * Deletes the ct process with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect CTProcessLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param ctProcessId the primary key of the ct process
 	 * @return the ct process that was removed
 	 * @throws PortalException if a ct process with the primary key could not be found
@@ -115,6 +122,10 @@ public abstract class CTProcessLocalServiceBaseImpl
 	/**
 	 * Deletes the ct process from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect CTProcessLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param ctProcess the ct process
 	 * @return the ct process that was removed
 	 */
@@ -122,6 +133,11 @@ public abstract class CTProcessLocalServiceBaseImpl
 	@Override
 	public CTProcess deleteCTProcess(CTProcess ctProcess) {
 		return ctProcessPersistence.remove(ctProcess);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return ctProcessPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -332,6 +348,10 @@ public abstract class CTProcessLocalServiceBaseImpl
 	/**
 	 * Updates the ct process in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect CTProcessLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param ctProcess the ct process
 	 * @return the ct process that was updated
 	 */
@@ -402,13 +422,7 @@ public abstract class CTProcessLocalServiceBaseImpl
 	protected CTProcessPersistence ctProcessPersistence;
 
 	@Reference
-	protected CTProcessFinder ctProcessFinder;
-
-	@Reference
 	protected CTCollectionPersistence ctCollectionPersistence;
-
-	@Reference
-	protected CTCollectionFinder ctCollectionFinder;
 
 	@Reference
 	protected com.liferay.counter.kernel.service.CounterLocalService

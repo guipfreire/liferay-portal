@@ -17,6 +17,7 @@ package com.liferay.depot.service.base;
 import com.liferay.depot.model.DepotEntryGroupRel;
 import com.liferay.depot.service.DepotEntryGroupRelLocalService;
 import com.liferay.depot.service.persistence.DepotEntryGroupRelPersistence;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -74,6 +75,10 @@ public abstract class DepotEntryGroupRelLocalServiceBaseImpl
 	/**
 	 * Adds the depot entry group rel to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DepotEntryGroupRelLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param depotEntryGroupRel the depot entry group rel
 	 * @return the depot entry group rel that was added
 	 */
@@ -104,6 +109,10 @@ public abstract class DepotEntryGroupRelLocalServiceBaseImpl
 	/**
 	 * Deletes the depot entry group rel with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DepotEntryGroupRelLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param depotEntryGroupRelId the primary key of the depot entry group rel
 	 * @return the depot entry group rel that was removed
 	 * @throws PortalException if a depot entry group rel with the primary key could not be found
@@ -120,6 +129,10 @@ public abstract class DepotEntryGroupRelLocalServiceBaseImpl
 	/**
 	 * Deletes the depot entry group rel from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DepotEntryGroupRelLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param depotEntryGroupRel the depot entry group rel
 	 * @return the depot entry group rel that was removed
 	 */
@@ -129,6 +142,11 @@ public abstract class DepotEntryGroupRelLocalServiceBaseImpl
 		DepotEntryGroupRel depotEntryGroupRel) {
 
 		return depotEntryGroupRelPersistence.remove(depotEntryGroupRel);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return depotEntryGroupRelPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -351,6 +369,10 @@ public abstract class DepotEntryGroupRelLocalServiceBaseImpl
 
 	/**
 	 * Updates the depot entry group rel in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DepotEntryGroupRelLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param depotEntryGroupRel the depot entry group rel
 	 * @return the depot entry group rel that was updated

@@ -112,7 +112,9 @@ public abstract class BaseExperimentResourceTestCase {
 
 		ExperimentResource.Builder builder = ExperimentResource.builder();
 
-		experimentResource = builder.locale(
+		experimentResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -300,6 +302,27 @@ public abstract class BaseExperimentResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/experiment"))));
+	}
+
+	@Test
+	public void testGraphQLGetExperimentNotFound() throws Exception {
+		String irrelevantExperimentId =
+			"\"" + RandomTestUtil.randomString() + "\"";
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"experiment",
+						new HashMap<String, Object>() {
+							{
+								put("experimentId", irrelevantExperimentId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	protected Experiment testGraphQLExperiment_addExperiment()

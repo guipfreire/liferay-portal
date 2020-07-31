@@ -65,9 +65,9 @@ portletDisplay.setURLBack(backURL);
 renderResponse.setTitle(headerTitle);
 %>
 
-<div class="container-fluid-1280">
+<clay:container-fluid>
 	<clay:col
-		className="lfr-asset-column lfr-asset-column-details"
+		cssClass="lfr-asset-column lfr-asset-column-details"
 	>
 		<liferay-ui:success key='<%= workflowTaskDisplayContext.getPortletResource() + "requestProcessed" %>' message="your-request-completed-successfully" />
 
@@ -292,7 +292,7 @@ renderResponse.setTitle(headerTitle);
 			</liferay-ui:panel-container>
 		</aui:fieldset-group>
 	</clay:col>
-</div>
+</clay:container-fluid>
 
 <aui:script use="liferay-workflow-tasks">
 	var onTaskClickFn = A.rbind('onTaskClick', Liferay.WorkflowTasks, '');

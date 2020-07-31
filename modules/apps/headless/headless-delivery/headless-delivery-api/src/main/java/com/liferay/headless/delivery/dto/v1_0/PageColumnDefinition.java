@@ -22,6 +22,7 @@ import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
+import com.liferay.portal.vulcan.util.ObjectMapperUtil;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -32,6 +33,7 @@ import java.util.Set;
 
 import javax.annotation.Generated;
 
+import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 
@@ -46,6 +48,77 @@ import javax.xml.bind.annotation.XmlRootElement;
 @JsonFilter("Liferay.Vulcan")
 @XmlRootElement(name = "PageColumnDefinition")
 public class PageColumnDefinition {
+
+	public static PageColumnDefinition toDTO(String json) {
+		return ObjectMapperUtil.readValue(PageColumnDefinition.class, json);
+	}
+
+	@Schema(
+		description = "Deprecated as of Athanasius (7.3.x), replaced by columnViewports"
+	)
+	@Valid
+	public ColumnViewportConfig getColumnViewportConfig() {
+		return columnViewportConfig;
+	}
+
+	public void setColumnViewportConfig(
+		ColumnViewportConfig columnViewportConfig) {
+
+		this.columnViewportConfig = columnViewportConfig;
+	}
+
+	@JsonIgnore
+	public void setColumnViewportConfig(
+		UnsafeSupplier<ColumnViewportConfig, Exception>
+			columnViewportConfigUnsafeSupplier) {
+
+		try {
+			columnViewportConfig = columnViewportConfigUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Deprecated
+	@GraphQLField(
+		description = "Deprecated as of Athanasius (7.3.x), replaced by columnViewports"
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ColumnViewportConfig columnViewportConfig;
+
+	@Schema
+	@Valid
+	public ColumnViewport[] getColumnViewports() {
+		return columnViewports;
+	}
+
+	public void setColumnViewports(ColumnViewport[] columnViewports) {
+		this.columnViewports = columnViewports;
+	}
+
+	@JsonIgnore
+	public void setColumnViewports(
+		UnsafeSupplier<ColumnViewport[], Exception>
+			columnViewportsUnsafeSupplier) {
+
+		try {
+			columnViewports = columnViewportsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ColumnViewport[] columnViewports;
 
 	@DecimalMax("12")
 	@DecimalMin("1")
@@ -103,6 +176,36 @@ public class PageColumnDefinition {
 
 		sb.append("{");
 
+		if (columnViewportConfig != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"columnViewportConfig\": ");
+
+			sb.append(String.valueOf(columnViewportConfig));
+		}
+
+		if (columnViewports != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"columnViewports\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < columnViewports.length; i++) {
+				sb.append(String.valueOf(columnViewports[i]));
+
+				if ((i + 1) < columnViewports.length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
 		if (size != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -130,6 +233,16 @@ public class PageColumnDefinition {
 		return string.replaceAll("\"", "\\\\\"");
 	}
 
+	private static boolean _isArray(Object value) {
+		if (value == null) {
+			return false;
+		}
+
+		Class<?> clazz = value.getClass();
+
+		return clazz.isArray();
+	}
+
 	private static String _toJSON(Map<String, ?> map) {
 		StringBuilder sb = new StringBuilder("{");
 
@@ -148,9 +261,7 @@ public class PageColumnDefinition {
 
 			Object value = entry.getValue();
 
-			Class<?> clazz = value.getClass();
-
-			if (clazz.isArray()) {
+			if (_isArray(value)) {
 				sb.append("[");
 
 				Object[] valueArray = (Object[])value;

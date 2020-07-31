@@ -27,6 +27,7 @@ import com.liferay.knowledge.base.service.persistence.KBCommentPersistence;
 import com.liferay.knowledge.base.service.persistence.KBFolderFinder;
 import com.liferay.knowledge.base.service.persistence.KBFolderPersistence;
 import com.liferay.knowledge.base.service.persistence.KBTemplatePersistence;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -86,6 +87,10 @@ public abstract class KBCommentLocalServiceBaseImpl
 	/**
 	 * Adds the kb comment to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KBCommentLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kbComment the kb comment
 	 * @return the kb comment that was added
 	 */
@@ -112,6 +117,10 @@ public abstract class KBCommentLocalServiceBaseImpl
 	/**
 	 * Deletes the kb comment with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KBCommentLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kbCommentId the primary key of the kb comment
 	 * @return the kb comment that was removed
 	 * @throws PortalException if a kb comment with the primary key could not be found
@@ -125,6 +134,10 @@ public abstract class KBCommentLocalServiceBaseImpl
 	/**
 	 * Deletes the kb comment from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KBCommentLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kbComment the kb comment
 	 * @return the kb comment that was removed
 	 * @throws PortalException
@@ -135,6 +148,11 @@ public abstract class KBCommentLocalServiceBaseImpl
 		throws PortalException {
 
 		return kbCommentPersistence.remove(kbComment);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return kbCommentPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -498,6 +516,10 @@ public abstract class KBCommentLocalServiceBaseImpl
 
 	/**
 	 * Updates the kb comment in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KBCommentLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param kbComment the kb comment
 	 * @return the kb comment that was updated

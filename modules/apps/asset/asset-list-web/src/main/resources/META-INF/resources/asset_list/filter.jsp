@@ -44,14 +44,14 @@
 			<liferay-ui:message arguments="<%= messageArgument %>" key="only-one-rule-with-the-combination-x-is-supported" translateArguments="<%= false %>" />
 		</liferay-ui:error>
 
-		<p><liferay-ui:message key="displayed-assets-must-match-these-rules" /></p>
+		<p><liferay-ui:message key="displayed-items-must-match-these-rules" /></p>
 
 		<div id="<portlet:namespace />ConditionForm"></div>
 
 		<div>
 
 			<%
-			Map<String, Object> data = HashMapBuilder.<String, Object>put(
+			Map<String, Object> props = HashMapBuilder.<String, Object>put(
 				"categorySelectorURL", editAssetListDisplayContext.getCategorySelectorURL()
 			).put(
 				"groupIds", ListUtil.toList(editAssetListDisplayContext.getReferencedModelsGroupIds())
@@ -67,8 +67,8 @@
 			%>
 
 			<react:component
-				data="<%= data %>"
 				module="auto_field/index"
+				props="<%= props %>"
 			/>
 		</div>
 	</liferay-frontend:fieldset>

@@ -119,7 +119,9 @@ public abstract class BaseOrganizationResourceTestCase {
 
 		OrganizationResource.Builder builder = OrganizationResource.builder();
 
-		organizationResource = builder.locale(
+		organizationResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -615,6 +617,27 @@ public abstract class BaseOrganizationResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/organization"))));
+	}
+
+	@Test
+	public void testGraphQLGetOrganizationNotFound() throws Exception {
+		String irrelevantOrganizationId =
+			"\"" + RandomTestUtil.randomString() + "\"";
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"organization",
+						new HashMap<String, Object>() {
+							{
+								put("organizationId", irrelevantOrganizationId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

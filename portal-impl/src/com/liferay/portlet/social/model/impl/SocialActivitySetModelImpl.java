@@ -68,6 +68,7 @@ public class SocialActivitySetModelImpl
 	public static final String TABLE_NAME = "SocialActivitySet";
 
 	public static final Object[][] TABLE_COLUMNS = {
+		{"mvccVersion", Types.BIGINT}, {"ctCollectionId", Types.BIGINT},
 		{"activitySetId", Types.BIGINT}, {"groupId", Types.BIGINT},
 		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
 		{"createDate", Types.BIGINT}, {"modifiedDate", Types.BIGINT},
@@ -80,6 +81,8 @@ public class SocialActivitySetModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("ctCollectionId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("activitySetId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("groupId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
@@ -94,7 +97,7 @@ public class SocialActivitySetModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table SocialActivitySet (activitySetId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,createDate LONG,modifiedDate LONG,classNameId LONG,classPK LONG,type_ INTEGER,extraData STRING null,activityCount INTEGER)";
+		"create table SocialActivitySet (mvccVersion LONG default 0 not null,ctCollectionId LONG default 0 not null,activitySetId LONG not null,groupId LONG,companyId LONG,userId LONG,createDate LONG,modifiedDate LONG,classNameId LONG,classPK LONG,type_ INTEGER,extraData STRING null,activityCount INTEGER,primary key (activitySetId, ctCollectionId))";
 
 	public static final String TABLE_SQL_DROP = "drop table SocialActivitySet";
 
@@ -110,20 +113,23 @@ public class SocialActivitySetModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.entity.cache.enabled.com.liferay.social.kernel.model.SocialActivitySet"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean ENTITY_CACHE_ENABLED = true;
 
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.finder.cache.enabled.com.liferay.social.kernel.model.SocialActivitySet"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean FINDER_CACHE_ENABLED = true;
 
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.column.bitmask.enabled.com.liferay.social.kernel.model.SocialActivitySet"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean COLUMN_BITMASK_ENABLED = true;
 
 	public static final long CLASSNAMEID_COLUMN_BITMASK = 1L;
 
@@ -192,9 +198,6 @@ public class SocialActivitySetModelImpl
 				attributeName,
 				attributeGetterFunction.apply((SocialActivitySet)this));
 		}
-
-		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
-		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
 
 		return attributes;
 	}
@@ -272,6 +275,18 @@ public class SocialActivitySetModelImpl
 				new LinkedHashMap<String, BiConsumer<SocialActivitySet, ?>>();
 
 		attributeGetterFunctions.put(
+			"mvccVersion", SocialActivitySet::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<SocialActivitySet, Long>)
+				SocialActivitySet::setMvccVersion);
+		attributeGetterFunctions.put(
+			"ctCollectionId", SocialActivitySet::getCtCollectionId);
+		attributeSetterBiConsumers.put(
+			"ctCollectionId",
+			(BiConsumer<SocialActivitySet, Long>)
+				SocialActivitySet::setCtCollectionId);
+		attributeGetterFunctions.put(
 			"activitySetId", SocialActivitySet::getActivitySetId);
 		attributeSetterBiConsumers.put(
 			"activitySetId",
@@ -334,6 +349,26 @@ public class SocialActivitySetModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@Override
+	public long getCtCollectionId() {
+		return _ctCollectionId;
+	}
+
+	@Override
+	public void setCtCollectionId(long ctCollectionId) {
+		_ctCollectionId = ctCollectionId;
 	}
 
 	@Override
@@ -586,6 +621,8 @@ public class SocialActivitySetModelImpl
 		SocialActivitySetImpl socialActivitySetImpl =
 			new SocialActivitySetImpl();
 
+		socialActivitySetImpl.setMvccVersion(getMvccVersion());
+		socialActivitySetImpl.setCtCollectionId(getCtCollectionId());
 		socialActivitySetImpl.setActivitySetId(getActivitySetId());
 		socialActivitySetImpl.setGroupId(getGroupId());
 		socialActivitySetImpl.setCompanyId(getCompanyId());
@@ -627,16 +664,16 @@ public class SocialActivitySetModelImpl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof SocialActivitySet)) {
+		if (!(object instanceof SocialActivitySet)) {
 			return false;
 		}
 
-		SocialActivitySet socialActivitySet = (SocialActivitySet)obj;
+		SocialActivitySet socialActivitySet = (SocialActivitySet)object;
 
 		long primaryKey = socialActivitySet.getPrimaryKey();
 
@@ -653,11 +690,19 @@ public class SocialActivitySetModelImpl
 		return (int)getPrimaryKey();
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isEntityCacheEnabled() {
 		return ENTITY_CACHE_ENABLED;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isFinderCacheEnabled() {
 		return FINDER_CACHE_ENABLED;
@@ -699,6 +744,10 @@ public class SocialActivitySetModelImpl
 	public CacheModel<SocialActivitySet> toCacheModel() {
 		SocialActivitySetCacheModel socialActivitySetCacheModel =
 			new SocialActivitySetCacheModel();
+
+		socialActivitySetCacheModel.mvccVersion = getMvccVersion();
+
+		socialActivitySetCacheModel.ctCollectionId = getCtCollectionId();
 
 		socialActivitySetCacheModel.activitySetId = getActivitySetId();
 
@@ -801,6 +850,8 @@ public class SocialActivitySetModelImpl
 
 	}
 
+	private long _mvccVersion;
+	private long _ctCollectionId;
 	private long _activitySetId;
 	private long _groupId;
 	private long _originalGroupId;

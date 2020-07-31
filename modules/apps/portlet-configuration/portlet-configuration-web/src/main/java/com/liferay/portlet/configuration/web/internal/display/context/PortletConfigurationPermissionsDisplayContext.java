@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.ResourcePrimKeyException;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.Portlet;
@@ -161,11 +162,8 @@ public class PortletConfigurationPermissionsDisplayContext {
 				resourceActions = new ArrayList<>(resourceActions);
 
 				resourceActions.remove(ActionKeys.ASSIGN_MEMBERS);
-				resourceActions.remove(ActionKeys.DEFINE_PERMISSIONS);
 				resourceActions.remove(ActionKeys.DELETE);
-				resourceActions.remove(ActionKeys.PERMISSIONS);
 				resourceActions.remove(ActionKeys.UPDATE);
-				resourceActions.remove(ActionKeys.VIEW);
 			}
 		}
 
@@ -329,7 +327,7 @@ public class PortletConfigurationPermissionsDisplayContext {
 		return _resourcePrimKey;
 	}
 
-	public SearchContainer getRoleSearchContainer() throws Exception {
+	public SearchContainer<Role> getRoleSearchContainer() throws Exception {
 		if (_roleSearchContainer != null) {
 			return _roleSearchContainer;
 		}
@@ -541,6 +539,10 @@ public class PortletConfigurationPermissionsDisplayContext {
 
 		_roleTypes = RoleConstants.TYPES_REGULAR_AND_SITE;
 
+		if (_group.getType() == GroupConstants.TYPE_DEPOT) {
+			_roleTypes = _TYPES_DEPOT_AND_REGULAR;
+		}
+
 		if (ResourceActionsUtil.isPortalModelResource(getModelResource())) {
 			if (Objects.equals(
 					getModelResource(), Organization.class.getName()) ||
@@ -726,6 +728,10 @@ public class PortletConfigurationPermissionsDisplayContext {
 		return _roleTypesParam;
 	}
 
+	private static final int[] _TYPES_DEPOT_AND_REGULAR = {
+		RoleConstants.TYPE_DEPOT, RoleConstants.TYPE_REGULAR
+	};
+
 	private List<String> _actions;
 	private Group _group;
 	private final long _groupId;
@@ -739,7 +745,7 @@ public class PortletConfigurationPermissionsDisplayContext {
 	private Long _resourceGroupId;
 	private String _resourcePrimKey;
 	private String _returnToFullPageURL;
-	private SearchContainer _roleSearchContainer;
+	private SearchContainer<Role> _roleSearchContainer;
 	private final RoleTypeContributorProvider _roleTypeContributorProvider;
 	private int[] _roleTypes;
 	private String _roleTypesParam;

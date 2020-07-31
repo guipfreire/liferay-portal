@@ -109,7 +109,9 @@ public abstract class BaseWorkflowTaskResourceTestCase {
 
 		WorkflowTaskResource.Builder builder = WorkflowTaskResource.builder();
 
-		workflowTaskResource = builder.locale(
+		workflowTaskResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -1051,6 +1053,26 @@ public abstract class BaseWorkflowTaskResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/workflowTask"))));
+	}
+
+	@Test
+	public void testGraphQLGetWorkflowTaskNotFound() throws Exception {
+		Long irrelevantWorkflowTaskId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"workflowTask",
+						new HashMap<String, Object>() {
+							{
+								put("workflowTaskId", irrelevantWorkflowTaskId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

@@ -14,6 +14,7 @@
 
 package com.liferay.portal.tools.service.builder.test.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -77,6 +78,10 @@ public abstract class LocalizedEntryLocalServiceBaseImpl
 	/**
 	 * Adds the localized entry to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect LocalizedEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param localizedEntry the localized entry
 	 * @return the localized entry that was added
 	 */
@@ -103,6 +108,10 @@ public abstract class LocalizedEntryLocalServiceBaseImpl
 	/**
 	 * Deletes the localized entry with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect LocalizedEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param localizedEntryId the primary key of the localized entry
 	 * @return the localized entry that was removed
 	 * @throws PortalException if a localized entry with the primary key could not be found
@@ -118,6 +127,10 @@ public abstract class LocalizedEntryLocalServiceBaseImpl
 	/**
 	 * Deletes the localized entry from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect LocalizedEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param localizedEntry the localized entry
 	 * @return the localized entry that was removed
 	 */
@@ -125,6 +138,11 @@ public abstract class LocalizedEntryLocalServiceBaseImpl
 	@Override
 	public LocalizedEntry deleteLocalizedEntry(LocalizedEntry localizedEntry) {
 		return localizedEntryPersistence.remove(localizedEntry);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return localizedEntryPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -338,6 +356,10 @@ public abstract class LocalizedEntryLocalServiceBaseImpl
 
 	/**
 	 * Updates the localized entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect LocalizedEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param localizedEntry the localized entry
 	 * @return the localized entry that was updated

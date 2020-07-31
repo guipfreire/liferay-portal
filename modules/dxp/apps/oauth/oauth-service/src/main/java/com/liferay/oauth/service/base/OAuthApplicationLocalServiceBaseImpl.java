@@ -18,6 +18,7 @@ import com.liferay.oauth.model.OAuthApplication;
 import com.liferay.oauth.service.OAuthApplicationLocalService;
 import com.liferay.oauth.service.persistence.OAuthApplicationPersistence;
 import com.liferay.oauth.service.persistence.OAuthUserPersistence;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -75,6 +76,10 @@ public abstract class OAuthApplicationLocalServiceBaseImpl
 	/**
 	 * Adds the o auth application to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect OAuthApplicationLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param oAuthApplication the o auth application
 	 * @return the o auth application that was added
 	 */
@@ -103,6 +108,10 @@ public abstract class OAuthApplicationLocalServiceBaseImpl
 	/**
 	 * Deletes the o auth application with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect OAuthApplicationLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param oAuthApplicationId the primary key of the o auth application
 	 * @return the o auth application that was removed
 	 * @throws PortalException if a o auth application with the primary key could not be found
@@ -118,6 +127,10 @@ public abstract class OAuthApplicationLocalServiceBaseImpl
 	/**
 	 * Deletes the o auth application from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect OAuthApplicationLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param oAuthApplication the o auth application
 	 * @return the o auth application that was removed
 	 * @throws PortalException
@@ -129,6 +142,11 @@ public abstract class OAuthApplicationLocalServiceBaseImpl
 		throws PortalException {
 
 		return oAuthApplicationPersistence.remove(oAuthApplication);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return oAuthApplicationPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -345,6 +363,10 @@ public abstract class OAuthApplicationLocalServiceBaseImpl
 
 	/**
 	 * Updates the o auth application in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect OAuthApplicationLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param oAuthApplication the o auth application
 	 * @return the o auth application that was updated

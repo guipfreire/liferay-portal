@@ -14,7 +14,6 @@
 
 package com.liferay.app.builder.deploy;
 
-import com.liferay.app.builder.constants.AppBuilderAppConstants;
 import com.liferay.app.builder.model.AppBuilderApp;
 import com.liferay.app.builder.service.AppBuilderAppLocalService;
 
@@ -44,15 +43,16 @@ public interface AppDeployer {
 			return false;
 		}
 
-		for (ServiceRegistration serviceRegistration : serviceRegistrations) {
+		for (ServiceRegistration<?> serviceRegistration :
+				serviceRegistrations) {
+
 			serviceRegistration.unregister();
 		}
 
 		AppBuilderApp appBuilderApp =
 			appBuilderAppLocalService.getAppBuilderApp(appId);
 
-		appBuilderApp.setStatus(
-			AppBuilderAppConstants.Status.UNDEPLOYED.getValue());
+		appBuilderApp.setActive(false);
 
 		appBuilderAppLocalService.updateAppBuilderApp(appBuilderApp);
 

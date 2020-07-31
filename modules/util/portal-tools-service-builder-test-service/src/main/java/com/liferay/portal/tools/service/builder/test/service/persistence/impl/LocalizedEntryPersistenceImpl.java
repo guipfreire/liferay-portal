@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.portal.tools.service.builder.test.exception.NoSuchLocalizedEntryException;
 import com.liferay.portal.tools.service.builder.test.model.LocalizedEntry;
+import com.liferay.portal.tools.service.builder.test.model.LocalizedEntryTable;
 import com.liferay.portal.tools.service.builder.test.model.impl.LocalizedEntryImpl;
 import com.liferay.portal.tools.service.builder.test.model.impl.LocalizedEntryModelImpl;
 import com.liferay.portal.tools.service.builder.test.service.persistence.LocalizedEntryPersistence;
@@ -75,7 +76,8 @@ public class LocalizedEntryPersistenceImpl
 
 		setModelImplClass(LocalizedEntryImpl.class);
 		setModelPKClass(long.class);
-		setEntityCacheEnabled(LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED);
+
+		setTable(LocalizedEntryTable.INSTANCE);
 	}
 
 	/**
@@ -86,7 +88,6 @@ public class LocalizedEntryPersistenceImpl
 	@Override
 	public void cacheResult(LocalizedEntry localizedEntry) {
 		entityCache.putResult(
-			LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED,
 			LocalizedEntryImpl.class, localizedEntry.getPrimaryKey(),
 			localizedEntry);
 
@@ -102,7 +103,6 @@ public class LocalizedEntryPersistenceImpl
 	public void cacheResult(List<LocalizedEntry> localizedEntries) {
 		for (LocalizedEntry localizedEntry : localizedEntries) {
 			if (entityCache.getResult(
-					LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED,
 					LocalizedEntryImpl.class, localizedEntry.getPrimaryKey()) ==
 						null) {
 
@@ -140,7 +140,6 @@ public class LocalizedEntryPersistenceImpl
 	@Override
 	public void clearCache(LocalizedEntry localizedEntry) {
 		entityCache.removeResult(
-			LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED,
 			LocalizedEntryImpl.class, localizedEntry.getPrimaryKey());
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
@@ -154,7 +153,6 @@ public class LocalizedEntryPersistenceImpl
 
 		for (LocalizedEntry localizedEntry : localizedEntries) {
 			entityCache.removeResult(
-				LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED,
 				LocalizedEntryImpl.class, localizedEntry.getPrimaryKey());
 		}
 	}
@@ -166,9 +164,7 @@ public class LocalizedEntryPersistenceImpl
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED,
-				LocalizedEntryImpl.class, primaryKey);
+			entityCache.removeResult(LocalizedEntryImpl.class, primaryKey);
 		}
 	}
 
@@ -308,7 +304,6 @@ public class LocalizedEntryPersistenceImpl
 		}
 
 		entityCache.putResult(
-			LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED,
 			LocalizedEntryImpl.class, localizedEntry.getPrimaryKey(),
 			localizedEntry, false);
 
@@ -492,10 +487,6 @@ public class LocalizedEntryPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(finderPath, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -541,9 +532,6 @@ public class LocalizedEntryPersistenceImpl
 					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY);
-
 				throw processException(exception);
 			}
 			finally {
@@ -579,21 +567,15 @@ public class LocalizedEntryPersistenceImpl
 	 */
 	public void afterPropertiesSet() {
 		_finderPathWithPaginationFindAll = new FinderPath(
-			LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED,
-			LocalizedEntryModelImpl.FINDER_CACHE_ENABLED,
 			LocalizedEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
 			"findAll", new String[0]);
 
 		_finderPathWithoutPaginationFindAll = new FinderPath(
-			LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED,
-			LocalizedEntryModelImpl.FINDER_CACHE_ENABLED,
 			LocalizedEntryImpl.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"findAll", new String[0]);
 
 		_finderPathCountAll = new FinderPath(
-			LocalizedEntryModelImpl.ENTITY_CACHE_ENABLED,
-			LocalizedEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
 			new String[0]);
 	}
 

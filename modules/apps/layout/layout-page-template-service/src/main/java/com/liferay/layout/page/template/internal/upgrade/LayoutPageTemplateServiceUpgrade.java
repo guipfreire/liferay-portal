@@ -22,11 +22,12 @@ import com.liferay.layout.page.template.internal.upgrade.v2_0_0.util.LayoutPageT
 import com.liferay.layout.page.template.internal.upgrade.v2_0_0.util.LayoutPageTemplateEntryTable;
 import com.liferay.layout.page.template.internal.upgrade.v2_1_0.UpgradeLayout;
 import com.liferay.layout.page.template.internal.upgrade.v3_0_1.util.LayoutPageTemplateStructureRelTable;
-import com.liferay.layout.page.template.internal.upgrade.v3_1_1.UpgradeResourcePermission;
+import com.liferay.layout.page.template.internal.upgrade.v3_1_3.UpgradeResourcePermission;
 import com.liferay.layout.page.template.internal.upgrade.v3_3_0.UpgradeLayoutPageTemplateStructureRel;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.LayoutPrototypeLocalService;
+import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.upgrade.BaseUpgradeSQLServerDatetime;
 import com.liferay.portal.kernel.upgrade.DummyUpgradeStep;
 import com.liferay.portal.kernel.upgrade.UpgradeMVCCVersion;
@@ -102,14 +103,18 @@ public class LayoutPageTemplateServiceUpgrade
 
 			});
 
+		registry.register("3.1.0", "3.1.1", new DummyUpgradeStep());
+
+		registry.register("3.1.1", "3.1.2", new DummyUpgradeStep());
+
 		registry.register(
-			"3.1.0", "3.1.1",
-			new com.liferay.layout.page.template.internal.upgrade.v3_1_1.
+			"3.1.2", "3.1.3",
+			new com.liferay.layout.page.template.internal.upgrade.v3_1_3.
 				UpgradeLayoutPageTemplateEntry(),
 			new UpgradeResourcePermission());
 
 		registry.register(
-			"3.1.1", "3.2.0",
+			"3.1.3", "3.2.0",
 			new com.liferay.layout.page.template.internal.upgrade.v3_2_0.
 				UpgradeLayoutPageTemplateCollection(),
 			new com.liferay.layout.page.template.internal.upgrade.v3_2_0.
@@ -118,7 +123,13 @@ public class LayoutPageTemplateServiceUpgrade
 		registry.register(
 			"3.2.0", "3.3.0",
 			new UpgradeLayoutPageTemplateStructureRel(
-				_fragmentEntryLinkLocalService));
+				_fragmentEntryLinkLocalService,
+				_portletPreferencesLocalService));
+
+		registry.register(
+			"3.3.0", "3.3.1",
+			new com.liferay.layout.page.template.internal.upgrade.v3_3_1.
+				UpgradeLayoutPageTemplateEntry(_layoutPrototypeLocalService));
 	}
 
 	@Reference
@@ -132,5 +143,8 @@ public class LayoutPageTemplateServiceUpgrade
 
 	@Reference
 	private LayoutPrototypeLocalService _layoutPrototypeLocalService;
+
+	@Reference
+	private PortletPreferencesLocalService _portletPreferencesLocalService;
 
 }

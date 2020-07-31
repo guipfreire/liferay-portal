@@ -14,6 +14,7 @@
 
 package com.liferay.portal.workflow.kaleo.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -92,6 +93,10 @@ public abstract class KaleoTimerLocalServiceBaseImpl
 	/**
 	 * Adds the kaleo timer to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoTimerLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoTimer the kaleo timer
 	 * @return the kaleo timer that was added
 	 */
@@ -118,6 +123,10 @@ public abstract class KaleoTimerLocalServiceBaseImpl
 	/**
 	 * Deletes the kaleo timer with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoTimerLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoTimerId the primary key of the kaleo timer
 	 * @return the kaleo timer that was removed
 	 * @throws PortalException if a kaleo timer with the primary key could not be found
@@ -133,6 +142,10 @@ public abstract class KaleoTimerLocalServiceBaseImpl
 	/**
 	 * Deletes the kaleo timer from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoTimerLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoTimer the kaleo timer
 	 * @return the kaleo timer that was removed
 	 */
@@ -140,6 +153,11 @@ public abstract class KaleoTimerLocalServiceBaseImpl
 	@Override
 	public KaleoTimer deleteKaleoTimer(KaleoTimer kaleoTimer) {
 		return kaleoTimerPersistence.remove(kaleoTimer);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return kaleoTimerPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -350,6 +368,10 @@ public abstract class KaleoTimerLocalServiceBaseImpl
 
 	/**
 	 * Updates the kaleo timer in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoTimerLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param kaleoTimer the kaleo timer
 	 * @return the kaleo timer that was updated

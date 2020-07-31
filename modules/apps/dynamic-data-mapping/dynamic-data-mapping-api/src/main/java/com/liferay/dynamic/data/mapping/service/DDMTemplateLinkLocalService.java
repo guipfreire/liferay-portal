@@ -16,6 +16,8 @@ package com.liferay.dynamic.data.mapping.service;
 
 import com.liferay.dynamic.data.mapping.model.DDMTemplateLink;
 import com.liferay.petra.function.UnsafeFunction;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
+import com.liferay.portal.kernel.change.tracking.CTAware;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
@@ -50,6 +52,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @see DDMTemplateLinkLocalServiceUtil
  * @generated
  */
+@CTAware
 @ProviderType
 @Transactional(
 	isolation = Isolation.PORTAL,
@@ -67,6 +70,10 @@ public interface DDMTemplateLinkLocalService
 
 	/**
 	 * Adds the ddm template link to the database. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMTemplateLinkLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param ddmTemplateLink the ddm template link
 	 * @return the ddm template link that was added
@@ -95,6 +102,10 @@ public interface DDMTemplateLinkLocalService
 	/**
 	 * Deletes the ddm template link from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMTemplateLinkLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param ddmTemplateLink the ddm template link
 	 * @return the ddm template link that was removed
 	 */
@@ -104,6 +115,10 @@ public interface DDMTemplateLinkLocalService
 
 	/**
 	 * Deletes the ddm template link with the primary key from the database. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMTemplateLinkLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param templateLinkId the primary key of the ddm template link
 	 * @return the ddm template link that was removed
@@ -128,6 +143,9 @@ public interface DDMTemplateLinkLocalService
 	public DDMTemplateLink deleteTemplateLink(long classNameId, long classPK);
 
 	public void deleteTemplateLinks(long templateId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public <T> T dslQuery(DSLQuery dslQuery);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DynamicQuery dynamicQuery();
@@ -260,6 +278,10 @@ public interface DDMTemplateLinkLocalService
 	public DDMTemplateLink getTemplateLink(long classNameId, long classPK)
 		throws PortalException;
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<DDMTemplateLink> getTemplateLinks(long classNameId);
 
@@ -268,6 +290,10 @@ public interface DDMTemplateLinkLocalService
 
 	/**
 	 * Updates the ddm template link in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DDMTemplateLinkLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param ddmTemplateLink the ddm template link
 	 * @return the ddm template link that was updated

@@ -92,16 +92,19 @@ public class LayoutDataConverter {
 					containerLayoutStructureItem.setBackgroundImageJSONObject(
 						_getBackgroundImageJSONObject(
 							inputRowConfigJSONObject));
-					containerLayoutStructureItem.setContainerType(
-						inputRowConfigJSONObject.getString(
-							"containerType", "fixed"));
 					containerLayoutStructureItem.setPaddingBottom(
-						inputRowConfigJSONObject.getInt("paddingVertical", 3));
-					containerLayoutStructureItem.setPaddingHorizontal(
+						inputRowConfigJSONObject.getInt("paddingVertical", 0));
+					containerLayoutStructureItem.setPaddingLeft(
 						inputRowConfigJSONObject.getInt(
-							"paddingHorizontal", 3));
+							"paddingHorizontal", 0));
+					containerLayoutStructureItem.setPaddingRight(
+						inputRowConfigJSONObject.getInt(
+							"paddingHorizontal", 0));
 					containerLayoutStructureItem.setPaddingTop(
-						inputRowConfigJSONObject.getInt("paddingVertical", 3));
+						inputRowConfigJSONObject.getInt("paddingVertical", 0));
+					containerLayoutStructureItem.setWidthType(
+						inputRowConfigJSONObject.getString(
+							"widthType", "fluid"));
 				}
 
 				RowLayoutStructureItem rowLayoutStructureItem =
@@ -204,7 +207,7 @@ public class LayoutDataConverter {
 		JSONObject inputRowConfigJSONObject) {
 
 		if (inputRowConfigJSONObject.isNull("backgroundImage")) {
-			return null;
+			return JSONFactoryUtil.createJSONObject();
 		}
 
 		Object backgroundImage = inputRowConfigJSONObject.get(

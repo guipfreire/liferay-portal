@@ -16,9 +16,10 @@ package com.liferay.layout.page.template.admin.web.internal.importer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.liferay.asset.kernel.model.ClassType;
 import com.liferay.fragment.model.FragmentEntryLink;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
+import com.liferay.headless.delivery.dto.v1_0.ContentSubtype;
+import com.liferay.headless.delivery.dto.v1_0.ContentType;
 import com.liferay.headless.delivery.dto.v1_0.DisplayPageTemplate;
 import com.liferay.headless.delivery.dto.v1_0.MasterPage;
 import com.liferay.headless.delivery.dto.v1_0.PageDefinition;
@@ -26,8 +27,6 @@ import com.liferay.headless.delivery.dto.v1_0.PageElement;
 import com.liferay.headless.delivery.dto.v1_0.PageTemplate;
 import com.liferay.headless.delivery.dto.v1_0.PageTemplateCollection;
 import com.liferay.headless.delivery.dto.v1_0.Settings;
-import com.liferay.info.display.contributor.InfoDisplayContributor;
-import com.liferay.info.display.contributor.InfoDisplayContributorTracker;
 import com.liferay.layout.admin.constants.LayoutAdminPortletKeys;
 import com.liferay.layout.page.template.admin.web.internal.headless.delivery.dto.v1_0.structure.importer.LayoutStructureItemImporter;
 import com.liferay.layout.page.template.admin.web.internal.headless.delivery.dto.v1_0.structure.importer.LayoutStructureItemImporterTracker;
@@ -61,11 +60,13 @@ import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.PortletPreferences;
 import com.liferay.portal.kernel.model.Repository;
 import com.liferay.portal.kernel.model.Theme;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepository;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.LayoutLocalService;
+import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.ThemeLocalService;
@@ -74,10 +75,10 @@ import com.liferay.portal.kernel.transaction.TransactionConfig;
 import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
@@ -91,11 +92,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -156,8 +159,11 @@ public class LayoutPageTemplatesImporterImpl
 		PageElement pageElement = _objectMapper.readValue(
 			pageElementJSON, PageElement.class);
 
+		Set<String> warningMessages = new HashSet<>();
+
 		_processPageElement(
-			layout, layoutStructure, pageElement, parentItemId, position);
+			layout, layoutStructure, pageElement, parentItemId, position,
+			warningMessages);
 
 		List<FragmentEntryLink> fragmentEntryLinks = new ArrayList<>();
 
@@ -174,44 +180,16 @@ public class LayoutPageTemplatesImporterImpl
 		return fragmentEntryLinks;
 	}
 
-	private long _getClassTypeId(
-		DisplayPageTemplate displayPageTemplate, long groupId) {
+	private void _deleteExistingPortletPreferences(long plid) {
+		List<PortletPreferences> portletPreferencesList =
+			_portletPreferencesLocalService.getPortletPreferences(
+				PortletKeys.PREFS_OWNER_ID_DEFAULT,
+				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid);
 
-		InfoDisplayContributor infoDisplayContributor =
-			_infoDisplayContributorTracker.getInfoDisplayContributor(
-				displayPageTemplate.getContentTypeClassName());
-
-		if (infoDisplayContributor == null) {
-			return 0;
+		for (PortletPreferences portletPreferences : portletPreferencesList) {
+			_portletPreferencesLocalService.deletePortletPreferences(
+				portletPreferences);
 		}
-
-		List<ClassType> classTypes = new ArrayList<>();
-
-		try {
-			classTypes = infoDisplayContributor.getClassTypes(
-				groupId, LocaleUtil.getSiteDefault());
-		}
-		catch (PortalException portalException) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					String.format(
-						"Class types for group %s and locale %s could not be " +
-							"obtained"),
-					portalException);
-			}
-
-			return 0;
-		}
-
-		String contentSubtypeName = displayPageTemplate.getContentSubtypeName();
-
-		for (ClassType classType : classTypes) {
-			if (contentSubtypeName.equals(classType.getName())) {
-				return classType.getClassTypeId();
-			}
-		}
-
-		return 0;
 	}
 
 	private PageTemplateCollectionEntry
@@ -230,7 +208,7 @@ public class LayoutPageTemplatesImporterImpl
 
 	private List<DisplayPageTemplateEntry> _getDisplayPageTemplateEntries(
 			long groupId, ZipFile zipFile)
-		throws IOException, PortalException {
+		throws Exception {
 
 		List<DisplayPageTemplateEntry> displayPageTemplateEntries =
 			new ArrayList<>();
@@ -345,7 +323,7 @@ public class LayoutPageTemplatesImporterImpl
 
 	private List<FragmentEntryLink> _getFragmentEntryLinks(
 			LayoutStructure layoutStructure, List<String> childrenItemIds)
-		throws PortalException {
+		throws Exception {
 
 		List<FragmentEntryLink> fragmentEntryLinks = new ArrayList<>();
 
@@ -397,7 +375,7 @@ public class LayoutPageTemplatesImporterImpl
 			long groupId, long layoutPageTemplateCollectionId,
 			PageTemplateCollectionEntry pageTemplateCollectionEntry,
 			boolean overwrite)
-		throws PortalException {
+		throws Exception {
 
 		LayoutPageTemplateCollection layoutPageTemplateCollection = null;
 
@@ -449,7 +427,7 @@ public class LayoutPageTemplatesImporterImpl
 
 	private List<MasterPageEntry> _getMasterPageEntries(
 			long groupId, ZipFile zipFile)
-		throws IOException, PortalException {
+		throws Exception {
 
 		List<MasterPageEntry> masterPageEntries = new ArrayList<>();
 
@@ -550,7 +528,7 @@ public class LayoutPageTemplatesImporterImpl
 
 	private Map<String, PageTemplateCollectionEntry>
 			_getPageTemplateCollectionEntryMap(long groupId, ZipFile zipFile)
-		throws IOException, PortalException {
+		throws Exception {
 
 		Map<String, PageTemplateCollectionEntry> pageTemplateCollectionMap =
 			new HashMap<>();
@@ -937,6 +915,9 @@ public class LayoutPageTemplatesImporterImpl
 				added = true;
 			}
 			else if (overwrite) {
+				_deleteExistingPortletPreferences(
+					layoutPageTemplateEntry.getPlid());
+
 				layoutPageTemplateEntry =
 					_layoutPageTemplateEntryService.
 						updateLayoutPageTemplateEntry(
@@ -948,7 +929,10 @@ public class LayoutPageTemplatesImporterImpl
 			}
 
 			if (added) {
-				_processPageDefinition(layoutPageTemplateEntry, pageDefinition);
+				Set<String> warningMessages = new HashSet<>();
+
+				_processPageDefinition(
+					layoutPageTemplateEntry, pageDefinition, warningMessages);
 
 				long previewFileEntryId = _getPreviewFileEntryId(
 					groupId,
@@ -962,8 +946,8 @@ public class LayoutPageTemplatesImporterImpl
 				_layoutPageTemplatesImporterResultEntries.add(
 					new LayoutPageTemplatesImporterResultEntry(
 						name, layoutPageTemplateEntryType,
-						LayoutPageTemplatesImporterResultEntry.Status.
-							IMPORTED));
+						LayoutPageTemplatesImporterResultEntry.Status.IMPORTED,
+						warningMessages.toArray(new String[0])));
 			}
 			else {
 				_layoutPageTemplatesImporterResultEntries.add(
@@ -1032,7 +1016,7 @@ public class LayoutPageTemplatesImporterImpl
 
 	private void _processPageDefinition(
 			LayoutPageTemplateEntry layoutPageTemplateEntry,
-			PageDefinition pageDefinition)
+			PageDefinition pageDefinition, Set<String> warningMessages)
 		throws Exception {
 
 		Layout layout = _layoutLocalService.getLayout(
@@ -1056,7 +1040,8 @@ public class LayoutPageTemplatesImporterImpl
 
 					_processPageElement(
 						layout, layoutStructure, childPageElement,
-						rootLayoutStructureItem.getItemId(), position);
+						rootLayoutStructureItem.getItemId(), position,
+						warningMessages);
 
 					position++;
 				}
@@ -1065,6 +1050,8 @@ public class LayoutPageTemplatesImporterImpl
 			Settings settings = pageDefinition.getSettings();
 
 			if (settings != null) {
+				layout = _layoutLocalService.fetchLayout(layout.getPlid());
+
 				_updateLayoutSettings(layout, settings);
 			}
 		}
@@ -1076,7 +1063,8 @@ public class LayoutPageTemplatesImporterImpl
 
 	private void _processPageElement(
 			Layout layout, LayoutStructure layoutStructure,
-			PageElement pageElement, String parentItemId, int position)
+			PageElement pageElement, String parentItemId, int position,
+			Set<String> warningMessages)
 		throws Exception {
 
 		LayoutStructureItemImporter layoutStructureItemImporter =
@@ -1089,7 +1077,7 @@ public class LayoutPageTemplatesImporterImpl
 			layoutStructureItem =
 				layoutStructureItemImporter.addLayoutStructureItem(
 					layout, layoutStructure, pageElement, parentItemId,
-					position);
+					position, warningMessages);
 		}
 		else if (pageElement.getType() == PageElement.Type.ROOT) {
 			layoutStructureItem = layoutStructure.getMainLayoutStructureItem();
@@ -1109,7 +1097,8 @@ public class LayoutPageTemplatesImporterImpl
 		for (PageElement childPageElement : pageElement.getPageElements()) {
 			_processPageElement(
 				layout, layoutStructure, childPageElement,
-				layoutStructureItem.getItemId(), childPosition);
+				layoutStructureItem.getItemId(), childPosition,
+				warningMessages);
 
 			childPosition++;
 		}
@@ -1120,7 +1109,7 @@ public class LayoutPageTemplatesImporterImpl
 			LayoutPageTemplateCollection layoutPageTemplateCollection,
 			Map<String, PageTemplateEntry> pageTemplateEntryMap,
 			boolean overwrite, ZipFile zipFile)
-		throws PortalException {
+		throws Exception {
 
 		for (Map.Entry<String, PageTemplateEntry> entry :
 				pageTemplateEntryMap.entrySet()) {
@@ -1187,16 +1176,14 @@ public class LayoutPageTemplatesImporterImpl
 
 	private void _updateLayoutPageTemplateStructure(
 			Layout layout, LayoutStructure layoutStructure)
-		throws PortalException {
-
-		long classNameId = _portal.getClassNameId(Layout.class.getName());
+		throws Exception {
 
 		JSONObject jsonObject = layoutStructure.toJSONObject();
 
 		LayoutPageTemplateStructure layoutPageTemplateStructure =
 			_layoutPageTemplateStructureLocalService.
 				fetchLayoutPageTemplateStructure(
-					layout.getGroupId(), classNameId, layout.getPlid());
+					layout.getGroupId(), layout.getPlid());
 
 		if (layoutPageTemplateStructure != null) {
 			_layoutPageTemplateStructureLocalService.
@@ -1204,8 +1191,8 @@ public class LayoutPageTemplatesImporterImpl
 		}
 
 		_layoutPageTemplateStructureLocalService.addLayoutPageTemplateStructure(
-			layout.getUserId(), layout.getGroupId(), classNameId,
-			layout.getPlid(), jsonObject.toString(),
+			layout.getUserId(), layout.getGroupId(), layout.getPlid(),
+			jsonObject.toString(),
 			ServiceContextThreadLocal.getServiceContext());
 	}
 
@@ -1215,8 +1202,7 @@ public class LayoutPageTemplatesImporterImpl
 		Layout layout = _layoutLocalService.fetchLayout(
 			layoutPageTemplateEntry.getPlid());
 
-		Layout draftLayout = _layoutLocalService.fetchLayout(
-			_portal.getClassNameId(Layout.class.getName()), layout.getPlid());
+		Layout draftLayout = layout.fetchDraftLayout();
 
 		draftLayout = _layoutCopyHelper.copyLayout(layout, draftLayout);
 
@@ -1232,6 +1218,15 @@ public class LayoutPageTemplatesImporterImpl
 
 		Map<String, String> themeSettings =
 			(Map<String, String>)settings.getThemeSettings();
+
+		Set<Map.Entry<String, String>> entrySet = unicodeProperties.entrySet();
+
+		entrySet.removeIf(
+			entry -> {
+				String key = entry.getKey();
+
+				return key.startsWith("lfr-theme:");
+			});
 
 		if (themeSettings != null) {
 			for (Map.Entry<String, String> entry : themeSettings.entrySet()) {
@@ -1308,9 +1303,6 @@ public class LayoutPageTemplatesImporterImpl
 	private FragmentEntryLinkLocalService _fragmentEntryLinkLocalService;
 
 	@Reference
-	private InfoDisplayContributorTracker _infoDisplayContributorTracker;
-
-	@Reference
 	private Language _language;
 
 	@Reference
@@ -1350,6 +1342,9 @@ public class LayoutPageTemplatesImporterImpl
 
 	@Reference
 	private PortletFileRepository _portletFileRepository;
+
+	@Reference
+	private PortletPreferencesLocalService _portletPreferencesLocalService;
 
 	@Reference
 	private ThemeLocalService _themeLocalService;
@@ -1484,9 +1479,19 @@ public class LayoutPageTemplatesImporterImpl
 			DisplayPageTemplate displayPageTemplate =
 				_displayPageTemplateEntry.getDisplayPageTemplate();
 
+			ContentType contentType = displayPageTemplate.getContentType();
+
 			long classNameId = _portal.getClassNameId(
-				displayPageTemplate.getContentTypeClassName());
-			long classTypeId = _getClassTypeId(displayPageTemplate, _groupId);
+				contentType.getClassName());
+
+			long classTypeId = 0L;
+
+			ContentSubtype contentSubtype =
+				displayPageTemplate.getContentSubtype();
+
+			if (contentSubtype != null) {
+				classTypeId = contentSubtype.getSubtypeId();
+			}
 
 			LayoutPageTemplateEntry layoutPageTemplateEntry =
 				_layoutPageTemplateEntryLocalService.

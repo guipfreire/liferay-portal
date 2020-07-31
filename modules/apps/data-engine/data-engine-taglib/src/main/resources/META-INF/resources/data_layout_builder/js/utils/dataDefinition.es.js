@@ -19,9 +19,9 @@ export const containsFieldSet = (dataDefinition, dataDefinitionId) => {
 		const {customProperties, fieldType} = dataDefinitionField;
 
 		if (
-			fieldType === 'section' &&
+			fieldType === 'fieldset' &&
 			customProperties &&
-			customProperties.dataDefinitionId == dataDefinitionId
+			customProperties.ddmStructureId == dataDefinitionId
 		) {
 			hasFieldSet = true;
 		}
@@ -61,6 +61,22 @@ export const forEachDataDefinitionField = (
 	return false;
 };
 
+/**
+ * @param {Array} fieldSets
+ * @returns {Array} fields
+ */
+export const getAllDataDefinitionFieldsFromAllFieldSets = (fieldSets = []) => {
+	const fields = [];
+
+	fieldSets.forEach(({dataDefinitionFields = []}) => {
+		dataDefinitionFields.forEach((field) => {
+			fields.push(field);
+		});
+	});
+
+	return fields;
+};
+
 export const getDataDefinitionField = (
 	dataDefinition = {dataDefinitionFields: []},
 	fieldName
@@ -80,10 +96,22 @@ export const getDataDefinitionField = (
 	return field;
 };
 
+export const getDataDefinitionFieldSet = (dataDefinitionFields, fieldSetId) =>
+	dataDefinitionFields.find(
+		({customProperties: {ddmStructureId}}) => ddmStructureId == fieldSetId
+	);
+
 export const getFieldLabel = (dataDefinition, fieldName) => {
 	const field = getDataDefinitionField(dataDefinition, fieldName);
 
-	return field ? field.label[themeDisplay.getLanguageId()] : fieldName;
+	if (field) {
+		return (
+			field.label[Liferay.ThemeDisplay.getLanguageId()] ||
+			field.label[dataDefinition.defaultLanguageId]
+		);
+	}
+
+	return fieldName;
 };
 
 export const getOptionLabel = (options = {}, value) => {

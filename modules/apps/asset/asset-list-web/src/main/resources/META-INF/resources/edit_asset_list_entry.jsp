@@ -31,7 +31,9 @@ portletDisplay.setURLBack(redirect);
 renderResponse.setTitle(assetListDisplayContext.getAssetListEntryTitle());
 %>
 
-<div class="container-fluid container-fluid-max-xl container-view">
+<clay:container-fluid
+	cssClass="container-view"
+>
 	<clay:row>
 		<clay:col
 			lg="3"
@@ -48,14 +50,18 @@ renderResponse.setTitle(assetListDisplayContext.getAssetListEntryTitle());
 
 						<c:choose>
 							<c:when test="<%= assetEntryListSegmentsEntryRels.size() > 1 %>">
-								<div class="autofit-row autofit-row-center">
-									<div class="autofit-col autofit-col-expand">
+								<clay:content-row
+									verticalAlign="center"
+								>
+									<clay:content-col
+										expand="<%= true %>"
+									>
 										<strong class="text-uppercase">
 											<liferay-ui:message key="personalized-variations" />
 										</strong>
-									</div>
+									</clay:content-col>
 
-									<div class="autofit-col autofit-col-end">
+									<clay:content-col>
 										<ul class="navbar-nav">
 											<li>
 												<c:if test="<%= availableSegmentsEntries.size() > 0 %>">
@@ -64,13 +70,13 @@ renderResponse.setTitle(assetListDisplayContext.getAssetListEntryTitle());
 														iconCssClass="btn btn-monospaced btn-outline-borderless btn-outline-secondary btn-sm"
 														id="addAssetListEntryVariationIcon"
 														markupView="lexicon"
-														url='<%= "javascript:" + renderResponse.getNamespace() + "openSelectSegmentsEntryDialog();" %>'
+														url='<%= "javascript:" + liferayPortletResponse.getNamespace() + "openSelectSegmentsEntryDialog();" %>'
 													/>
 												</c:if>
 											</li>
 										</ul>
-									</div>
-								</div>
+									</clay:content-col>
+								</clay:content-row>
 
 								<ul class="nav nav-stacked">
 
@@ -107,7 +113,7 @@ renderResponse.setTitle(assetListDisplayContext.getAssetListEntryTitle());
 								<liferay-frontend:empty-result-message
 									actionDropdownItems="<%= (availableSegmentsEntries.size() > 0) ? editAssetListDisplayContext.getAssetListEntryVariationActionDropdownItems() : null %>"
 									animationType="<%= EmptyResultMessageKeys.AnimationType.NONE %>"
-									componentId='<%= renderResponse.getNamespace() + "emptyResultMessageComponent" %>'
+									componentId='<%= liferayPortletResponse.getNamespace() + "emptyResultMessageComponent" %>'
 									description='<%= LanguageUtil.get(request, "no-personalized-variations-were-found") %>'
 									elementType='<%= LanguageUtil.get(request, "personalized-variations") %>'
 								/>
@@ -136,7 +142,7 @@ renderResponse.setTitle(assetListDisplayContext.getAssetListEntryTitle());
 			</c:choose>
 		</clay:col>
 	</clay:row>
-</div>
+</clay:container-fluid>
 
 <script>
 	<portlet:actionURL name="/asset_list/add_asset_list_entry_variation" var="addAssetListEntryVariationURL">
@@ -145,26 +151,20 @@ renderResponse.setTitle(assetListDisplayContext.getAssetListEntryTitle());
 	</portlet:actionURL>
 
 	function <portlet:namespace />openSelectSegmentsEntryDialog() {
-		Liferay.Util.selectEntity(
-			{
-				dialog: {
-					constrain: true,
-					modal: true,
-				},
-				id: '<portlet:namespace />selectEntity',
-				title:
-					'<liferay-ui:message arguments="personalized-variation" key="new-x" />',
-				uri:
-					'<%= editAssetListDisplayContext.getSelectSegmentsEntryURL() %>',
-			},
-			function (event) {
+		Liferay.Util.openModal({
+			id: '<portlet:namespace />selectEntity',
+			onSelect: function (selectedItem) {
 				Liferay.Util.postForm(document.<portlet:namespace />fm, {
 					data: {
-						segmentsEntryId: event.entityid,
+						segmentsEntryId: selectedItem.entityid,
 					},
 					url: '<%= addAssetListEntryVariationURL %>',
 				});
-			}
-		);
+			},
+			selectEventName: '<portlet:namespace />selectEntity',
+			title:
+				'<liferay-ui:message arguments="personalized-variation" key="new-x" />',
+			url: '<%= editAssetListDisplayContext.getSelectSegmentsEntryURL() %>',
+		});
 	}
 </script>

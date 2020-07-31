@@ -50,6 +50,10 @@ public class TrashVersionLocalServiceUtil {
 	/**
 	 * Adds the trash version to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect TrashVersionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param trashVersion the trash version
 	 * @return the trash version that was added
 	 */
@@ -95,6 +99,10 @@ public class TrashVersionLocalServiceUtil {
 	/**
 	 * Deletes the trash version with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect TrashVersionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param versionId the primary key of the trash version
 	 * @return the trash version that was removed
 	 * @throws PortalException if a trash version with the primary key could not be found
@@ -115,6 +123,10 @@ public class TrashVersionLocalServiceUtil {
 	/**
 	 * Deletes the trash version from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect TrashVersionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param trashVersion the trash version
 	 * @return the trash version that was removed
 	 */
@@ -122,6 +134,12 @@ public class TrashVersionLocalServiceUtil {
 		com.liferay.trash.model.TrashVersion trashVersion) {
 
 		return getService().deleteTrashVersion(trashVersion);
+	}
+
+	public static <T> T dslQuery(
+		com.liferay.petra.sql.dsl.query.DSLQuery dslQuery) {
+
+		return getService().dslQuery(dslQuery);
 	}
 
 	public static com.liferay.portal.kernel.dao.orm.DynamicQuery
@@ -307,6 +325,10 @@ public class TrashVersionLocalServiceUtil {
 
 	/**
 	 * Updates the trash version in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect TrashVersionLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param trashVersion the trash version
 	 * @return the trash version that was updated

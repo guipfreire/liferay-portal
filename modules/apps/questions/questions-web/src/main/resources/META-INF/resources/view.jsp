@@ -17,7 +17,7 @@
 <%@ include file="/init.jsp" %>
 
 <%
-String questionsRootElementId = renderResponse.getNamespace() + "-questions-root";
+String questionsRootElementId = liferayPortletResponse.getNamespace() + "-questions-root";
 %>
 
 <portlet:renderURL var="basePortletURL" />
@@ -25,19 +25,29 @@ String questionsRootElementId = renderResponse.getNamespace() + "-questions-root
 <div id="<%= questionsRootElementId %>">
 
 	<%
-	Map<String, Object> data = HashMapBuilder.<String, Object>put(
-		"defaultRank", renderRequest.getAttribute(QuestionsPortletKeys.DEFAULT_RANK)
+	QuestionsConfiguration questionsConfiguration = (QuestionsConfiguration)request.getAttribute(QuestionsConfiguration.class.getName());
+
+	Map<String, Object> props = HashMapBuilder.<String, Object>put(
+		"defaultRank", renderRequest.getAttribute(QuestionsWebKeys.DEFAULT_RANK)
+	).put(
+		"imageBrowseURL", renderRequest.getAttribute(QuestionsWebKeys.IMAGE_BROWSE_URL)
+	).put(
+		"includeContextPath", renderRequest.getAttribute("javax.servlet.include.context_path")
 	).put(
 		"isOmniAdmin", permissionChecker.isOmniadmin()
 	).put(
+		"redirectToLogin", questionsConfiguration.enableRedirectToLogin()
+	).put(
 		"siteKey", String.valueOf(themeDisplay.getScopeGroupId())
+	).put(
+		"tagSelectorURL", renderRequest.getAttribute(QuestionsWebKeys.TAG_SELECTOR_URL)
 	).put(
 		"userId", String.valueOf(themeDisplay.getUserId())
 	).build();
 	%>
 
 	<react:component
-		data="<%= data %>"
 		module="js/index.es"
+		props="<%= props %>"
 	/>
 </div>

@@ -121,6 +121,10 @@ public class SocialRelationPersistenceTest {
 
 		SocialRelation newSocialRelation = _persistence.create(pk);
 
+		newSocialRelation.setMvccVersion(RandomTestUtil.nextLong());
+
+		newSocialRelation.setCtCollectionId(RandomTestUtil.nextLong());
+
 		newSocialRelation.setUuid(RandomTestUtil.randomString());
 
 		newSocialRelation.setCompanyId(RandomTestUtil.nextLong());
@@ -138,6 +142,12 @@ public class SocialRelationPersistenceTest {
 		SocialRelation existingSocialRelation = _persistence.findByPrimaryKey(
 			newSocialRelation.getPrimaryKey());
 
+		Assert.assertEquals(
+			existingSocialRelation.getMvccVersion(),
+			newSocialRelation.getMvccVersion());
+		Assert.assertEquals(
+			existingSocialRelation.getCtCollectionId(),
+			newSocialRelation.getCtCollectionId());
 		Assert.assertEquals(
 			existingSocialRelation.getUuid(), newSocialRelation.getUuid());
 		Assert.assertEquals(
@@ -271,9 +281,9 @@ public class SocialRelationPersistenceTest {
 
 	protected OrderByComparator<SocialRelation> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create(
-			"SocialRelation", "uuid", true, "relationId", true, "companyId",
-			true, "createDate", true, "userId1", true, "userId2", true, "type",
-			true);
+			"SocialRelation", "mvccVersion", true, "ctCollectionId", true,
+			"uuid", true, "relationId", true, "companyId", true, "createDate",
+			true, "userId1", true, "userId2", true, "type", true);
 	}
 
 	@Test
@@ -517,6 +527,10 @@ public class SocialRelationPersistenceTest {
 		long pk = RandomTestUtil.nextLong();
 
 		SocialRelation socialRelation = _persistence.create(pk);
+
+		socialRelation.setMvccVersion(RandomTestUtil.nextLong());
+
+		socialRelation.setCtCollectionId(RandomTestUtil.nextLong());
 
 		socialRelation.setUuid(RandomTestUtil.randomString());
 

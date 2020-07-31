@@ -12,7 +12,7 @@
  * details.
  */
 
-import updateItemConfig from '../actions/updateItemConfig';
+import updateRowColumnsAction from '../actions/updateRowColumns';
 import LayoutService from '../services/LayoutService';
 
 export default function updateRowColumns({
@@ -27,6 +27,11 @@ export default function updateRowColumns({
 			onNetworkStatus: dispatch,
 			segmentsExperienceId,
 		}).then(({layoutData}) => {
-			dispatch(updateItemConfig({layoutData}));
+			dispatch(
+				updateRowColumnsAction({
+					itemId,
+					layoutData,
+				})
+			);
 		});
 }

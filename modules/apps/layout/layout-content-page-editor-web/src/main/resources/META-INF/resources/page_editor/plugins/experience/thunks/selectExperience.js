@@ -15,7 +15,7 @@
 import ExperienceService from '../../../app/services/ExperienceService';
 import selectExperienceAction from '../actions/selectExperience';
 
-export default function selectExperience(id) {
+export default function selectExperience({id}) {
 	return (dispatch) => {
 		return ExperienceService.selectExperience({
 			body: {

@@ -23,15 +23,16 @@ import {EDITABLE_TYPES} from '../../config/constants/editableTypes';
 import selectEditableValueContent from '../../selectors/selectEditableValueContent';
 import {useDispatch, useSelector} from '../../store/index';
 import updateEditableValuesThunk from '../../thunks/updateEditableValues';
+import {useId} from '../../utils/useId';
 
 export function ImagePropertiesPanel({item}) {
-	const {editableId, editableType, fragmentEntryLinkId} = item;
-
+	const {editableId, fragmentEntryLinkId, type} = item;
 	const dispatch = useDispatch();
+	const imageDescriptionId = useId();
 	const state = useSelector((state) => state);
 
 	const processorKey =
-		editableType === EDITABLE_TYPES.backgroundImage
+		type === EDITABLE_TYPES.backgroundImage
 			? BACKGROUND_IMAGE_FRAGMENT_ENTRY_PROCESSOR
 			: EDITABLE_FRAGMENT_ENTRY_PROCESSOR;
 
@@ -47,7 +48,7 @@ export function ImagePropertiesPanel({item}) {
 	);
 
 	useEffect(() => {
-		const editableConfig = editableValue ? editableValue.config : {};
+		const editableConfig = editableValue ? editableValue.config || {} : {};
 
 		setImageDescription((imageDescription) => {
 			if (imageDescription !== editableConfig.alt) {
@@ -162,13 +163,13 @@ export function ImagePropertiesPanel({item}) {
 				}
 			/>
 
-			{editableType === EDITABLE_TYPES.image && (
+			{type === EDITABLE_TYPES.image && (
 				<>
-					<label htmlFor="imageDescription">
+					<label htmlFor={imageDescriptionId}>
 						{Liferay.Language.get('image-description')}
 					</label>
 					<ClayInput
-						id="imageDescription"
+						id={imageDescriptionId}
 						onBlur={() => {
 							const previousValue = editableConfig.alt || '';
 

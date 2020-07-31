@@ -14,6 +14,7 @@
 
 package com.liferay.portal.workflow.kaleo.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -93,6 +94,10 @@ public abstract class KaleoTaskAssignmentLocalServiceBaseImpl
 	/**
 	 * Adds the kaleo task assignment to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoTaskAssignmentLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoTaskAssignment the kaleo task assignment
 	 * @return the kaleo task assignment that was added
 	 */
@@ -123,6 +128,10 @@ public abstract class KaleoTaskAssignmentLocalServiceBaseImpl
 	/**
 	 * Deletes the kaleo task assignment with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoTaskAssignmentLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoTaskAssignmentId the primary key of the kaleo task assignment
 	 * @return the kaleo task assignment that was removed
 	 * @throws PortalException if a kaleo task assignment with the primary key could not be found
@@ -139,6 +148,10 @@ public abstract class KaleoTaskAssignmentLocalServiceBaseImpl
 	/**
 	 * Deletes the kaleo task assignment from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoTaskAssignmentLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoTaskAssignment the kaleo task assignment
 	 * @return the kaleo task assignment that was removed
 	 */
@@ -148,6 +161,11 @@ public abstract class KaleoTaskAssignmentLocalServiceBaseImpl
 		KaleoTaskAssignment kaleoTaskAssignment) {
 
 		return kaleoTaskAssignmentPersistence.remove(kaleoTaskAssignment);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return kaleoTaskAssignmentPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -375,6 +393,10 @@ public abstract class KaleoTaskAssignmentLocalServiceBaseImpl
 
 	/**
 	 * Updates the kaleo task assignment in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoTaskAssignmentLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param kaleoTaskAssignment the kaleo task assignment
 	 * @return the kaleo task assignment that was updated

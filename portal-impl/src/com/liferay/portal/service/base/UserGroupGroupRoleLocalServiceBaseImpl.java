@@ -15,6 +15,7 @@
 package com.liferay.portal.service.base;
 
 import com.liferay.petra.function.UnsafeFunction;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -78,6 +79,10 @@ public abstract class UserGroupGroupRoleLocalServiceBaseImpl
 	/**
 	 * Adds the user group group role to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect UserGroupGroupRoleLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param userGroupGroupRole the user group group role
 	 * @return the user group group role that was added
 	 */
@@ -108,6 +113,10 @@ public abstract class UserGroupGroupRoleLocalServiceBaseImpl
 	/**
 	 * Deletes the user group group role with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect UserGroupGroupRoleLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param userGroupGroupRoleId the primary key of the user group group role
 	 * @return the user group group role that was removed
 	 * @throws PortalException if a user group group role with the primary key could not be found
@@ -124,6 +133,10 @@ public abstract class UserGroupGroupRoleLocalServiceBaseImpl
 	/**
 	 * Deletes the user group group role from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect UserGroupGroupRoleLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param userGroupGroupRole the user group group role
 	 * @return the user group group role that was removed
 	 */
@@ -133,6 +146,11 @@ public abstract class UserGroupGroupRoleLocalServiceBaseImpl
 		UserGroupGroupRole userGroupGroupRole) {
 
 		return userGroupGroupRolePersistence.remove(userGroupGroupRole);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return userGroupGroupRolePersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -355,6 +373,10 @@ public abstract class UserGroupGroupRoleLocalServiceBaseImpl
 
 	/**
 	 * Updates the user group group role in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect UserGroupGroupRoleLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param userGroupGroupRole the user group group role
 	 * @return the user group group role that was updated

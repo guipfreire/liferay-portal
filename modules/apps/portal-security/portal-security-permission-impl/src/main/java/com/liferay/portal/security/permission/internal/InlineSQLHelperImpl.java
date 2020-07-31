@@ -393,7 +393,7 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 			if (!isEnabled(groupId)) {
 				if (groupAdminResourcePermissionSB == null) {
 					groupAdminResourcePermissionSB = new StringBundler(
-						groupIds.length * 2 - 1);
+						(groupIds.length * 2) - 1);
 				}
 				else {
 					groupAdminResourcePermissionSB.append(", ");
@@ -447,6 +447,27 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 
 		Predicate permissionPredicate = classPKColumn.in(
 			resourcePermissionDSLQuery);
+
+		List<PermissionSQLContributor> permissionSQLContributors =
+			_permissionSQLContributors.getService(modelClass.getName());
+
+		if ((permissionSQLContributors != null) &&
+			!permissionSQLContributors.isEmpty()) {
+
+			for (PermissionSQLContributor permissionSQLContributor :
+					permissionSQLContributors) {
+
+				Predicate contributorPermissionPredicate =
+					permissionSQLContributor.getPermissionPredicate(
+						permissionChecker, modelClass.getName(), classPKColumn,
+						groupIds);
+
+				if (contributorPermissionPredicate != null) {
+					permissionPredicate = permissionPredicate.or(
+						contributorPermissionPredicate.withParentheses());
+				}
+			}
+		}
 
 		Set<Long> groupIdSet = null;
 

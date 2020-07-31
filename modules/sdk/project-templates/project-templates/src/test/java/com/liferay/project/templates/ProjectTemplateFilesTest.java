@@ -110,7 +110,7 @@ public class ProjectTemplateFilesTest {
 
 	private List<BuildGradleDependency> _getBuildGradleDependencies(
 			Path buildGradlePath)
-		throws IOException {
+		throws Exception {
 
 		List<BuildGradleDependency> buildGradleDependencies = new ArrayList<>();
 
@@ -370,7 +370,7 @@ public class ProjectTemplateFilesTest {
 	}
 
 	private String _testArchetypePostGenerateGroovy(Path projectTemplateDirPath)
-		throws IOException {
+		throws Exception {
 
 		Path path = projectTemplateDirPath.resolve(
 			"src/main/resources/META-INF/archetype-post-generate.groovy");
@@ -383,7 +383,7 @@ public class ProjectTemplateFilesTest {
 	}
 
 	private Properties _testBndBnd(Path projectTemplateDirPath)
-		throws IOException {
+		throws Exception {
 
 		Path bndBndPath = projectTemplateDirPath.resolve("bnd.bnd");
 
@@ -422,7 +422,7 @@ public class ProjectTemplateFilesTest {
 	}
 
 	private void _testBuildGradle(Path archetypeResourcesDirPath)
-		throws IOException {
+		throws Exception {
 
 		Path buildGradlePath = archetypeResourcesDirPath.resolve(
 			"build.gradle");
@@ -444,7 +444,7 @@ public class ProjectTemplateFilesTest {
 
 	private void _testGitIgnore(
 			String projectTemplateDirName, Path archetypeResourcesDirPath)
-		throws IOException {
+		throws Exception {
 
 		Path dotGitIgnorePath = archetypeResourcesDirPath.resolve(".gitignore");
 		Path gitIgnorePath = archetypeResourcesDirPath.resolve("gitignore");
@@ -752,7 +752,7 @@ public class ProjectTemplateFilesTest {
 
 	private void _testProjectTemplateCustomizer(
 			String projectTemplateDirName, Path projectTemplateDirPath)
-		throws IOException {
+		throws Exception {
 
 		Path projectTemplateCustomizerPath = projectTemplateDirPath.resolve(
 			"src/main/resources/META-INF/services" +
@@ -867,6 +867,13 @@ public class ProjectTemplateFilesTest {
 
 						_testLiferayPluginPackageProperties(
 							liferayPluginPackagePropertiesPath);
+					}
+
+					Path restConfigYAMLPath = dirPath.resolve(
+						"rest-config.yaml");
+
+					if (Files.exists(restConfigYAMLPath)) {
+						requireAuthorProperty.set(true);
 					}
 
 					return FileVisitResult.CONTINUE;
@@ -1054,7 +1061,7 @@ public class ProjectTemplateFilesTest {
 	private static final Set<String> _textFileExtensions = new HashSet<>(
 		Arrays.asList(
 			"bnd", "gradle", "java", "js", "json", "jsp", "jspf", "properties",
-			"vm", "xml"));
+			"vm", "xml", "yaml"));
 	private static final Pattern _velocityDirectivePattern = Pattern.compile(
 		"#(if|set)\\s*\\(\\s*(.+)\\s*\\)");
 	private static final Pattern _velocitySetDirectivePattern = Pattern.compile(

@@ -107,7 +107,9 @@ public abstract class BaseHistogramMetricResourceTestCase {
 		HistogramMetricResource.Builder builder =
 			HistogramMetricResource.builder();
 
-		histogramMetricResource = builder.locale(
+		histogramMetricResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -191,6 +193,13 @@ public abstract class BaseHistogramMetricResourceTestCase {
 
 	@Test
 	public void testGraphQLGetProcessHistogramMetric() throws Exception {
+		Assert.assertTrue(true);
+	}
+
+	@Test
+	public void testGraphQLGetProcessHistogramMetricNotFound()
+		throws Exception {
+
 		Assert.assertTrue(true);
 	}
 

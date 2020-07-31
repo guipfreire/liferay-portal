@@ -15,6 +15,7 @@
 package com.liferay.document.library.file.rank.service;
 
 import com.liferay.document.library.file.rank.model.DLFileRank;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
@@ -67,6 +68,10 @@ public interface DLFileRankLocalService
 	/**
 	 * Adds the document library file rank to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DLFileRankLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param dlFileRank the document library file rank
 	 * @return the document library file rank that was added
 	 */
@@ -97,6 +102,10 @@ public interface DLFileRankLocalService
 	/**
 	 * Deletes the document library file rank from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DLFileRankLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param dlFileRank the document library file rank
 	 * @return the document library file rank that was removed
 	 */
@@ -105,6 +114,10 @@ public interface DLFileRankLocalService
 
 	/**
 	 * Deletes the document library file rank with the primary key from the database. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DLFileRankLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param fileRankId the primary key of the document library file rank
 	 * @return the document library file rank that was removed
@@ -133,6 +146,9 @@ public interface DLFileRankLocalService
 
 	public void disableFileRanksByFolderId(long folderId)
 		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public <T> T dslQuery(DSLQuery dslQuery);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DynamicQuery dynamicQuery();
@@ -265,6 +281,10 @@ public interface DLFileRankLocalService
 
 	/**
 	 * Updates the document library file rank in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DLFileRankLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param dlFileRank the document library file rank
 	 * @return the document library file rank that was updated

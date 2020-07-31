@@ -14,6 +14,7 @@
 
 package com.liferay.portal.security.audit.storage.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -73,6 +74,10 @@ public abstract class AuditEventLocalServiceBaseImpl
 	/**
 	 * Adds the audit event to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AuditEventLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param auditEvent the audit event
 	 * @return the audit event that was added
 	 */
@@ -99,6 +104,10 @@ public abstract class AuditEventLocalServiceBaseImpl
 	/**
 	 * Deletes the audit event with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AuditEventLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param auditEventId the primary key of the audit event
 	 * @return the audit event that was removed
 	 * @throws PortalException if a audit event with the primary key could not be found
@@ -114,6 +123,10 @@ public abstract class AuditEventLocalServiceBaseImpl
 	/**
 	 * Deletes the audit event from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AuditEventLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param auditEvent the audit event
 	 * @return the audit event that was removed
 	 */
@@ -121,6 +134,11 @@ public abstract class AuditEventLocalServiceBaseImpl
 	@Override
 	public AuditEvent deleteAuditEvent(AuditEvent auditEvent) {
 		return auditEventPersistence.remove(auditEvent);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return auditEventPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -331,6 +349,10 @@ public abstract class AuditEventLocalServiceBaseImpl
 
 	/**
 	 * Updates the audit event in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AuditEventLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param auditEvent the audit event
 	 * @return the audit event that was updated

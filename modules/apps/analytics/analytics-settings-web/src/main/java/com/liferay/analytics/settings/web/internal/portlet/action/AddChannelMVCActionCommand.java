@@ -67,7 +67,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	property = {
 		"javax.portlet.name=" + ConfigurationAdminPortletKeys.INSTANCE_SETTINGS,
-		"mvc.command.name=/analytics/add_channel"
+		"mvc.command.name=/analytics_settings/add_channel"
 	},
 	service = MVCActionCommand.class
 )
@@ -258,9 +258,7 @@ public class AddChannelMVCActionCommand extends BaseAnalyticsMVCActionCommand {
 		return liferayAnalyticsGroupIds;
 	}
 
-	private void _updateTypeSettingsProperties(String json)
-		throws PortalException {
-
+	private void _updateTypeSettingsProperties(String json) throws Exception {
 		JSONArray channelsJSONArray = JSONFactoryUtil.createJSONArray(json);
 
 		for (int i = 0; i < channelsJSONArray.length(); i++) {

@@ -27,6 +27,7 @@ import com.liferay.dynamic.data.mapping.model.DDMFormRule;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
+import com.liferay.portal.kernel.upgrade.UpgradeException;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -35,10 +36,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * @author Inácio Nery
@@ -59,7 +58,7 @@ public class UpgradeDDMStructure extends UpgradeProcess {
 		upgradeDDMStructureVersionDefinition();
 	}
 
-	protected String updateDefinition(String definition) {
+	protected String updateDefinition(String definition) throws Exception {
 		DDMFormDeserializerDeserializeRequest.Builder deserializerBuilder =
 			DDMFormDeserializerDeserializeRequest.Builder.newBuilder(
 				definition);
@@ -67,6 +66,13 @@ public class UpgradeDDMStructure extends UpgradeProcess {
 		DDMFormDeserializerDeserializeResponse
 			ddmFormDeserializerDeserializeResponse =
 				_ddmFormDeserializer.deserialize(deserializerBuilder.build());
+
+		Exception exception =
+			ddmFormDeserializerDeserializeResponse.getException();
+
+		if (exception != null) {
+			throw new UpgradeException(exception);
+		}
 
 		DDMForm ddmForm = ddmFormDeserializerDeserializeResponse.getDDMForm();
 
@@ -83,8 +89,7 @@ public class UpgradeDDMStructure extends UpgradeProcess {
 				continue;
 			}
 
-			visibilityExpression = _convertExpression(
-				ddmFormFieldsMap.values(), visibilityExpression);
+			visibilityExpression = _convertExpression(visibilityExpression);
 
 			DDMFormRule ddmFormRule = new DDMFormRule(
 				Arrays.asList(
@@ -172,28 +177,16 @@ public class UpgradeDDMStructure extends UpgradeProcess {
 		}
 	}
 
-	private String _convertExpression(
-		Collection<DDMFormField> ddmFormFields, String visibilityExpression) {
-
+	private String _convertExpression(String visibilityExpression) {
 		List<String> parameterValues =
 			ExpressionParameterValueExtractor.extractParameterValues(
 				visibilityExpression);
 
 		for (String parameterValue : parameterValues) {
-			if (Validator.isNull(parameterValue)) {
-				continue;
-			}
+			if (Validator.isNull(parameterValue) ||
+				Validator.isNumber(parameterValue) ||
+				StringUtil.startsWith(parameterValue, StringPool.QUOTE)) {
 
-			Stream<DDMFormField> ddmFormFieldsStream = ddmFormFields.stream();
-
-			boolean hasParameterValue = ddmFormFieldsStream.anyMatch(
-				ddmFormField -> ddmFormField.getProperty(
-					"name"
-				).equals(
-					parameterValue
-				));
-
-			if (!hasParameterValue) {
 				continue;
 			}
 

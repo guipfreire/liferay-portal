@@ -14,11 +14,11 @@
 
 import ClayLink from '@clayui/link';
 import ClayNavigationBar from '@clayui/navigation-bar';
-import React, {useContext, useEffect} from 'react';
+import React, {useContext} from 'react';
 import {withRouter} from 'react-router-dom';
 
 import {AppContext} from '../AppContext.es';
-import {getSections} from '../utils/client.es';
+import useQueryParams from '../hooks/useQueryParams.es';
 import {historyPushWithSlug} from '../utils/utils.es';
 
 export default withRouter(
@@ -29,20 +29,27 @@ export default withRouter(
 			params: {sectionTitle},
 		},
 	}) => {
-		const isActive = (value) => location.pathname.includes(value);
-
 		const context = useContext(AppContext);
 
-		useEffect(() => {
-			if (sectionTitle) {
-				context.setSection(sectionTitle);
+		const queryParams = useQueryParams(location);
+
+		sectionTitle = sectionTitle || queryParams.get('sectiontitle');
+
+		const isActive = (value) => location.pathname.includes(value);
+
+		const label = () => {
+			if (location.pathname.includes('tags')) {
+				return Liferay.Language.get('tags');
 			}
-			else if (Object.keys(context.section).length === 0) {
-				getSections(context.siteKey).then((sections) =>
-					context.setSection(sections.items[0].title)
-				);
+			else if (location.pathname.includes('activity')) {
+				return Liferay.Language.get('my-activity');
 			}
-		}, [context, sectionTitle]);
+			else if (location.pathname.includes('subscriptions')) {
+				return Liferay.Language.get('my-subscriptions');
+			}
+
+			return Liferay.Language.get('questions');
+		};
 
 		const historyPushParser = historyPushWithSlug(history.push);
 
@@ -54,16 +61,19 @@ export default withRouter(
 							<div className="align-items-center col d-flex justify-content-between">
 								<ClayNavigationBar
 									className="navigation-bar"
-									triggerLabel="Questions"
+									triggerLabel={label()}
 								>
 									<ClayNavigationBar.Item
 										active={
 											!isActive('activity') &&
-											!isActive('tags')
+											!isActive('tags') &&
+											!isActive('subscriptions')
 										}
 										onClick={() =>
 											historyPushParser(
-												`/questions/${context.section}`
+												sectionTitle
+													? `/questions/${sectionTitle}`
+													: '/'
 											)
 										}
 									>
@@ -79,7 +89,9 @@ export default withRouter(
 										active={isActive('tags')}
 										onClick={() =>
 											historyPushParser(
-												`/questions/${context.section}/tags`
+												sectionTitle
+													? `/questions/${sectionTitle}/tags`
+													: '/'
 											)
 										}
 									>
@@ -92,7 +104,7 @@ export default withRouter(
 									</ClayNavigationBar.Item>
 
 									<ClayNavigationBar.Item
-										active={isActive('activity')}
+										active={isActive('subscriptions')}
 										className={
 											Liferay.ThemeDisplay.isSignedIn()
 												? 'ml-md-auto'
@@ -100,7 +112,30 @@ export default withRouter(
 										}
 										onClick={() =>
 											historyPushParser(
-												`/activity/${context.userId}`
+												`/subscriptions/${context.userId}?sectionTitle=${sectionTitle}`
+											)
+										}
+									>
+										<ClayLink
+											className="nav-link"
+											displayType="unstyled"
+										>
+											{Liferay.Language.get(
+												'my-subscriptions'
+											)}
+										</ClayLink>
+									</ClayNavigationBar.Item>
+
+									<ClayNavigationBar.Item
+										active={isActive('activity')}
+										className={
+											Liferay.ThemeDisplay.isSignedIn()
+												? ''
+												: 'd-none'
+										}
+										onClick={() =>
+											historyPushParser(
+												`/activity/${context.userId}?sectionTitle=${sectionTitle}`
 											)
 										}
 									>

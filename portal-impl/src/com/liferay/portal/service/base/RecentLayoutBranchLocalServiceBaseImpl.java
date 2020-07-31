@@ -14,6 +14,7 @@
 
 package com.liferay.portal.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -72,6 +73,10 @@ public abstract class RecentLayoutBranchLocalServiceBaseImpl
 	/**
 	 * Adds the recent layout branch to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RecentLayoutBranchLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param recentLayoutBranch the recent layout branch
 	 * @return the recent layout branch that was added
 	 */
@@ -102,6 +107,10 @@ public abstract class RecentLayoutBranchLocalServiceBaseImpl
 	/**
 	 * Deletes the recent layout branch with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RecentLayoutBranchLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param recentLayoutBranchId the primary key of the recent layout branch
 	 * @return the recent layout branch that was removed
 	 * @throws PortalException if a recent layout branch with the primary key could not be found
@@ -118,6 +127,10 @@ public abstract class RecentLayoutBranchLocalServiceBaseImpl
 	/**
 	 * Deletes the recent layout branch from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RecentLayoutBranchLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param recentLayoutBranch the recent layout branch
 	 * @return the recent layout branch that was removed
 	 */
@@ -127,6 +140,11 @@ public abstract class RecentLayoutBranchLocalServiceBaseImpl
 		RecentLayoutBranch recentLayoutBranch) {
 
 		return recentLayoutBranchPersistence.remove(recentLayoutBranch);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return recentLayoutBranchPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -349,6 +367,10 @@ public abstract class RecentLayoutBranchLocalServiceBaseImpl
 
 	/**
 	 * Updates the recent layout branch in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RecentLayoutBranchLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param recentLayoutBranch the recent layout branch
 	 * @return the recent layout branch that was updated

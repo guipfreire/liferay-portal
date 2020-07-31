@@ -24,9 +24,9 @@ import com.liferay.fragment.renderer.FragmentRenderer;
 import com.liferay.fragment.renderer.FragmentRendererTracker;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.fragment.service.FragmentEntryLocalService;
+import com.liferay.journal.constants.JournalArticleConstants;
+import com.liferay.journal.constants.JournalFolderConstants;
 import com.liferay.journal.model.JournalArticle;
-import com.liferay.journal.model.JournalArticleConstants;
-import com.liferay.journal.model.JournalFolderConstants;
 import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeConstants;
 import com.liferay.layout.page.template.model.LayoutPageTemplateCollection;
@@ -36,7 +36,6 @@ import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocal
 import com.liferay.layout.util.LayoutCopyHelper;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.comment.CommentManager;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -74,7 +73,6 @@ import com.liferay.site.navigation.type.SiteNavigationMenuItemType;
 import com.liferay.site.navigation.type.SiteNavigationMenuItemTypeRegistry;
 
 import java.io.File;
-import java.io.IOException;
 
 import java.net.URL;
 
@@ -164,7 +162,7 @@ public class BuildingsSiteInitializer implements SiteInitializer {
 	}
 
 	private void _addComments(FragmentEntryLink fragmentEntryLink)
-		throws PortalException {
+		throws Exception {
 
 		long parentCommentId1 = _commentManager.addComment(
 			fragmentEntryLink.getUserId(), fragmentEntryLink.getGroupId(),
@@ -254,8 +252,7 @@ public class BuildingsSiteInitializer implements SiteInitializer {
 				return _fragmentEntryLinkLocalService.addFragmentEntryLink(
 					_serviceContext.getUserId(),
 					_serviceContext.getScopeGroupId(), 0,
-					fragmentEntry.getFragmentEntryId(), 0,
-					_portal.getClassNameId(Layout.class), plid,
+					fragmentEntry.getFragmentEntryId(), 0, plid,
 					fragmentEntry.getCss(), fragmentEntry.getHtml(),
 					fragmentEntry.getJs(), fragmentEntry.getConfiguration(),
 					editableValues, StringPool.BLANK, 0, contributedRendererKey,
@@ -264,10 +261,9 @@ public class BuildingsSiteInitializer implements SiteInitializer {
 
 			return _fragmentEntryLinkLocalService.addFragmentEntryLink(
 				_serviceContext.getUserId(), _serviceContext.getScopeGroupId(),
-				0, 0, 0, _portal.getClassNameId(Layout.class), plid,
-				StringPool.BLANK, StringPool.BLANK, StringPool.BLANK,
-				StringPool.BLANK, editableValues, StringPool.BLANK, 0,
-				fragmentEntryKey, _serviceContext);
+				0, 0, 0, plid, StringPool.BLANK, StringPool.BLANK,
+				StringPool.BLANK, StringPool.BLANK, editableValues,
+				StringPool.BLANK, 0, fragmentEntryKey, _serviceContext);
 		}
 		catch (Exception exception) {
 		}
@@ -304,11 +300,11 @@ public class BuildingsSiteInitializer implements SiteInitializer {
 	}
 
 	private void _addJournalArticleDDMStructures() throws Exception {
-		Enumeration<URL> urls = _bundle.findEntries(
+		Enumeration<URL> enumeration = _bundle.findEntries(
 			_PATH + "/ddm", StringPool.STAR, false);
 
-		while (urls.hasMoreElements()) {
-			URL url = urls.nextElement();
+		while (enumeration.hasMoreElements()) {
+			URL url = enumeration.nextElement();
 
 			Class<?> clazz = getClass();
 
@@ -346,7 +342,7 @@ public class BuildingsSiteInitializer implements SiteInitializer {
 					_serviceContext.getUserId(),
 					_serviceContext.getScopeGroupId(),
 					JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-					JournalArticleConstants.CLASSNAME_ID_DEFAULT, 0,
+					JournalArticleConstants.CLASS_NAME_ID_DEFAULT, 0,
 					jsonObject.getString("articleId"), false, 1,
 					Collections.singletonMap(
 						LocaleUtil.US, jsonObject.getString("name")),
@@ -366,25 +362,22 @@ public class BuildingsSiteInitializer implements SiteInitializer {
 			long parentLayoutId, String name, String type, String dataPath)
 		throws Exception {
 
-		Map<Locale, String> nameMap = HashMapBuilder.put(
-			LocaleUtil.getSiteDefault(), name
-		).build();
-
 		Layout layout = _layoutLocalService.addLayout(
 			_serviceContext.getUserId(), _serviceContext.getScopeGroupId(),
-			false, parentLayoutId, nameMap, new HashMap<>(), new HashMap<>(),
-			new HashMap<>(), new HashMap<>(), type, null, false, false,
-			new HashMap<>(), _serviceContext);
+			false, parentLayoutId,
+			HashMapBuilder.put(
+				LocaleUtil.getSiteDefault(), name
+			).build(),
+			new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(),
+			type, null, false, false, new HashMap<>(), _serviceContext);
 
 		if (Validator.isNotNull(dataPath)) {
-			Layout draftLayout = _layoutLocalService.fetchLayout(
-				_portal.getClassNameId(Layout.class), layout.getPlid());
+			Layout draftLayout = layout.fetchDraftLayout();
 
 			_layoutPageTemplateStructureLocalService.
 				addLayoutPageTemplateStructure(
 					_serviceContext.getUserId(),
-					_serviceContext.getScopeGroupId(),
-					_portal.getClassNameId(Layout.class), draftLayout.getPlid(),
+					_serviceContext.getScopeGroupId(), draftLayout.getPlid(),
 					_parseLayoutContent(
 						draftLayout.getPlid(),
 						_readFile("/layout-content/" + dataPath)),
@@ -512,8 +505,7 @@ public class BuildingsSiteInitializer implements SiteInitializer {
 	}
 
 	private void _copyLayout(Layout layout) throws Exception {
-		Layout draftLayout = _layoutLocalService.fetchLayout(
-			_portal.getClassNameId(Layout.class), layout.getPlid());
+		Layout draftLayout = layout.fetchDraftLayout();
 
 		if (draftLayout != null) {
 			_layoutCopyHelper.copyLayout(draftLayout, layout);
@@ -628,7 +620,7 @@ public class BuildingsSiteInitializer implements SiteInitializer {
 			_resourcesMap);
 	}
 
-	private String _readFile(String fileName) throws IOException {
+	private String _readFile(String fileName) throws Exception {
 		Class<?> clazz = getClass();
 
 		return StringUtil.read(clazz.getClassLoader(), _PATH + fileName);

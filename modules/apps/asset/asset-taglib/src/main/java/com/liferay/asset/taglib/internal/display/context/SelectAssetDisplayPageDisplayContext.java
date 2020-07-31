@@ -261,13 +261,13 @@ public class SelectAssetDisplayPageDisplayContext {
 			(ThemeDisplay)_httpServletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
-		AssetRendererFactory assetRendererFactory =
+		AssetRendererFactory<?> assetRendererFactory =
 			AssetRendererFactoryRegistryUtil.
 				getAssetRendererFactoryByClassNameId(_classNameId);
 
 		try {
-			AssetRenderer assetRenderer = assetRendererFactory.getAssetRenderer(
-				_classPK);
+			AssetRenderer<?> assetRenderer =
+				assetRendererFactory.getAssetRenderer(_classPK);
 
 			String viewInContextURL = assetRenderer.getURLViewInContext(
 				_liferayPortletRequest, _liferayPortletResponse,
@@ -316,7 +316,7 @@ public class SelectAssetDisplayPageDisplayContext {
 				InfoDisplayContributorTrackerUtil.
 					getInfoDisplayContributorTracker();
 
-			InfoDisplayContributor infoDisplayContributor =
+			InfoDisplayContributor<?> infoDisplayContributor =
 				infoDisplayContributorTracker.getInfoDisplayContributor(
 					PortalUtil.getClassName(_classNameId));
 
@@ -324,7 +324,7 @@ public class SelectAssetDisplayPageDisplayContext {
 				return false;
 			}
 
-			InfoDisplayObjectProvider infoDisplayObjectProvider =
+			InfoDisplayObjectProvider<?> infoDisplayObjectProvider =
 				infoDisplayContributor.getInfoDisplayObjectProvider(_classPK);
 
 			if (infoDisplayObjectProvider == null) {
@@ -416,7 +416,7 @@ public class SelectAssetDisplayPageDisplayContext {
 
 		List<Layout> ancestors = layout.getAncestors();
 
-		StringBundler sb = new StringBundler(4 * ancestors.size() + 5);
+		StringBundler sb = new StringBundler((4 * ancestors.size()) + 5);
 
 		if (layout.isPrivateLayout()) {
 			sb.append(LanguageUtil.get(_httpServletRequest, "private-pages"));

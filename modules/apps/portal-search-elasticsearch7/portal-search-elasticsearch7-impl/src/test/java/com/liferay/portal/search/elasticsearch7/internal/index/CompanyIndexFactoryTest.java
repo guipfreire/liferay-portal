@@ -15,12 +15,14 @@
 package com.liferay.portal.search.elasticsearch7.internal.index;
 
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
-import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchFixture;
 import com.liferay.portal.search.elasticsearch7.internal.connection.IndexName;
 import com.liferay.portal.search.elasticsearch7.internal.document.SingleFieldFixture;
+import com.liferay.portal.search.elasticsearch7.internal.index.constants.LiferayTypeMappingsConstants;
 import com.liferay.portal.search.elasticsearch7.internal.query.QueryBuilderFactories;
 import com.liferay.portal.search.elasticsearch7.internal.settings.BaseIndexSettingsContributor;
 import com.liferay.portal.search.elasticsearch7.internal.util.ResourceUtil;
@@ -30,19 +32,18 @@ import com.liferay.portal.search.spi.model.index.contributor.IndexContributor;
 
 import java.io.IOException;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
-import org.elasticsearch.action.admin.indices.get.GetIndexResponse;
 import org.elasticsearch.client.IndicesClient;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.settings.Settings;
+
+import org.hamcrest.CoreMatchers;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -51,6 +52,10 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 /**
  * @author André de Oliveira
@@ -72,11 +77,18 @@ public class CompanyIndexFactoryTest {
 
 	@Before
 	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
+
 		_companyIndexFactoryFixture = new CompanyIndexFactoryFixture(
 			_elasticsearchFixture, testName.getMethodName());
 
 		_companyIndexFactory =
 			_companyIndexFactoryFixture.getCompanyIndexFactory();
+
+		Mockito.reset(_elasticsearchConfigurationWrapper);
+
+		_companyIndexFactory.setElasticsearchConfigurationWrapper(
+			_elasticsearchConfigurationWrapper);
 
 		_singleFieldFixture = new SingleFieldFixture(
 			_elasticsearchFixture.getRestHighLevelClient(),
@@ -88,8 +100,11 @@ public class CompanyIndexFactoryTest {
 
 	@Test
 	public void testAdditionalIndexConfigurations() throws Exception {
-		_companyIndexFactory.setAdditionalIndexConfigurations(
-			"index.number_of_replicas: 1\nindex.number_of_shards: 2");
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalIndexConfigurations()
+		).thenReturn(
+			"index.number_of_replicas: 1\nindex.number_of_shards: 2"
+		);
 
 		createIndices();
 
@@ -101,8 +116,11 @@ public class CompanyIndexFactoryTest {
 
 	@Test
 	public void testAdditionalTypeMappings() throws Exception {
-		_companyIndexFactory.setAdditionalTypeMappings(
-			loadAdditionalTypeMappings());
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalTypeMappings()
+		).thenReturn(
+			loadAdditionalTypeMappings()
+		);
 
 		assertAdditionalTypeMappings();
 	}
@@ -116,8 +134,11 @@ public class CompanyIndexFactoryTest {
 
 	@Test
 	public void testAdditionalTypeMappingsWithRootType() throws Exception {
-		_companyIndexFactory.setAdditionalTypeMappings(
-			loadAdditionalTypeMappingsWithRootType());
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalTypeMappings()
+		).thenReturn(
+			loadAdditionalTypeMappingsWithRootType()
+		);
 
 		assertAdditionalTypeMappings();
 	}
@@ -133,25 +154,35 @@ public class CompanyIndexFactoryTest {
 
 	@Test
 	public void testCreateIndicesWithBlankStrings() throws Exception {
-		Map<String, Object> properties = HashMapBuilder.<String, Object>put(
-			"additionalIndexConfigurations", StringPool.BLANK
-		).put(
-			"additionalTypeMappings", StringPool.SPACE
-		).put(
-			"indexNumberOfReplicas", StringPool.BLANK
-		).put(
-			"indexNumberOfShards", StringPool.SPACE
-		).build();
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalIndexConfigurations()
+		).thenReturn(
+			StringPool.BLANK
+		);
 
-		_companyIndexFactory.activate(properties);
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalTypeMappings()
+		).thenReturn(
+			StringPool.SPACE
+		);
+
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.indexNumberOfReplicas()
+		).thenReturn(
+			StringPool.BLANK
+		);
+
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.indexNumberOfShards()
+		).thenReturn(
+			StringPool.SPACE
+		);
 
 		createIndices();
 	}
 
 	@Test
 	public void testCreateIndicesWithEmptyConfiguration() throws Exception {
-		_companyIndexFactory.activate(new HashMap<String, Object>());
-
 		createIndices();
 	}
 
@@ -167,17 +198,24 @@ public class CompanyIndexFactoryTest {
 
 	@Test
 	public void testDefaultIndices() throws Exception {
-		_companyIndexFactory.activate(Collections.emptyMap());
-
 		createIndices();
 
-		assertIndicesExist(LiferayTypeMappingsConstants.LIFERAY_DOCUMENT_TYPE);
+		assertMappings(Field.COMPANY_ID, Field.ENTRY_CLASS_NAME);
 	}
 
 	@Test
 	public void testIndexConfigurations() throws Exception {
-		_companyIndexFactory.setIndexNumberOfReplicas("1");
-		_companyIndexFactory.setIndexNumberOfShards("2");
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.indexNumberOfReplicas()
+		).thenReturn(
+			"1"
+		);
+
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.indexNumberOfShards()
+		).thenReturn(
+			"2"
+		);
 
 		createIndices();
 
@@ -248,8 +286,12 @@ public class CompanyIndexFactoryTest {
 				}
 
 			});
-		_companyIndexFactory.setAdditionalIndexConfigurations(
-			"index.number_of_replicas: 0\nindex.number_of_shards: 0");
+
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalIndexConfigurations()
+		).thenReturn(
+			"index.number_of_replicas: 0\nindex.number_of_shards: 0"
+		);
 
 		createIndices();
 
@@ -265,8 +307,11 @@ public class CompanyIndexFactoryTest {
 
 		addIndexSettingsContributor(replaceAnalyzer(mappings, "brazilian"));
 
-		_companyIndexFactory.setAdditionalTypeMappings(
-			replaceAnalyzer(mappings, "portuguese"));
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalTypeMappings()
+		).thenReturn(
+			replaceAnalyzer(mappings, "portuguese")
+		);
 
 		createIndices();
 
@@ -279,10 +324,17 @@ public class CompanyIndexFactoryTest {
 
 	@Test
 	public void testOverrideTypeMappings() throws Exception {
-		_companyIndexFactory.setAdditionalIndexConfigurations(
-			loadAdditionalAnalyzers());
-		_companyIndexFactory.setOverrideTypeMappings(
-			loadOverrideTypeMappings());
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalIndexConfigurations()
+		).thenReturn(
+			loadAdditionalAnalyzers()
+		);
+
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.overrideTypeMappings()
+		).thenReturn(
+			loadOverrideTypeMappings()
+		);
 
 		createIndices();
 
@@ -301,16 +353,21 @@ public class CompanyIndexFactoryTest {
 
 	@Test
 	public void testOverrideTypeMappingsHonorDefaultIndices() throws Exception {
-		_companyIndexFactory.activate(Collections.emptyMap());
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalIndexConfigurations()
+		).thenReturn(
+			loadAdditionalAnalyzers()
+		);
 
-		_companyIndexFactory.setAdditionalIndexConfigurations(
-			loadAdditionalAnalyzers());
-		_companyIndexFactory.setOverrideTypeMappings(
-			loadOverrideTypeMappings());
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.overrideTypeMappings()
+		).thenReturn(
+			loadOverrideTypeMappings()
+		);
 
 		createIndices();
 
-		assertIndicesExist(LiferayTypeMappingsConstants.LIFERAY_DOCUMENT_TYPE);
+		assertMappings(Field.TITLE);
 	}
 
 	@Test
@@ -322,11 +379,23 @@ public class CompanyIndexFactoryTest {
 
 		addIndexSettingsContributor(mappings);
 
-		_companyIndexFactory.setAdditionalIndexConfigurations(
-			loadAdditionalAnalyzers());
-		_companyIndexFactory.setAdditionalTypeMappings(mappings);
-		_companyIndexFactory.setOverrideTypeMappings(
-			loadOverrideTypeMappings());
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalIndexConfigurations()
+		).thenReturn(
+			loadAdditionalAnalyzers()
+		);
+
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalTypeMappings()
+		).thenReturn(
+			mappings
+		);
+
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.overrideTypeMappings()
+		).thenReturn(
+			loadOverrideTypeMappings()
+		);
 
 		createIndices();
 
@@ -359,8 +428,11 @@ public class CompanyIndexFactoryTest {
 	}
 
 	protected void assertAdditionalTypeMappings() throws Exception {
-		_companyIndexFactory.setAdditionalIndexConfigurations(
-			loadAdditionalAnalyzers());
+		Mockito.when(
+			_elasticsearchConfigurationWrapper.additionalIndexConfigurations()
+		).thenReturn(
+			loadAdditionalAnalyzers()
+		);
 
 		createIndices();
 
@@ -410,21 +482,21 @@ public class CompanyIndexFactoryTest {
 			"Index " + indexName + " does not exist", hasIndex(indexName));
 	}
 
-	protected void assertIndicesExist(String... indexNames) {
+	protected void assertMappings(String... fieldNames) {
+		String indexName = _companyIndexFactoryFixture.getIndexName();
+
 		GetIndexResponse getIndexResponse = _elasticsearchFixture.getIndex(
-			_companyIndexFactoryFixture.getIndexName());
+			indexName);
 
-		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>>
-			mappings = getIndexResponse.getMappings();
+		Map<String, MappingMetaData> mappings = getIndexResponse.getMappings();
 
-		Iterator<ImmutableOpenMap<String, MappingMetaData>> iterator =
-			mappings.valuesIt();
+		MappingMetaData mappingMetaData = mappings.get(indexName);
 
-		ImmutableOpenMap<String, MappingMetaData> map = iterator.next();
+		Map<String, Object> map = getPropertiesMap(mappingMetaData);
 
-		for (String indexName : indexNames) {
-			Assert.assertTrue(indexName, map.containsKey(indexName));
-		}
+		Set<String> set = map.keySet();
+
+		Assert.assertThat(set, CoreMatchers.hasItems(fieldNames));
 	}
 
 	protected void assertNoAnalyzer(String field) throws Exception {
@@ -472,10 +544,17 @@ public class CompanyIndexFactoryTest {
 		GetIndexResponse getIndexResponse = _elasticsearchFixture.getIndex(
 			name);
 
-		ImmutableOpenMap<String, Settings> immutableOpenMap =
-			getIndexResponse.getSettings();
+		Map<String, Settings> map = getIndexResponse.getSettings();
 
-		return immutableOpenMap.get(name);
+		return map.get(name);
+	}
+
+	protected Map<String, Object> getPropertiesMap(
+		MappingMetaData mappingMetaData) {
+
+		Map<String, Object> map = mappingMetaData.getSourceAsMap();
+
+		return (Map<String, Object>)map.get("properties");
 	}
 
 	protected boolean hasIndex(String indexName) {
@@ -536,6 +615,11 @@ public class CompanyIndexFactoryTest {
 
 	private CompanyIndexFactory _companyIndexFactory;
 	private CompanyIndexFactoryFixture _companyIndexFactoryFixture;
+
+	@Mock
+	private ElasticsearchConfigurationWrapper
+		_elasticsearchConfigurationWrapper;
+
 	private SingleFieldFixture _singleFieldFixture;
 
 }

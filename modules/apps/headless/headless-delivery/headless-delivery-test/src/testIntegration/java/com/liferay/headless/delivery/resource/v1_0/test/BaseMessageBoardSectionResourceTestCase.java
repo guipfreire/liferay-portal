@@ -121,7 +121,9 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 		MessageBoardSectionResource.Builder builder =
 			MessageBoardSectionResource.builder();
 
-		messageBoardSectionResource = builder.locale(
+		messageBoardSectionResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -319,6 +321,28 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/messageBoardSection"))));
+	}
+
+	@Test
+	public void testGraphQLGetMessageBoardSectionNotFound() throws Exception {
+		Long irrelevantMessageBoardSectionId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"messageBoardSection",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"messageBoardSectionId",
+									irrelevantMessageBoardSectionId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

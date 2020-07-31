@@ -20,7 +20,6 @@ import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
@@ -118,7 +117,7 @@ public class DLAdminDisplayContextTest {
 			_addDLFileEntry("alpha_" + i + ".txt", "alpha");
 		}
 
-		SearchContainer searchContainer = _getSearchContainer(
+		SearchContainer<Object> searchContainer = _getSearchContainer(
 			_getMockLiferayPortletActionRequest());
 
 		Assert.assertEquals(25, searchContainer.getTotal());
@@ -130,7 +129,7 @@ public class DLAdminDisplayContextTest {
 			_addDLFileEntry("alpha_" + i + ".txt", "alpha");
 		}
 
-		SearchContainer searchContainer = _getSearchContainer(
+		SearchContainer<Object> searchContainer = _getSearchContainer(
 			_getMockLiferayPortletActionRequestWithSearch("alpha"));
 
 		Assert.assertEquals(25, searchContainer.getTotal());
@@ -152,7 +151,7 @@ public class DLAdminDisplayContextTest {
 
 	private MockLiferayPortletActionRequest
 			_getMockLiferayPortletActionRequest()
-		throws PortalException {
+		throws Exception {
 
 		MockLiferayPortletActionRequest mockLiferayPortletActionRequest =
 			new MockLiferayPortletActionRequest();
@@ -172,7 +171,7 @@ public class DLAdminDisplayContextTest {
 
 	private MockLiferayPortletActionRequest
 			_getMockLiferayPortletActionRequestWithSearch(String keywords)
-		throws PortalException {
+		throws Exception {
 
 		MockLiferayPortletActionRequest mockLiferayPortletActionRequest =
 			_getMockLiferayPortletActionRequest();
@@ -184,7 +183,7 @@ public class DLAdminDisplayContextTest {
 		return mockLiferayPortletActionRequest;
 	}
 
-	private SearchContainer _getSearchContainer(
+	private SearchContainer<Object> _getSearchContainer(
 		MockLiferayPortletActionRequest mockLiferayPortletActionRequest) {
 
 		Object dlAdminDisplayContextProvider = _serviceTracker.getService();
@@ -200,7 +199,7 @@ public class DLAdminDisplayContextTest {
 			dlAdminDisplayContext, "getSearchContainer", new Class<?>[0], null);
 	}
 
-	private ThemeDisplay _getThemeDisplay() throws PortalException {
+	private ThemeDisplay _getThemeDisplay() throws Exception {
 		ThemeDisplay themeDisplay = new ThemeDisplay();
 
 		themeDisplay.setCompany(_company);

@@ -16,6 +16,7 @@ package com.liferay.data.engine.service;
 
 import com.liferay.data.engine.model.DEDataListView;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
@@ -68,6 +69,10 @@ public interface DEDataListViewLocalService
 	/**
 	 * Adds the de data list view to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DEDataListViewLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param deDataListView the de data list view
 	 * @return the de data list view that was added
 	 */
@@ -99,6 +104,10 @@ public interface DEDataListViewLocalService
 	/**
 	 * Deletes the de data list view from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DEDataListViewLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param deDataListView the de data list view
 	 * @return the de data list view that was removed
 	 */
@@ -107,6 +116,10 @@ public interface DEDataListViewLocalService
 
 	/**
 	 * Deletes the de data list view with the primary key from the database. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DEDataListViewLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param deDataListViewId the primary key of the de data list view
 	 * @return the de data list view that was removed
@@ -124,6 +137,9 @@ public interface DEDataListViewLocalService
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public <T> T dslQuery(DSLQuery dslQuery);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DynamicQuery dynamicQuery();
@@ -317,12 +333,17 @@ public interface DEDataListViewLocalService
 	/**
 	 * Updates the de data list view in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect DEDataListViewLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param deDataListView the de data list view
 	 * @return the de data list view that was updated
 	 */
 	@Indexable(type = IndexableType.REINDEX)
 	public DEDataListView updateDEDataListView(DEDataListView deDataListView);
 
+	@Indexable(type = IndexableType.REINDEX)
 	public DEDataListView updateDEDataListView(
 			long deDataListViewId, String appliedFilters, String fieldNames,
 			Map<Locale, String> nameMap, String sortField)

@@ -15,6 +15,7 @@
 import {
 	ADD_FRAGMENT_ENTRY_LINKS,
 	ADD_FRAGMENT_ENTRY_LINK_COMMENT,
+	CHANGE_MASTER_LAYOUT,
 	DELETE_FRAGMENT_ENTRY_LINK_COMMENT,
 	DUPLICATE_ITEM,
 	EDIT_FRAGMENT_ENTRY_LINK_COMMENT,
@@ -78,6 +79,23 @@ export default function fragmentEntryLinksReducer(
 					comments: nextComments,
 				},
 			};
+		}
+		case CHANGE_MASTER_LAYOUT: {
+			const nextFragmentEntryLinks = {
+				...(action.fragmentEntryLinks || {}),
+			};
+
+			Object.entries(fragmentEntryLinks).forEach(
+				([fragmentEntryLinkId, fragmentEntryLink]) => {
+					if (!fragmentEntryLink.masterLayout) {
+						nextFragmentEntryLinks[
+							fragmentEntryLinkId
+						] = fragmentEntryLink;
+					}
+				}
+			);
+
+			return nextFragmentEntryLinks;
 		}
 
 		case DELETE_FRAGMENT_ENTRY_LINK_COMMENT: {
@@ -182,8 +200,7 @@ export default function fragmentEntryLinksReducer(
 		case UPDATE_FRAGMENT_ENTRY_LINK_CONFIGURATION:
 			return {
 				...fragmentEntryLinks,
-				[action.fragmentEntryLink.fragmentEntryLinkId]:
-					action.fragmentEntryLink,
+				[action.fragmentEntryLinkId]: action.fragmentEntryLink,
 			};
 
 		case UPDATE_FRAGMENT_ENTRY_LINK_CONTENT: {
@@ -204,10 +221,6 @@ export default function fragmentEntryLinksReducer(
 					...fragmentEntryLinks[action.fragmentEntryLinkId],
 					collectionContent,
 					content: action.content,
-					editableValues:
-						action.editableValues ||
-						fragmentEntryLinks[action.fragmentEntryLinkId]
-							.editableValues,
 				},
 			};
 		}

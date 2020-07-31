@@ -116,7 +116,9 @@ public abstract class BaseContentStructureResourceTestCase {
 		ContentStructureResource.Builder builder =
 			ContentStructureResource.builder();
 
-		contentStructureResource = builder.locale(
+		contentStructureResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -241,6 +243,28 @@ public abstract class BaseContentStructureResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/contentStructure"))));
+	}
+
+	@Test
+	public void testGraphQLGetContentStructureNotFound() throws Exception {
+		Long irrelevantContentStructureId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"contentStructure",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"contentStructureId",
+									irrelevantContentStructureId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

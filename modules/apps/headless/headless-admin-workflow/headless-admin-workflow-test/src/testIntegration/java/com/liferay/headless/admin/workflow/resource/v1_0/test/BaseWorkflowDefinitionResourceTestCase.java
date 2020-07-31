@@ -109,7 +109,9 @@ public abstract class BaseWorkflowDefinitionResourceTestCase {
 		WorkflowDefinitionResource.Builder builder =
 			WorkflowDefinitionResource.builder();
 
-		workflowDefinitionResource = builder.locale(
+		workflowDefinitionResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -220,6 +222,13 @@ public abstract class BaseWorkflowDefinitionResourceTestCase {
 	}
 
 	@Test
+	public void testGraphQLGetWorkflowDefinitionByNameNotFound()
+		throws Exception {
+
+		Assert.assertTrue(true);
+	}
+
+	@Test
 	public void testPostWorkflowDefinitionDeploy() throws Exception {
 		WorkflowDefinition randomWorkflowDefinition =
 			randomWorkflowDefinition();
@@ -283,28 +292,6 @@ public abstract class BaseWorkflowDefinitionResourceTestCase {
 
 	protected WorkflowDefinition
 			testPostWorkflowDefinitionUpdateActive_addWorkflowDefinition(
-				WorkflowDefinition workflowDefinition)
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
-	}
-
-	@Test
-	public void testPostWorkflowDefinitionUpdateTitle() throws Exception {
-		WorkflowDefinition randomWorkflowDefinition =
-			randomWorkflowDefinition();
-
-		WorkflowDefinition postWorkflowDefinition =
-			testPostWorkflowDefinitionUpdateTitle_addWorkflowDefinition(
-				randomWorkflowDefinition);
-
-		assertEquals(randomWorkflowDefinition, postWorkflowDefinition);
-		assertValid(postWorkflowDefinition);
-	}
-
-	protected WorkflowDefinition
-			testPostWorkflowDefinitionUpdateTitle_addWorkflowDefinition(
 				WorkflowDefinition workflowDefinition)
 		throws Exception {
 

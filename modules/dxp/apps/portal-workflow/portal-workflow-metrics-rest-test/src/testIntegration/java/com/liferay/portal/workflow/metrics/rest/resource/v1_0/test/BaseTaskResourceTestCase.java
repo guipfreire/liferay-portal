@@ -108,7 +108,9 @@ public abstract class BaseTaskResourceTestCase {
 
 		TaskResource.Builder builder = TaskResource.builder();
 
-		taskResource = builder.locale(
+		taskResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -329,6 +331,28 @@ public abstract class BaseTaskResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/processTask"))));
+	}
+
+	@Test
+	public void testGraphQLGetProcessTaskNotFound() throws Exception {
+		Long irrelevantProcessId = RandomTestUtil.randomLong();
+		Long irrelevantTaskId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"processTask",
+						new HashMap<String, Object>() {
+							{
+								put("processId", irrelevantProcessId);
+								put("taskId", irrelevantTaskId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

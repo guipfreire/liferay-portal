@@ -375,6 +375,24 @@ public class ProjectTemplatesFormFieldTest
 	}
 
 	@Test
+	public void testBuildTemplateFormField72CustomPackage() throws Exception {
+		String liferayVersion = "7.2.1";
+		String name = "foobar";
+
+		File workspaceDir = buildWorkspace(temporaryFolder, liferayVersion);
+
+		File gradleProjectDir = buildTemplateWithGradle(
+			new File(workspaceDir, "modules"), "form-field", name,
+			"--liferay-version", liferayVersion, "--package-name",
+			"com.liferay.test.form");
+
+		testNotExists(
+			gradleProjectDir,
+			"src/main/java/com/liferay/test/form/form/field" +
+				"/FooBarDDMFormFieldRenderer.java");
+	}
+
+	@Test
 	public void testBuildTemplateFormField72Maven() throws Exception {
 		String groupId = "com.test";
 		String liferayVersion = "7.2.1";
@@ -388,6 +406,17 @@ public class ProjectTemplatesFormFieldTest
 
 		completeArgs.add("archetype:generate");
 		completeArgs.add("--batch-mode");
+		completeArgs.add("--settings");
+
+		String content = FileTestUtil.read(
+			BaseProjectTemplatesTestCase.class.getClassLoader(),
+			"com/liferay/project/templates/dependencies/settings.xml");
+
+		Path tempPath = Files.createTempFile("settings", "xml");
+
+		Files.write(tempPath, content.getBytes());
+
+		completeArgs.add(tempPath.toString());
 
 		String archetypeArtifactId =
 			"com.liferay.project.templates." + template.replace('-', '.');

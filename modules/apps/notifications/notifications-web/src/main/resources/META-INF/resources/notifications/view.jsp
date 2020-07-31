@@ -25,7 +25,7 @@ if (actionRequired) {
 	navigation = "unread";
 }
 
-SearchContainer notificationsSearchContainer = new SearchContainer(renderRequest, currentURLObj, null, actionRequired ? "you-do-not-have-any-requests" : "you-do-not-have-any-notifications");
+SearchContainer<UserNotificationEvent> notificationsSearchContainer = new SearchContainer(renderRequest, currentURLObj, null, actionRequired ? "you-do-not-have-any-requests" : "you-do-not-have-any-notifications");
 
 String searchContainerId = "userNotificationEvents";
 
@@ -85,7 +85,9 @@ navigationURL.setParameter(SearchContainer.DEFAULT_CUR_PARAM, "0");
 	sortingURL="<%= String.valueOf(notificationsManagementToolbarDisplayContext.getSortingURL()) %>"
 />
 
-<div class="container-fluid-1280 main-content-body">
+<clay:container-fluid
+	cssClass="main-content-body"
+>
 	<aui:form action="<%= currentURL %>" method="get" name="fm">
 		<div class="user-notifications">
 			<liferay-ui:search-container
@@ -120,7 +122,7 @@ navigationURL.setParameter(SearchContainer.DEFAULT_CUR_PARAM, "0");
 			</liferay-ui:search-container>
 		</div>
 	</aui:form>
-</div>
+</clay:container-fluid>
 
 <aui:script sandbox="<%= true %>">
 	var deleteNotifications = function () {
@@ -175,7 +177,7 @@ navigationURL.setParameter(SearchContainer.DEFAULT_CUR_PARAM, "0");
 	});
 </aui:script>
 
-<aui:script use="aui-base,liferay-notice">
+<aui:script use="aui-base">
 	var form = A.one('#<portlet:namespace />fm');
 
 	form.delegate(
@@ -210,30 +212,17 @@ navigationURL.setParameter(SearchContainer.DEFAULT_CUR_PARAM, "0");
 						}
 					}
 					else {
-						getNotice().show();
+						Liferay.Util.openToast({
+							message:
+								'<liferay-ui:message key="an-unexpected-error-occurred" />',
+							toastProps: {
+								autoClose: 5000,
+							},
+							type: 'warning',
+						});
 					}
 				});
 		},
 		'.user-notification-action'
 	);
-
-	var notice;
-
-	function getNotice() {
-		if (!notice) {
-			notice = new Liferay.Notice({
-				closeText: false,
-				content:
-					'<liferay-ui:message key="an-unexpected-error-occurred" /><button aria-label="' +
-					Liferay.Language.get('close') +
-					'" class="close" type="button">&times;</button>',
-				timeout: 5000,
-				toggleText: false,
-				type: 'warning',
-				useAnimation: false,
-			});
-		}
-
-		return notice;
-	}
 </aui:script>

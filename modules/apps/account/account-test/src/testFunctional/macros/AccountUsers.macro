@@ -83,4 +83,36 @@ definition {
 		Alert.viewSuccessMessage();
 	}
 
+	macro removeAccount {
+		LexiconEntry.gotoEntry(rowEntry = "${accountUser}");
+
+		Navigator.gotoNavUnderline(navUnderline = "General");
+
+		Navigator.gotoNavNested(navNested = "Accounts");
+
+		LexiconEntry.viewEntryName(rowEntry = "${accountName}");
+
+		Click(
+			key_entryName = "${accountName}",
+			locator1 = "LexiconTable#TABLE_ENTRY_DELETE");
+
+		PortletEntry.save();
+
+		LexiconEntry.viewNoEntry(rowEntry = "${accountName}");
+	}
+
+	macro selectAccounts {
+		SelectFrame(locator1 = "IFrame#SELECT_ACCOUNTS");
+
+		Check(
+			key_tableEntry = "${accountName}",
+			locator1 = "LexiconTable#TABLE_ENTRY_CHECKBOX");
+
+		SelectFrame(value1 = "relative=top");
+
+		Button.clickSelect();
+
+		AssertElementPresent(locator1 = "Search#SEARCH_INFO");
+	}
+
 }

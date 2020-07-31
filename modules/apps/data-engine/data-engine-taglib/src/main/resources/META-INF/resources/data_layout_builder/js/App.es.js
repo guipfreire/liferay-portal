@@ -15,15 +15,16 @@
 import {ClayModalProvider} from '@clayui/modal';
 import React, {useContext, useEffect, useState} from 'react';
 import {DndProvider} from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
+import {HTML5Backend} from 'react-dnd-html5-backend';
 
 import AppContext from './AppContext.es';
 import AppContextProvider from './AppContextProvider.es';
+import {UPDATE_APP_PROPS} from './actions.es';
 import MultiPanelSidebar from './components/sidebar/MultiPanelSidebar.es';
 import initializeSidebarConfig from './components/sidebar/initializeSidebarConfig.es';
 import DataLayoutBuilder from './data-layout-builder/DataLayoutBuilder.es';
 import DataLayoutBuilderContextProvider from './data-layout-builder/DataLayoutBuilderContextProvider.es';
-import DataLayoutBuilderDragAndDrop from './drag-and-drop/DataLayoutBuilderDragAndDrop.es';
+import DragLayer from './drag-and-drop/DragLayer.es';
 
 const parseProps = ({
 	dataDefinitionId,
@@ -39,29 +40,34 @@ const parseProps = ({
 	groupId: Number(groupId),
 });
 
-const AppSidebar = ({panels, sidebarPanels, toolbarId}) => (
-	<MultiPanelSidebar
-		panels={panels}
-		sidebarPanels={sidebarPanels}
-		toolbarId={toolbarId}
-	/>
-);
-
 const AppContent = ({
 	dataLayoutBuilder,
+	setChildrenContext,
 	setDataLayoutBuilder,
 	sidebarConfig,
 	...props
 }) => {
 	const [state, dispatch] = useContext(AppContext);
-
-	const {panels, sidebarPanels} = sidebarConfig;
+	const {panels, sidebarPanels, sidebarVariant} = sidebarConfig;
 
 	useEffect(() => {
 		if (dataLayoutBuilder) {
 			dataLayoutBuilder.emit('contextUpdated', state);
 		}
 	}, [dataLayoutBuilder, state]);
+
+	useEffect(() => {
+		if (setChildrenContext) {
+			setChildrenContext({dataLayoutBuilder, dispatch, state});
+		}
+	}, [dataLayoutBuilder, dispatch, setChildrenContext, state]);
+
+	useEffect(() => {
+		if (!setChildrenContext) {
+			dispatch({payload: props, type: UPDATE_APP_PROPS});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [dispatch, setChildrenContext]);
 
 	return (
 		<>
@@ -76,11 +82,13 @@ const AppContent = ({
 				<DataLayoutBuilderContextProvider
 					dataLayoutBuilder={dataLayoutBuilder}
 				>
-					<AppSidebar panels={panels} sidebarPanels={sidebarPanels} />
-
-					<DataLayoutBuilderDragAndDrop
-						dataLayoutBuilder={dataLayoutBuilder}
+					<MultiPanelSidebar
+						panels={panels}
+						sidebarPanels={sidebarPanels}
+						variant={sidebarVariant}
 					/>
+
+					<DragLayer />
 				</DataLayoutBuilderContextProvider>
 			)}
 		</>
@@ -99,7 +107,6 @@ const App = (props) => {
 	} = parseProps(props);
 
 	const sidebarConfig = initializeSidebarConfig(props);
-
 	const [loaded, setLoaded] = useState(false);
 	const [dataLayoutBuilder, setDataLayoutBuilder] = useState(null);
 

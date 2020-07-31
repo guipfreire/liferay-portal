@@ -20,8 +20,8 @@ import com.liferay.exportimport.kernel.exception.RemoteExportException;
 import com.liferay.exportimport.kernel.staging.Staging;
 import com.liferay.layout.seo.service.LayoutSEOSiteLocalService;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.backgroundtask.BackgroundTaskConstants;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
+import com.liferay.portal.kernel.backgroundtask.constants.BackgroundTaskConstants;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.AvailableLocaleException;
 import com.liferay.portal.kernel.exception.DuplicateGroupException;
@@ -785,7 +785,7 @@ public class SiteAdminPortlet extends MVCPortlet {
 			Locale defaultLocale = LocaleUtil.fromLanguageId(
 				unicodeProperties.getProperty("languageId"));
 
-			if (!liveGroup.isGuest()) {
+			if (!liveGroup.isGuest() && !liveGroup.isOrganization()) {
 				validateDefaultLocaleGroupName(nameMap, defaultLocale);
 			}
 

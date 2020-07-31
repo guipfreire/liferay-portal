@@ -17,14 +17,13 @@ import ClayIcon from '@clayui/icon';
 import ClayLoadingIndicator from '@clayui/loading-indicator';
 import {ClayTooltipProvider} from '@clayui/tooltip';
 import classNames from 'classnames';
-import {useIsMounted} from 'frontend-js-react-web';
+import {useIsMounted, useStateSafe} from 'frontend-js-react-web';
 import React from 'react';
 
 import AppContext from '../../AppContext.es';
 import useLazy from '../../hooks/useLazy.es';
 import useLoad from '../../hooks/useLoad.es';
 import usePlugins from '../../hooks/usePlugins.es';
-import useStateSafe from '../../hooks/useStateSafe.es';
 
 const {Suspense, useCallback, useContext, useEffect} = React;
 
@@ -87,24 +86,26 @@ export default function MultiPanelSidebar({
 			document.querySelector('.product-menu-toggle')
 		);
 
-		const onCloseSidebar = () => {
-			dispatch({
-				payload: {
-					sidebarOpen: false,
-					sidebarPanelId: null,
-				},
-				type: 'SWITCH_SIDEBAR_PANEL',
-			});
-		};
+		if (sideNavigation) {
+			const onCloseSidebar = () => {
+				dispatch({
+					payload: {
+						sidebarOpen: false,
+						sidebarPanelId: null,
+					},
+					type: 'SWITCH_SIDEBAR_PANEL',
+				});
+			};
 
-		const sideNavigationListener = sideNavigation.on(
-			'openStart.lexicon.sidenav',
-			onCloseSidebar
-		);
+			const sideNavigationListener = sideNavigation.on(
+				'openStart.lexicon.sidenav',
+				onCloseSidebar
+			);
 
-		return () => {
-			sideNavigationListener.removeListener();
-		};
+			return () => {
+				sideNavigationListener.removeListener();
+			};
+		}
 	}, []);
 
 	const SidebarPanel = useLazy(
@@ -170,7 +171,16 @@ export default function MultiPanelSidebar({
 					`multi-panel-sidebar-${variant}`
 				)}
 			>
-				<nav className="multi-panel-sidebar-buttons tbar tbar-stacked">
+				<nav
+					className={classNames(
+						'multi-panel-sidebar-buttons',
+						'tbar',
+						'tbar-stacked',
+						variant === 'dark'
+							? `tbar-${variant}-d1`
+							: `tbar-${variant}`
+					)}
+				>
 					<ul className="tbar-nav">
 						{panels.reduce((elements, group, groupIndex) => {
 							const buttons = group.map((panelId) => {
@@ -199,7 +209,10 @@ export default function MultiPanelSidebar({
 
 								return (
 									<li
-										className="tbar-item"
+										className={classNames(
+											'tbar-item',
+											`tbar-item--${panel.sidebarPanelId}`
+										)}
 										key={panel.sidebarPanelId}
 									>
 										{isLink ? (

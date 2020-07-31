@@ -69,6 +69,10 @@ public interface LiferaySelenium {
 
 	public void assertHTMLSourceTextPresent(String value) throws Exception;
 
+	public void assertJavaScript(
+			String javaScript, String message, String argument)
+		throws Exception;
+
 	public void assertJavaScriptErrors(String ignoreJavaScriptError)
 		throws Exception;
 
@@ -172,6 +176,9 @@ public interface LiferaySelenium {
 
 	public void echo(String message);
 
+	public void executeJavaScript(
+		String javaScript, String argument1, String argument2);
+
 	public void fail(String message);
 
 	public String getAlert();
@@ -199,6 +206,9 @@ public interface LiferaySelenium {
 	public String getFirstNumberIncrement(String locator);
 
 	public String getHtmlSource();
+
+	public String getJavaScriptResult(
+		String javaScript, String argument1, String argument2);
 
 	public String getLocation() throws Exception;
 
@@ -309,9 +319,7 @@ public interface LiferaySelenium {
 
 	public void javaScriptClick(String locator);
 
-	public void javaScriptDragAndDropToObject(
-			String sourceLocator, String targetLocator)
-		throws Exception;
+	public void javaScriptDoubleClick(String locator);
 
 	public void javaScriptMouseDown(String locator);
 
@@ -483,6 +491,10 @@ public interface LiferaySelenium {
 
 	public void verifyElementPresent(String locator) throws Exception;
 
+	public void verifyJavaScript(
+			String javaScript, String message, String argument)
+		throws Exception;
+
 	public void verifyNotVisible(String locator) throws Exception;
 
 	public void verifyVisible(String locator) throws Exception;
@@ -499,6 +511,14 @@ public interface LiferaySelenium {
 		throws Exception;
 
 	public void waitForElementPresent(String locator, String throwException)
+		throws Exception;
+
+	public void waitForJavaScript(
+			String javaScript, String message, String argument)
+		throws Exception;
+
+	public void waitForJavaScriptNoError(
+			String javaScript, String message, String argument)
 		throws Exception;
 
 	public void waitForNotEditable(String locator) throws Exception;

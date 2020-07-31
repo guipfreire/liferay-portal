@@ -112,7 +112,9 @@ public abstract class BaseProcessResourceTestCase {
 
 		ProcessResource.Builder builder = ProcessResource.builder();
 
-		processResource = builder.locale(
+		processResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -307,6 +309,26 @@ public abstract class BaseProcessResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/process"))));
+	}
+
+	@Test
+	public void testGraphQLGetProcessNotFound() throws Exception {
+		Long irrelevantProcessId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"process",
+						new HashMap<String, Object>() {
+							{
+								put("processId", irrelevantProcessId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

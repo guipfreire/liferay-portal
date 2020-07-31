@@ -14,6 +14,7 @@
 
 package com.liferay.portal.workflow.kaleo.forms.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -76,6 +77,10 @@ public abstract class KaleoProcessLinkLocalServiceBaseImpl
 	/**
 	 * Adds the kaleo process link to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoProcessLinkLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoProcessLink the kaleo process link
 	 * @return the kaleo process link that was added
 	 */
@@ -104,6 +109,10 @@ public abstract class KaleoProcessLinkLocalServiceBaseImpl
 	/**
 	 * Deletes the kaleo process link with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoProcessLinkLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoProcessLinkId the primary key of the kaleo process link
 	 * @return the kaleo process link that was removed
 	 * @throws PortalException if a kaleo process link with the primary key could not be found
@@ -119,6 +128,10 @@ public abstract class KaleoProcessLinkLocalServiceBaseImpl
 	/**
 	 * Deletes the kaleo process link from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoProcessLinkLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoProcessLink the kaleo process link
 	 * @return the kaleo process link that was removed
 	 */
@@ -128,6 +141,11 @@ public abstract class KaleoProcessLinkLocalServiceBaseImpl
 		KaleoProcessLink kaleoProcessLink) {
 
 		return kaleoProcessLinkPersistence.remove(kaleoProcessLink);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return kaleoProcessLinkPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -344,6 +362,10 @@ public abstract class KaleoProcessLinkLocalServiceBaseImpl
 
 	/**
 	 * Updates the kaleo process link in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoProcessLinkLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param kaleoProcessLink the kaleo process link
 	 * @return the kaleo process link that was updated

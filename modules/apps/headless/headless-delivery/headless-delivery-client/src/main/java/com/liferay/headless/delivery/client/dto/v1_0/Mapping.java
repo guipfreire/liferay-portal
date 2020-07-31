@@ -28,6 +28,10 @@ import javax.annotation.Generated;
 @Generated("")
 public class Mapping implements Cloneable {
 
+	public static Mapping toDTO(String json) {
+		return MappingSerDes.toDTO(json);
+	}
+
 	public String getFieldKey() {
 		return fieldKey;
 	}
@@ -49,47 +53,26 @@ public class Mapping implements Cloneable {
 
 	protected String fieldKey;
 
-	public String getItemClassName() {
-		return itemClassName;
+	public Object getItemReference() {
+		return itemReference;
 	}
 
-	public void setItemClassName(String itemClassName) {
-		this.itemClassName = itemClassName;
+	public void setItemReference(Object itemReference) {
+		this.itemReference = itemReference;
 	}
 
-	public void setItemClassName(
-		UnsafeSupplier<String, Exception> itemClassNameUnsafeSupplier) {
+	public void setItemReference(
+		UnsafeSupplier<Object, Exception> itemReferenceUnsafeSupplier) {
 
 		try {
-			itemClassName = itemClassNameUnsafeSupplier.get();
+			itemReference = itemReferenceUnsafeSupplier.get();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected String itemClassName;
-
-	public Long getItemClassPK() {
-		return itemClassPK;
-	}
-
-	public void setItemClassPK(Long itemClassPK) {
-		this.itemClassPK = itemClassPK;
-	}
-
-	public void setItemClassPK(
-		UnsafeSupplier<Long, Exception> itemClassPKUnsafeSupplier) {
-
-		try {
-			itemClassPK = itemClassPKUnsafeSupplier.get();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected Long itemClassPK;
+	protected Object itemReference;
 
 	@Override
 	public Mapping clone() throws CloneNotSupportedException {

@@ -50,7 +50,7 @@ List<Map<String, String>> selectedItems = (List<Map<String, String>>)data.get("s
 						%>
 
 							<clay:label
-								closeable="<%= true %>"
+								dismissible="<%= true %>"
 								label='<%= selectedItem.get("label") %>'
 							/>
 
@@ -70,7 +70,7 @@ List<Map<String, String>> selectedItems = (List<Map<String, String>>)data.get("s
 	</div>
 
 	<react:component
-		data="<%= data %>"
 		module="asset_tags_selector/AssetTagsSelectorTag.es"
+		props="<%= data %>"
 	/>
 </div>

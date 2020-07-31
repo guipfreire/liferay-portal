@@ -27,7 +27,7 @@ renderResponse.setTitle(siteNavigationAdminDisplayContext.getSiteNavigationMenuN
 
 <c:if test="<%= siteNavigationAdminDisplayContext.hasUpdatePermission() %>">
 	<nav class="management-bar management-bar-light navbar navbar-expand-md site-navigation-management-bar">
-		<div class="container">
+		<clay:container-fluid>
 			<ul class="navbar-nav"></ul>
 
 			<ul class="navbar-nav">
@@ -52,24 +52,24 @@ renderResponse.setTitle(siteNavigationAdminDisplayContext.getSiteNavigationMenuN
 							/>
 						</button>
 
-						<%
-						Map<String, Object> data = HashMapBuilder.<String, Object>put(
-							"dropdownItems", siteNavigationAdminDisplayContext.getAddSiteNavigationMenuItemDropdownItems()
-						).build();
-						%>
-
 						<react:component
-							data="<%= data %>"
 							module="js/add_menu/index"
+							props='<%=
+								HashMapBuilder.<String, Object>put(
+									"dropdownItems", siteNavigationAdminDisplayContext.getAddSiteNavigationMenuItemDropdownItems()
+								).build()
+							%>'
 						/>
 					</div>
 				</li>
 			</ul>
-		</div>
+		</clay:container-fluid>
 	</nav>
 </c:if>
 
-<div class="container-fluid-1280 contextual-sidebar-content site-navigation-content">
+<clay:container-fluid
+	cssClass="contextual-sidebar-content site-navigation-content"
+>
 	<div class="lfr-search-container-wrapper site-navigation-menu-container">
 		<liferay-ui:error embed="<%= false %>" key="<%= InvalidSiteNavigationMenuItemOrderException.class.getName() %>" message="the-order-of-site-navigation-menu-items-is-invalid" />
 
@@ -103,13 +103,13 @@ renderResponse.setTitle(siteNavigationAdminDisplayContext.getSiteNavigationMenuN
 			<c:otherwise>
 				<liferay-frontend:empty-result-message
 					actionDropdownItems="<%= siteNavigationAdminDisplayContext.getAddSiteNavigationMenuItemDropdownItems() %>"
-					defaultEventHandler='<%= renderResponse.getNamespace() + "AddMenuDefaultEventHandler" %>'
+					defaultEventHandler='<%= liferayPortletResponse.getNamespace() + "AddMenuDefaultEventHandler" %>'
 					description='<%= LanguageUtil.get(request, "fortunately-it-is-very-easy-to-add-new-ones") %>'
 				/>
 			</c:otherwise>
 		</c:choose>
 	</div>
-</div>
+</clay:container-fluid>
 
 <c:if test="<%= siteNavigationAdminDisplayContext.hasUpdatePermission() %>">
 	<div>
@@ -126,14 +126,14 @@ renderResponse.setTitle(siteNavigationAdminDisplayContext.getSiteNavigationMenuN
 		</portlet:renderURL>
 
 		<%
-		Map<String, Object> data = HashMapBuilder.<String, Object>put(
+		Map<String, Object> props = HashMapBuilder.<String, Object>put(
 			"editSiteNavigationMenuItemParentURL", editSiteNavigationMenuItemParentURL.toString()
 		).put(
 			"editSiteNavigationMenuItemURL", editSiteNavigationMenuItemURL.toString()
 		).put(
 			"editSiteNavigationMenuSettingsURL", editSiteNavigationMenuSettingsURL.toString()
 		).put(
-			"id", renderResponse.getNamespace() + "sidebar"
+			"id", liferayPortletResponse.getNamespace() + "sidebar"
 		).put(
 			"redirect", currentURL
 		).put(
@@ -145,8 +145,8 @@ renderResponse.setTitle(siteNavigationAdminDisplayContext.getSiteNavigationMenuN
 
 		<react:component
 			componentId="contextualSidebar"
-			data="<%= data %>"
 			module="js/ContextualSidebar"
+			props="<%= props %>"
 		/>
 	</div>
 </c:if>

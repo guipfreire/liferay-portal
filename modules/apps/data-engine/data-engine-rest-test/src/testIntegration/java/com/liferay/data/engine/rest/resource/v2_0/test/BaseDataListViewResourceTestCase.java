@@ -118,7 +118,9 @@ public abstract class BaseDataListViewResourceTestCase {
 
 		DataListViewResource.Builder builder = DataListViewResource.builder();
 
-		dataListViewResource = builder.locale(
+		dataListViewResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -197,6 +199,26 @@ public abstract class BaseDataListViewResourceTestCase {
 		dataListView = DataListViewSerDes.toDTO(json);
 
 		Assert.assertEquals(regex, dataListView.getSortField());
+	}
+
+	@Test
+	public void testDeleteDataListViewsDataDefinition() throws Exception {
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		DataListView dataListView =
+			testDeleteDataListViewsDataDefinition_addDataListView();
+
+		assertHttpResponseStatusCode(
+			204,
+			dataListViewResource.deleteDataListViewsDataDefinitionHttpResponse(
+				dataListView.getDataDefinitionId()));
+	}
+
+	protected DataListView
+			testDeleteDataListViewsDataDefinition_addDataListView()
+		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
 	}
 
 	@Test
@@ -576,6 +598,26 @@ public abstract class BaseDataListViewResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/dataListView"))));
+	}
+
+	@Test
+	public void testGraphQLGetDataListViewNotFound() throws Exception {
+		Long irrelevantDataListViewId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"dataListView",
+						new HashMap<String, Object>() {
+							{
+								put("dataListViewId", irrelevantDataListViewId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

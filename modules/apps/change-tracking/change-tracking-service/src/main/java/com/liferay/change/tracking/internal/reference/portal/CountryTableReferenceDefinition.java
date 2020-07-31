@@ -14,8 +14,9 @@
 
 package com.liferay.change.tracking.internal.reference.portal;
 
-import com.liferay.change.tracking.reference.TableReferenceDefinition;
-import com.liferay.change.tracking.reference.helper.TableReferenceInfoDefiner;
+import com.liferay.change.tracking.spi.reference.TableReferenceDefinition;
+import com.liferay.change.tracking.spi.reference.builder.ChildTableReferenceInfoBuilder;
+import com.liferay.change.tracking.spi.reference.builder.ParentTableReferenceInfoBuilder;
 import com.liferay.portal.kernel.model.CountryTable;
 import com.liferay.portal.kernel.service.persistence.BasePersistence;
 import com.liferay.portal.kernel.service.persistence.CountryPersistence;
@@ -31,29 +32,15 @@ public class CountryTableReferenceDefinition
 	implements TableReferenceDefinition<CountryTable> {
 
 	@Override
-	public void defineTableReferences(
-		TableReferenceInfoDefiner<CountryTable> tableReferenceInfoDefiner) {
+	public void defineChildTableReferences(
+		ChildTableReferenceInfoBuilder<CountryTable>
+			childTableReferenceInfoBuilder) {
+	}
 
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			CountryTable.INSTANCE.name);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			CountryTable.INSTANCE.a2);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			CountryTable.INSTANCE.a3);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			CountryTable.INSTANCE.number);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			CountryTable.INSTANCE.idd);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			CountryTable.INSTANCE.zipRequired);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			CountryTable.INSTANCE.active);
+	@Override
+	public void defineParentTableReferences(
+		ParentTableReferenceInfoBuilder<CountryTable>
+			parentTableReferenceInfoBuilder) {
 	}
 
 	@Override

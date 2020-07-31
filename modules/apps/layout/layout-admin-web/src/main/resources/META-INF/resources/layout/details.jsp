@@ -80,7 +80,7 @@ String friendlyURLBase = StringPool.BLANK;
 <c:choose>
 	<c:when test="<%= !group.isLayoutPrototype() %>">
 		<c:if test="<%= !layoutsAdminDisplayContext.isDraft() && !selLayout.isSystem() %>">
-			<aui:input name="name" />
+			<aui:input ignoreRequestValue="<%= SessionErrors.isEmpty(liferayPortletRequest) %>" name="name" />
 
 			<div class="form-group">
 				<aui:input helpMessage="hidden-from-navigation-menu-widget-help-message" label="hidden-from-navigation-menu-widget" name="hidden" type="toggle-switch" value="<%= selLayout.isHidden() %>" />
@@ -89,11 +89,45 @@ String friendlyURLBase = StringPool.BLANK;
 
 		<c:choose>
 			<c:when test="<%= selLayoutType.isURLFriendliable() && !layoutsAdminDisplayContext.isDraft() && !selLayout.isSystem() %>">
+				<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/layout/get_friendly_url_entry_localizations" var="friendlyURLEntryLocalizationsURL">
+					<portlet:param name="plid" value="<%= String.valueOf(selLayout.getPlid()) %>" />
+				</liferay-portlet:resourceURL>
+
+				<portlet:actionURL name="/layout/delete_friendly_url_entry_localization" var="deleteFriendlyURLEntryLocalizationURL">
+					<portlet:param name="plid" value="<%= String.valueOf(selLayout.getPlid()) %>" />
+				</portlet:actionURL>
+
+				<portlet:actionURL name="/layout/restore_friendly_url_entry_localization" var="restoreFriendlyURLEntryLocalizationURL">
+					<portlet:param name="plid" value="<%= String.valueOf(selLayout.getPlid()) %>" />
+				</portlet:actionURL>
+
+				<div class="btn-url-history-wrapper">
+					<react:component
+						module="js/friendly_url_history/FriendlyURLHistory"
+						props='<%=
+							HashMapBuilder.<String, Object>put(
+								"defaultLanguageId",
+								LocaleUtil.toLanguageId(company.getDefaultUser().getLocale())
+							).put(
+								"deleteFriendlyURLEntryLocalizationURL",
+								deleteFriendlyURLEntryLocalizationURL
+							).put(
+								"friendlyURLEntryLocalizationsURL",
+								friendlyURLEntryLocalizationsURL
+							).put(
+								"restoreFriendlyURLEntryLocalizationURL",
+								restoreFriendlyURLEntryLocalizationURL
+							).build()
+						%>'
+					/>
+				</div>
+
 				<div class="form-group friendly-url">
 					<label for="<portlet:namespace />friendlyURL"><liferay-ui:message key="friendly-url" /> <liferay-ui:icon-help message='<%= LanguageUtil.format(request, "for-example-x", "<em>/news</em>", false) %>' /></label>
 
 					<liferay-ui:input-localized
 						defaultLanguageId="<%= LocaleUtil.toLanguageId(themeDisplay.getSiteDefaultLocale()) %>"
+						ignoreRequestValue="<%= SessionErrors.isEmpty(liferayPortletRequest) %>"
 						inputAddon="<%= friendlyURLBase.toString() %>"
 						name="friendlyURL"
 						xml="<%= HttpUtil.decodeURL(selLayout.getFriendlyURLsXML()) %>"
@@ -158,11 +192,11 @@ String friendlyURLBase = StringPool.BLANK;
 </div>
 
 <c:if test="<%= !selLayout.isTypeAssetDisplay() %>">
-	<div class="sheet-section">
+	<clay:sheet-section>
 		<h3 class="sheet-subtitle"><liferay-ui:message key="categorization" /></h3>
 
 		<liferay-util:include page="/layout/categorization.jsp" servletContext="<%= application %>" />
-	</div>
+	</clay:sheet-section>
 </c:if>
 
 <aui:script require="metal-dom/src/dom as dom">

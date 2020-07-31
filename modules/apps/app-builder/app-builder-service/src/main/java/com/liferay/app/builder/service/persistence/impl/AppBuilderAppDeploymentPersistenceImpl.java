@@ -16,6 +16,7 @@ package com.liferay.app.builder.service.persistence.impl;
 
 import com.liferay.app.builder.exception.NoSuchAppDeploymentException;
 import com.liferay.app.builder.model.AppBuilderAppDeployment;
+import com.liferay.app.builder.model.AppBuilderAppDeploymentTable;
 import com.liferay.app.builder.model.impl.AppBuilderAppDeploymentImpl;
 import com.liferay.app.builder.model.impl.AppBuilderAppDeploymentModelImpl;
 import com.liferay.app.builder.service.persistence.AppBuilderAppDeploymentPersistence;
@@ -34,7 +35,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
@@ -252,10 +252,6 @@ public class AppBuilderAppDeploymentPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(finderPath, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -594,8 +590,6 @@ public class AppBuilderAppDeploymentPersistenceImpl
 				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(finderPath, finderArgs);
-
 				throw processException(exception);
 			}
 			finally {
@@ -774,10 +768,6 @@ public class AppBuilderAppDeploymentPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(_finderPathFetchByA_T, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -868,8 +858,6 @@ public class AppBuilderAppDeploymentPersistenceImpl
 				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(finderPath, finderArgs);
-
 				throw processException(exception);
 			}
 			finally {
@@ -890,17 +878,19 @@ public class AppBuilderAppDeploymentPersistenceImpl
 		"(appBuilderAppDeployment.type IS NULL OR appBuilderAppDeployment.type = '')";
 
 	public AppBuilderAppDeploymentPersistenceImpl() {
-		setModelClass(AppBuilderAppDeployment.class);
-
-		setModelImplClass(AppBuilderAppDeploymentImpl.class);
-		setModelPKClass(long.class);
-
 		Map<String, String> dbColumnNames = new HashMap<String, String>();
 
 		dbColumnNames.put("settings", "settings_");
 		dbColumnNames.put("type", "type_");
 
 		setDBColumnNames(dbColumnNames);
+
+		setModelClass(AppBuilderAppDeployment.class);
+
+		setModelImplClass(AppBuilderAppDeploymentImpl.class);
+		setModelPKClass(long.class);
+
+		setTable(AppBuilderAppDeploymentTable.INSTANCE);
 	}
 
 	/**
@@ -911,7 +901,7 @@ public class AppBuilderAppDeploymentPersistenceImpl
 	@Override
 	public void cacheResult(AppBuilderAppDeployment appBuilderAppDeployment) {
 		entityCache.putResult(
-			entityCacheEnabled, AppBuilderAppDeploymentImpl.class,
+			AppBuilderAppDeploymentImpl.class,
 			appBuilderAppDeployment.getPrimaryKey(), appBuilderAppDeployment);
 
 		finderCache.putResult(
@@ -938,7 +928,7 @@ public class AppBuilderAppDeploymentPersistenceImpl
 				appBuilderAppDeployments) {
 
 			if (entityCache.getResult(
-					entityCacheEnabled, AppBuilderAppDeploymentImpl.class,
+					AppBuilderAppDeploymentImpl.class,
 					appBuilderAppDeployment.getPrimaryKey()) == null) {
 
 				cacheResult(appBuilderAppDeployment);
@@ -975,7 +965,7 @@ public class AppBuilderAppDeploymentPersistenceImpl
 	@Override
 	public void clearCache(AppBuilderAppDeployment appBuilderAppDeployment) {
 		entityCache.removeResult(
-			entityCacheEnabled, AppBuilderAppDeploymentImpl.class,
+			AppBuilderAppDeploymentImpl.class,
 			appBuilderAppDeployment.getPrimaryKey());
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
@@ -996,7 +986,7 @@ public class AppBuilderAppDeploymentPersistenceImpl
 				appBuilderAppDeployments) {
 
 			entityCache.removeResult(
-				entityCacheEnabled, AppBuilderAppDeploymentImpl.class,
+				AppBuilderAppDeploymentImpl.class,
 				appBuilderAppDeployment.getPrimaryKey());
 
 			clearUniqueFindersCache(
@@ -1013,8 +1003,7 @@ public class AppBuilderAppDeploymentPersistenceImpl
 
 		for (Serializable primaryKey : primaryKeys) {
 			entityCache.removeResult(
-				entityCacheEnabled, AppBuilderAppDeploymentImpl.class,
-				primaryKey);
+				AppBuilderAppDeploymentImpl.class, primaryKey);
 		}
 	}
 
@@ -1221,10 +1210,7 @@ public class AppBuilderAppDeploymentPersistenceImpl
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (!_columnBitmaskEnabled) {
-			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
-		}
-		else if (isNew) {
+		if (isNew) {
 			Object[] args = new Object[] {
 				appBuilderAppDeploymentModelImpl.getAppBuilderAppId()
 			};
@@ -1264,7 +1250,7 @@ public class AppBuilderAppDeploymentPersistenceImpl
 		}
 
 		entityCache.putResult(
-			entityCacheEnabled, AppBuilderAppDeploymentImpl.class,
+			AppBuilderAppDeploymentImpl.class,
 			appBuilderAppDeployment.getPrimaryKey(), appBuilderAppDeployment,
 			false);
 
@@ -1457,10 +1443,6 @@ public class AppBuilderAppDeploymentPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(finderPath, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -1507,9 +1489,6 @@ public class AppBuilderAppDeploymentPersistenceImpl
 					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY);
-
 				throw processException(exception);
 			}
 			finally {
@@ -1550,29 +1529,20 @@ public class AppBuilderAppDeploymentPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		AppBuilderAppDeploymentModelImpl.setEntityCacheEnabled(
-			entityCacheEnabled);
-		AppBuilderAppDeploymentModelImpl.setFinderCacheEnabled(
-			finderCacheEnabled);
-
 		_finderPathWithPaginationFindAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled,
 			AppBuilderAppDeploymentImpl.class,
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
 
 		_finderPathWithoutPaginationFindAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled,
 			AppBuilderAppDeploymentImpl.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
 			new String[0]);
 
 		_finderPathCountAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
 			new String[0]);
 
 		_finderPathWithPaginationFindByAppBuilderAppId = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled,
 			AppBuilderAppDeploymentImpl.class,
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByAppBuilderAppId",
 			new String[] {
@@ -1581,19 +1551,16 @@ public class AppBuilderAppDeploymentPersistenceImpl
 			});
 
 		_finderPathWithoutPaginationFindByAppBuilderAppId = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled,
 			AppBuilderAppDeploymentImpl.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByAppBuilderAppId",
 			new String[] {Long.class.getName()},
 			AppBuilderAppDeploymentModelImpl.APPBUILDERAPPID_COLUMN_BITMASK);
 
 		_finderPathCountByAppBuilderAppId = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByAppBuilderAppId",
-			new String[] {Long.class.getName()});
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"countByAppBuilderAppId", new String[] {Long.class.getName()});
 
 		_finderPathFetchByA_T = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled,
 			AppBuilderAppDeploymentImpl.class, FINDER_CLASS_NAME_ENTITY,
 			"fetchByA_T",
 			new String[] {Long.class.getName(), String.class.getName()},
@@ -1601,8 +1568,7 @@ public class AppBuilderAppDeploymentPersistenceImpl
 			AppBuilderAppDeploymentModelImpl.TYPE_COLUMN_BITMASK);
 
 		_finderPathCountByA_T = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByA_T",
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByA_T",
 			new String[] {Long.class.getName(), String.class.getName()});
 	}
 
@@ -1620,12 +1586,6 @@ public class AppBuilderAppDeploymentPersistenceImpl
 		unbind = "-"
 	)
 	public void setConfiguration(Configuration configuration) {
-		super.setConfiguration(configuration);
-
-		_columnBitmaskEnabled = GetterUtil.getBoolean(
-			configuration.get(
-				"value.object.column.bitmask.enabled.com.liferay.app.builder.model.AppBuilderAppDeployment"),
-			true);
 	}
 
 	@Override
@@ -1645,8 +1605,6 @@ public class AppBuilderAppDeploymentPersistenceImpl
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		super.setSessionFactory(sessionFactory);
 	}
-
-	private boolean _columnBitmaskEnabled;
 
 	@Reference
 	protected EntityCache entityCache;

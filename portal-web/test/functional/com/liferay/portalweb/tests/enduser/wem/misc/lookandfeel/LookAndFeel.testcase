@@ -22,15 +22,24 @@ definition {
 
 	@priority = "5"
 	test ConfigureCustomStylesViaLookAndFeelPG {
+		property portal.acceptance = "true";
 		property testray.component.names = "Training";
 
 		JSONLayout.addPublicLayout(
 			groupName = "Guest",
 			layoutName = "Test Page Name");
 
-		Navigator.gotoPage(pageName = "Test Page Name");
+		JSONLayout.addWidgetToPublicLayout(
+			groupName = "Guest",
+			layoutName = "Test Page Name",
+			widgetName = "Sign In");
 
-		Portlet.addPG(portletName = "Sign In");
+		JSONLayout.addWidgetToPublicLayout(
+			groupName = "Guest",
+			layoutName = "Test Page Name",
+			widgetName = "Web Content Display");
+
+		Navigator.gotoPage(pageName = "Test Page Name");
 
 		Portlet.gotoPortletOptions(
 			portletName = "Sign In",
@@ -45,8 +54,6 @@ definition {
 		Navigator.gotoPage(pageName = "Test Page Name");
 
 		Portlet.viewCustomStylesViaLookandfeelPG();
-
-		Portlet.addPG(portletName = "Web Content Display");
 
 		Portlet.gotoPortletOptions(
 			portletName = "Web Content Display",

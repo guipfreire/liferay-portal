@@ -35,6 +35,10 @@ public class TreeTag extends SimpleTagSupport {
 	public void doTag() throws IOException, JspException {
 		JspContext jspContext = getJspContext();
 
+		JspFragment jspFragment = getJspBody();
+
+		jspFragment.invoke(null);
+
 		Object parentNodes = jspContext.getAttribute("parentNodes");
 
 		try {
@@ -74,8 +78,8 @@ public class TreeTag extends SimpleTagSupport {
 		this.nodeJspFragment = nodeJspFragment;
 	}
 
-	public void setTrees(Collection trees) {
-		_trees = (Collection)trees;
+	public void setTrees(Collection<Tree<?>> trees) {
+		_trees = trees;
 	}
 
 	protected void renderTree(Tree<?> tree) throws IOException, JspException {
@@ -87,10 +91,14 @@ public class TreeTag extends SimpleTagSupport {
 			jspContext.setAttribute("tree", tree);
 
 			if (tree instanceof Tree.Leaf) {
-				getLeafJspFragment().invoke(null);
+				JspFragment leafJspFragment = getLeafJspFragment();
+
+				leafJspFragment.invoke(null);
 			}
 			else {
-				getNodeJspFragment().invoke(null);
+				JspFragment nodeJspFragment = getNodeJspFragment();
+
+				nodeJspFragment.invoke(null);
 			}
 		}
 		finally {

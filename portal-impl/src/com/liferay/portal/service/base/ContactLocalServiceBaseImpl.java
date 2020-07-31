@@ -14,6 +14,7 @@
 
 package com.liferay.portal.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -77,6 +78,10 @@ public abstract class ContactLocalServiceBaseImpl
 	/**
 	 * Adds the contact to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ContactLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param contact the contact
 	 * @return the contact that was added
 	 */
@@ -103,6 +108,10 @@ public abstract class ContactLocalServiceBaseImpl
 	/**
 	 * Deletes the contact with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ContactLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param contactId the primary key of the contact
 	 * @return the contact that was removed
 	 * @throws PortalException if a contact with the primary key could not be found
@@ -116,6 +125,10 @@ public abstract class ContactLocalServiceBaseImpl
 	/**
 	 * Deletes the contact from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ContactLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param contact the contact
 	 * @return the contact that was removed
 	 */
@@ -123,6 +136,11 @@ public abstract class ContactLocalServiceBaseImpl
 	@Override
 	public Contact deleteContact(Contact contact) {
 		return contactPersistence.remove(contact);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return contactPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -331,6 +349,10 @@ public abstract class ContactLocalServiceBaseImpl
 
 	/**
 	 * Updates the contact in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect ContactLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param contact the contact
 	 * @return the contact that was updated

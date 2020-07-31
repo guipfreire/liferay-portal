@@ -19,6 +19,7 @@ import com.liferay.exportimport.kernel.lar.ManifestSummary;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -81,6 +82,10 @@ public abstract class SiteNavigationMenuItemLocalServiceBaseImpl
 	/**
 	 * Adds the site navigation menu item to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect SiteNavigationMenuItemLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param siteNavigationMenuItem the site navigation menu item
 	 * @return the site navigation menu item that was added
 	 */
@@ -112,6 +117,10 @@ public abstract class SiteNavigationMenuItemLocalServiceBaseImpl
 	/**
 	 * Deletes the site navigation menu item with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect SiteNavigationMenuItemLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param siteNavigationMenuItemId the primary key of the site navigation menu item
 	 * @return the site navigation menu item that was removed
 	 * @throws PortalException if a site navigation menu item with the primary key could not be found
@@ -129,6 +138,10 @@ public abstract class SiteNavigationMenuItemLocalServiceBaseImpl
 	/**
 	 * Deletes the site navigation menu item from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect SiteNavigationMenuItemLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param siteNavigationMenuItem the site navigation menu item
 	 * @return the site navigation menu item that was removed
 	 */
@@ -138,6 +151,11 @@ public abstract class SiteNavigationMenuItemLocalServiceBaseImpl
 		SiteNavigationMenuItem siteNavigationMenuItem) {
 
 		return siteNavigationMenuItemPersistence.remove(siteNavigationMenuItem);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return siteNavigationMenuItemPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -503,6 +521,10 @@ public abstract class SiteNavigationMenuItemLocalServiceBaseImpl
 
 	/**
 	 * Updates the site navigation menu item in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect SiteNavigationMenuItemLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param siteNavigationMenuItem the site navigation menu item
 	 * @return the site navigation menu item that was updated

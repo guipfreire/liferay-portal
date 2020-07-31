@@ -19,6 +19,7 @@ import com.liferay.analytics.message.storage.model.AnalyticsMessageBodyBlobModel
 import com.liferay.analytics.message.storage.service.AnalyticsMessageLocalService;
 import com.liferay.analytics.message.storage.service.persistence.AnalyticsMessagePersistence;
 import com.liferay.petra.io.AutoDeleteFileInputStream;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -84,6 +85,10 @@ public abstract class AnalyticsMessageLocalServiceBaseImpl
 	/**
 	 * Adds the analytics message to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AnalyticsMessageLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param analyticsMessage the analytics message
 	 * @return the analytics message that was added
 	 */
@@ -112,6 +117,10 @@ public abstract class AnalyticsMessageLocalServiceBaseImpl
 	/**
 	 * Deletes the analytics message with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AnalyticsMessageLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param analyticsMessageId the primary key of the analytics message
 	 * @return the analytics message that was removed
 	 * @throws PortalException if a analytics message with the primary key could not be found
@@ -127,6 +136,10 @@ public abstract class AnalyticsMessageLocalServiceBaseImpl
 	/**
 	 * Deletes the analytics message from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AnalyticsMessageLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param analyticsMessage the analytics message
 	 * @return the analytics message that was removed
 	 */
@@ -136,6 +149,11 @@ public abstract class AnalyticsMessageLocalServiceBaseImpl
 		AnalyticsMessage analyticsMessage) {
 
 		return analyticsMessagePersistence.remove(analyticsMessage);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return analyticsMessagePersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -352,6 +370,10 @@ public abstract class AnalyticsMessageLocalServiceBaseImpl
 
 	/**
 	 * Updates the analytics message in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect AnalyticsMessageLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param analyticsMessage the analytics message
 	 * @return the analytics message that was updated

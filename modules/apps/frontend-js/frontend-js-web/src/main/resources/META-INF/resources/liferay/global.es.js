@@ -17,6 +17,7 @@ import groupBy from 'lodash.groupby';
 import isEqual from 'lodash.isequal';
 import unescape from 'lodash.unescape';
 
+import DynamicSelect from './DynamicSelect';
 import BREAKPOINTS from './breakpoints';
 import {
 	component,
@@ -55,6 +56,11 @@ import getDOM from './util/get_dom';
 import getElement from './util/get_element';
 import getPortletId from './util/get_portlet_id';
 import getPortletNamespace from './util/get_portlet_namespace.es';
+import {
+	MAP_HTML_CHARS_ESCAPED,
+	escapeHTML,
+	unescapeHTML,
+} from './util/html_util';
 import inBrowserView from './util/in_browser_view';
 import isPhone from './util/is_phone';
 import isTablet from './util/is_tablet';
@@ -90,6 +96,15 @@ Liferay.Address = {
 	getRegions,
 };
 
+/**
+ * @deprecated As of Athanasius (7.3.x), with no direct replacement
+ */
+Liferay.DynamicSelect = DynamicSelect;
+
+Liferay.Language = {
+	get: (key) => key,
+};
+
 Liferay.LayoutExporter = {
 	all: hideLayoutPane,
 	details: toggleLayoutDetails,
@@ -112,9 +127,29 @@ Liferay.Portlet = Liferay.Portlet || {};
 
 Liferay.Portlet.minimize = minimizePortlet;
 
+Liferay.Portlet.openModal = (...args) => {
+	Liferay.Loader.require(
+		'frontend-js-web/liferay/modal/Modal',
+		(commands) => {
+			commands.openPortletModal(...args);
+		}
+	);
+};
+
+Liferay.Portlet.openWindow = (...args) => {
+	Liferay.Loader.require(
+		'frontend-js-web/liferay/modal/Modal',
+		(commands) => {
+			commands.openPortletWindow(...args);
+		}
+	);
+};
+
 Liferay.SideNavigation = SideNavigation;
 
 Liferay.Util = Liferay.Util || {};
+
+Liferay.Util.MAP_HTML_CHARS_ESCAPED = MAP_HTML_CHARS_ESCAPED;
 
 /**
  * @deprecated As of Athanasius (7.3.x), replaced by `import {addParams} from 'frontend-js-web'`
@@ -131,6 +166,7 @@ Liferay.Util.disableEsc = () => {
 };
 
 Liferay.Util.escape = escape;
+Liferay.Util.escapeHTML = escapeHTML;
 Liferay.Util.fetch = fetch;
 
 /**
@@ -229,5 +265,6 @@ Liferay.Util.Session = {
 };
 
 Liferay.Util.unescape = unescape;
+Liferay.Util.unescapeHTML = unescapeHTML;
 
 export {portlet};

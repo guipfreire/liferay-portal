@@ -11,6 +11,8 @@ definition {
 	}
 
 	macro clickCard {
+		WaitForLiferayEvent.initializeLiferayEventLog();
+
 		Click.waitForMenuToggleJSClick(
 			key_card = "${card}",
 			locator1 = "LexiconCard#CARD");
@@ -76,6 +78,12 @@ definition {
 			key_card = "${card}",
 			locator1 = "LexiconCard#CARD_SUBTITLE",
 			value1 = "${cardSubtitle}");
+	}
+
+	macro viewCardThumbnail {
+		AssertVisible(
+			key_card = "${card}",
+			locator1 = "LexiconCard#CARD_THUMBNAIL");
 	}
 
 	macro viewCardTitle {

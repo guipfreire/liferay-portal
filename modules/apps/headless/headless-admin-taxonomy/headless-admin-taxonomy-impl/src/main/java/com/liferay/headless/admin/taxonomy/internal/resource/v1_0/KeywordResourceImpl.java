@@ -22,6 +22,7 @@ import com.liferay.headless.admin.taxonomy.dto.v1_0.Keyword;
 import com.liferay.headless.admin.taxonomy.internal.dto.v1_0.util.CreatorUtil;
 import com.liferay.headless.admin.taxonomy.internal.odata.entity.v1_0.KeywordEntityModel;
 import com.liferay.headless.admin.taxonomy.resource.v1_0.KeywordResource;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.OrderFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
@@ -37,6 +38,8 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.odata.entity.EntityModel;
 import com.liferay.portal.vulcan.pagination.Page;
@@ -83,7 +86,8 @@ public class KeywordResourceImpl
 
 	@Override
 	public Page<Keyword> getKeywordsRankedPage(
-		Long siteId, Pagination pagination) {
+			Long siteId, String search, Pagination pagination)
+		throws Exception {
 
 		DynamicQuery dynamicQuery = _assetTagLocalService.dynamicQuery();
 
@@ -93,6 +97,12 @@ public class KeywordResourceImpl
 
 		if (siteId != null) {
 			dynamicQuery.add(RestrictionsFactoryUtil.eq("groupId", siteId));
+		}
+
+		if (!Validator.isBlank(search)) {
+			dynamicQuery.add(
+				RestrictionsFactoryUtil.ilike(
+					"name", StringUtil.quote(search, StringPool.PERCENT)));
 		}
 
 		dynamicQuery.addOrder(OrderFactoryUtil.desc("assetCount"));
@@ -165,9 +175,9 @@ public class KeywordResourceImpl
 		projectionList.add(
 			ProjectionFactoryUtil.alias(
 				ProjectionFactoryUtil.sqlProjection(
-					"(select count(entryId) assetCount from " +
+					"COALESCE((select count(entryId) assetCount from " +
 						"AssetEntries_AssetTags where tagId = this_.tagId " +
-							"group by tagId) AS assetCount",
+							"group by tagId), 0) AS assetCount",
 					new String[] {"assetCount"}, new Type[] {Type.INTEGER}),
 				"assetCount"));
 		projectionList.add(ProjectionFactoryUtil.property("companyId"));
@@ -255,7 +265,7 @@ public class KeywordResourceImpl
 						if (assetTag.getUserId() != 0) {
 							return CreatorUtil.toCreator(
 								_portal,
-								_userLocalService.getUserById(
+								_userLocalService.fetchUser(
 									assetTag.getUserId()));
 						}
 

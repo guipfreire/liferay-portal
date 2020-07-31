@@ -32,9 +32,15 @@ if (mvcPath.startsWith("/edit_entry.jsp")) {
 
 <div class="app-builder-standalone">
 	<header class="app-builder-standalone-header">
-		<div class="container p-0">
-			<div class="app-builder-standalone-menu autofit-row">
-				<div class="autofit-col autofit-col-expand">
+		<clay:container-fluid
+			cssClass="p-0"
+		>
+			<clay:content-row
+				cssClass="app-builder-standalone-menu"
+			>
+				<clay:content-col
+					expand="<%= true %>"
+				>
 					<a class="company-link" href="<%= PortalUtil.addPreservedParameters(themeDisplay, themeDisplay.getURLPortal(), false, true) %>">
 						<span class="company-details text-truncate">
 							<img alt="" class="company-logo" src="<%= themeDisplay.getPathImage() + "/company_logo?img_id=" + company.getLogoId() + "&t=" + WebServerServletTokenUtil.getToken(company.getLogoId()) %>" />
@@ -42,7 +48,7 @@ if (mvcPath.startsWith("/edit_entry.jsp")) {
 							<span class="company-name"><%= HtmlUtil.escape(company.getName()) %></span>
 						</span>
 					</a>
-				</div>
+				</clay:content-col>
 
 				<div style="display: none;">
 					<liferay-portlet:runtime
@@ -50,21 +56,25 @@ if (mvcPath.startsWith("/edit_entry.jsp")) {
 					/>
 				</div>
 
-				<div class="autofit-col text-right">
+				<clay:content-col
+					cssClass="text-right"
+				>
 					<liferay-portlet:runtime
 						portletProviderAction="<%= PortletProvider.Action.VIEW %>"
 						portletProviderClassName="com.liferay.admin.kernel.util.PortalUserPersonalBarApplicationType$UserPersonalBar"
 					/>
-				</div>
-			</div>
+				</clay:content-col>
+			</clay:content-row>
 
 			<h1 class="app-builder-standalone-name <%= editEntryCssClass %>"><%= HtmlUtil.escape(appName) %></h1>
-		</div>
+		</clay:container-fluid>
 	</header>
 
-	<div class="app-builder-standalone-content container <%= editEntryCssClass %> sheet">
+	<clay:container-fluid
+		cssClass='<%= " app-builder-standalone-content sheet " + editEntryCssClass %>'
+	>
 		<liferay-portlet:runtime
 			portletName="<%= portletName %>"
 		/>
-	</div>
+	</clay:container-fluid>
 </div>

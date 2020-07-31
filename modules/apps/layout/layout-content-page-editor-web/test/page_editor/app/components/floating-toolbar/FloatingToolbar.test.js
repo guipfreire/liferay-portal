@@ -74,21 +74,25 @@ const item = {
 };
 
 const renderFloatingToolbar = ({onButtonClick = () => {}}) => {
-	const itemRef = React.createRef();
-
-	itemRef.current = document.createElement('div');
+	const itemElement = document.createElement('div');
 
 	const state = {
 		languageId: 'language',
+		permissions: {
+			UPDATE: true,
+			UPDATE_LAYOUT_CONTENT: true,
+		},
 	};
 
 	return render(
 		<StoreAPIContextProvider dispatch={() => {}} getState={() => state}>
+			<div id="page-editor"></div>
 			<div className="page-editor__sidebar__content"></div>
+
 			<FloatingToolbar
 				buttons={buttons}
 				item={item}
-				itemRef={itemRef}
+				itemElement={itemElement}
 				onButtonClick={onButtonClick}
 			/>
 		</StoreAPIContextProvider>

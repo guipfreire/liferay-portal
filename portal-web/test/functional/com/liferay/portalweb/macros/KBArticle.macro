@@ -141,6 +141,18 @@ definition {
 			CKEditor.addContent(content = "${kbArticleContent}");
 		}
 
+		if (isSet(embedVideo)) {
+			WaitForLiferayEvent.initializeLiferayEventLog();
+
+			Click.pauseClickAt(locator1 = "CKEditor#CONTENT_VIDEO_IMAGE");
+
+			Type(
+				locator1 = "CKEditor#VIDEO_URL",
+				value1 = "${embedVideo}");
+
+			Click(locator1 = "CKEditor#VIDEO_OK");
+		}
+
 		if (isSet(kbArticleAttachment)) {
 			KBArticle.selectAttachmentCP(kbArticleAttachment = "${kbArticleAttachment}");
 		}
@@ -311,7 +323,7 @@ definition {
 
 		MenuItem.click(menuItem = "Configuration");
 
-		SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		if (isSet(emailFrom)) {
 			AssertClick(
@@ -342,7 +354,7 @@ definition {
 
 			SelectFrame(value1 = "relative=top");
 
-			SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 			PortletEntry.save();
 		}
@@ -360,7 +372,7 @@ definition {
 
 			SelectFrame(value1 = "relative=top");
 
-			SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 			PortletEntry.save();
 		}
@@ -378,7 +390,7 @@ definition {
 
 			SelectFrame(value1 = "relative=top");
 
-			SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 			PortletEntry.save();
 		}
@@ -391,7 +403,7 @@ definition {
 			portletName = "${portletName}",
 			portletOption = "Configuration");
 
-		SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		AssertClick(
 			locator1 = "Button#SELECT",
@@ -418,7 +430,7 @@ definition {
 
 		SelectFrame(value1 = "relative=top");
 
-		SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		PortletEntry.save();
 
@@ -430,7 +442,7 @@ definition {
 			portletName = "${portletName}",
 			portletOption = "Configuration");
 
-		SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		AssertClick(
 			locator1 = "KnowledgeBaseConfiguration#NAVIGATION_TAB_DISPLAY_SETTINGS",
@@ -467,7 +479,7 @@ definition {
 			portletName = "${portletName}",
 			portletOption = "Configuration");
 
-		SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		AssertClick(
 			locator1 = "Button#SELECT",
@@ -484,7 +496,7 @@ definition {
 
 		SelectFrame(value1 = "relative=top");
 
-		SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		PortletEntry.save();
 	}
@@ -494,7 +506,7 @@ definition {
 			portletName = "${portletName}",
 			portletOption = "Configuration");
 
-		SelectFrame(locator1 = "KnowledgeBaseConfiguration#IFRAME");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		AssertClick(
 			locator1 = "KnowledgeBaseConfiguration#NAVIGATION_TAB_DISPLAY_SETTINGS",
@@ -678,7 +690,7 @@ definition {
 			locator1 = "Button#PUBLISH_LOCALIZED",
 			value1 = "Publicar");
 
-		AssertElementPresent(locator1 = "Message#SUCCESS");
+		VerifyElementPresent(locator1 = "Message#SUCCESS");
 	}
 
 	macro enableSocialBookmarkSites {
@@ -779,7 +791,7 @@ definition {
 			locator1 = "KnowledgeBase#HIERARCHY_NAVIGATION_PARENT",
 			value1 = "${kbArticleTitle}");
 
-		Pause(locator1 = "5000");
+		Pause(locator1 = "3000");
 	}
 
 	macro importCP {
@@ -843,6 +855,8 @@ definition {
 	}
 
 	macro moveArticleViaKBDisplayPG {
+		WaitForLiferayEvent.initializeLiferayEventLog();
+
 		AssertClick(
 			key_kbTool = "Move",
 			locator1 = "KnowledgeBase#KB_TOOLS",
@@ -948,7 +962,7 @@ definition {
 			portletName = "${portletName}",
 			portletOption = "Configuration");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		AssertClick(
 			locator1 = "Button#SELECT",
@@ -965,7 +979,7 @@ definition {
 
 		SelectFrame(value1 = "relative=top");
 
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		Button.clickSave();
 
@@ -983,7 +997,6 @@ definition {
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
-			panel = "Site Administration",
 			portlet = "Knowledge Base");
 
 		if (IsElementPresent(locator1 = "KnowledgeBase#ARTICLE_DESCRIPTIVE_ARTICLE_TITLE_GENERIC")) {
@@ -1143,6 +1156,20 @@ definition {
 		AssertTextEquals(
 			locator1 = "KnowledgeBaseArticle#CONTENT",
 			value1 = "${kbArticleContent}");
+
+		if (isSet(embedVideo)) {
+			Pause(locator1 = "5000");
+
+			AssertElementPresent(
+				key_service = "youtube",
+				locator1 = "BlogsEntry#CONTENT_VIDEO");
+
+			SelectFrame.selectFrameNoLoading(locator1 = "IFrame#EMBEDDED_VIDEO_IFRAME");
+
+			AssertElementPresent(
+				key_service = "youtube",
+				locator1 = "CKEditor#VIDEO_BUTTON_PLAY");
+		}
 
 		if (isSet(kbChildArticleTitle)) {
 			AssertTextEquals(

@@ -28,7 +28,10 @@ RedirectManagementToolbarDisplayContext redirectManagementToolbarDisplayContext 
 	displayContext="<%= redirectManagementToolbarDisplayContext %>"
 />
 
-<div class="closed container-fluid-1280 redirect-entries sidenav-container sidenav-right" id="<portlet:namespace />infoPanelId">
+<clay:container-fluid
+	cssClass="closed redirect-entries sidenav-container sidenav-right"
+	id='<%= liferayPortletResponse.getNamespace() + "infoPanelId" %>'
+>
 	<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/redirect/info_panel" var="sidebarPanelURL" />
 
 	<liferay-frontend:sidebar-panel
@@ -54,14 +57,17 @@ RedirectManagementToolbarDisplayContext redirectManagementToolbarDisplayContext 
 
 					<%
 					row.setData(HashMapBuilder.<String, Object>put("actions", redirectManagementToolbarDisplayContext.getAvailableActions(redirectEntry)).build());
-
-					String sourceURL = RedirectUtil.getGroupBaseURL(themeDisplay) + StringPool.SLASH + redirectEntry.getSourceURL();
 					%>
 
 					<liferay-ui:search-container-column-text
 						cssClass="table-cell-content"
 						name="source-url"
 					>
+
+						<%
+						String sourceURL = RedirectUtil.getGroupBaseURL(themeDisplay) + StringPool.SLASH + redirectEntry.getSourceURL();
+						%>
+
 						<span data-title="<%= sourceURL %>">
 							<%= HtmlUtil.escape(sourceURL) %>
 						</span>
@@ -73,25 +79,11 @@ RedirectManagementToolbarDisplayContext redirectManagementToolbarDisplayContext 
 					>
 
 						<%
-						String destinationUrl = HtmlUtil.escape(redirectEntry.getDestinationURL());
-
-						Map<String, String> data = HashMapBuilder.put(
-							"href", sourceURL
-						).build();
+						String destinationURL = HtmlUtil.escape(redirectEntry.getDestinationURL());
 						%>
 
-						<clay:button
-							data="<%= data %>"
-							elementClasses="icon-shortcut"
-							icon="shortcut"
-							monospaced="<%= true %>"
-							size="sm"
-							style="unstyled"
-							title='<%= LanguageUtil.get(request, "try-redirection") %>'
-						/>
-
-						<span data-title="<%= destinationUrl %>">
-							<%= destinationUrl %>
+						<span data-title="<%= destinationURL %>">
+							<%= destinationURL %>
 						</span>
 					</liferay-ui:search-container-column-text>
 
@@ -119,11 +111,17 @@ RedirectManagementToolbarDisplayContext redirectManagementToolbarDisplayContext 
 						</c:choose>
 					</liferay-ui:search-container-column-text>
 
-					<liferay-ui:search-container-column-text>
-						<clay:dropdown-actions
-							dropdownItems="<%= redirectDisplayContext.getActionDropdownItems(redirectEntry) %>"
-						/>
-					</liferay-ui:search-container-column-text>
+					<%
+					List<DropdownItem> dropdownItems = redirectDisplayContext.getActionDropdownItems(redirectEntry);
+					%>
+
+					<c:if test="<%= ListUtil.isNotEmpty(dropdownItems) %>">
+						<liferay-ui:search-container-column-text>
+							<clay:dropdown-actions
+								dropdownItems="<%= dropdownItems %>"
+							/>
+						</liferay-ui:search-container-column-text>
+					</c:if>
 				</liferay-ui:search-container-row>
 
 				<liferay-ui:search-iterator
@@ -133,7 +131,7 @@ RedirectManagementToolbarDisplayContext redirectManagementToolbarDisplayContext 
 			</liferay-ui:search-container>
 		</aui:form>
 	</div>
-</div>
+</clay:container-fluid>
 
 <liferay-frontend:component
 	componentId="<%= redirectManagementToolbarDisplayContext.getDefaultEventHandler() %>"
@@ -149,10 +147,10 @@ RedirectManagementToolbarDisplayContext redirectManagementToolbarDisplayContext 
 		function (event) {
 			var delegateTarget = event.delegateTarget;
 
-			var destinationUrl = delegateTarget.dataset.href;
+			var destinationURL = delegateTarget.dataset.href;
 
-			if (destinationUrl) {
-				window.open(destinationUrl, '_blank');
+			if (destinationURL) {
+				window.open(destinationURL, '_blank');
 			}
 		}
 	);

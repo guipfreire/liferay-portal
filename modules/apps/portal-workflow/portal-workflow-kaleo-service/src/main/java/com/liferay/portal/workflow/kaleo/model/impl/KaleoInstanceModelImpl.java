@@ -132,22 +132,30 @@ public class KaleoInstanceModelImpl
 
 	public static final long COMPLETIONDATE_COLUMN_BITMASK = 16L;
 
-	public static final long KALEODEFINITIONNAME_COLUMN_BITMASK = 32L;
+	public static final long KALEODEFINITIONID_COLUMN_BITMASK = 32L;
 
-	public static final long KALEODEFINITIONVERSION_COLUMN_BITMASK = 64L;
+	public static final long KALEODEFINITIONNAME_COLUMN_BITMASK = 64L;
 
-	public static final long KALEODEFINITIONVERSIONID_COLUMN_BITMASK = 128L;
+	public static final long KALEODEFINITIONVERSION_COLUMN_BITMASK = 128L;
 
-	public static final long USERID_COLUMN_BITMASK = 256L;
+	public static final long KALEODEFINITIONVERSIONID_COLUMN_BITMASK = 256L;
 
 	public static final long KALEOINSTANCEID_COLUMN_BITMASK = 512L;
 
+	public static final long USERID_COLUMN_BITMASK = 1024L;
+
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
-		_entityCacheEnabled = entityCacheEnabled;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
-		_finderCacheEnabled = finderCacheEnabled;
 	}
 
 	public KaleoInstanceModelImpl() {
@@ -201,9 +209,6 @@ public class KaleoInstanceModelImpl
 				attributeName,
 				attributeGetterFunction.apply((KaleoInstance)this));
 		}
-
-		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
-		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
 
 		return attributes;
 	}
@@ -394,7 +399,17 @@ public class KaleoInstanceModelImpl
 	public void setKaleoInstanceId(long kaleoInstanceId) {
 		_columnBitmask = -1L;
 
+		if (!_setOriginalKaleoInstanceId) {
+			_setOriginalKaleoInstanceId = true;
+
+			_originalKaleoInstanceId = _kaleoInstanceId;
+		}
+
 		_kaleoInstanceId = kaleoInstanceId;
+	}
+
+	public long getOriginalKaleoInstanceId() {
+		return _originalKaleoInstanceId;
 	}
 
 	@Override
@@ -515,7 +530,19 @@ public class KaleoInstanceModelImpl
 
 	@Override
 	public void setKaleoDefinitionId(long kaleoDefinitionId) {
+		_columnBitmask |= KALEODEFINITIONID_COLUMN_BITMASK;
+
+		if (!_setOriginalKaleoDefinitionId) {
+			_setOriginalKaleoDefinitionId = true;
+
+			_originalKaleoDefinitionId = _kaleoDefinitionId;
+		}
+
 		_kaleoDefinitionId = kaleoDefinitionId;
+	}
+
+	public long getOriginalKaleoDefinitionId() {
+		return _originalKaleoDefinitionId;
 	}
 
 	@Override
@@ -791,16 +818,16 @@ public class KaleoInstanceModelImpl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof KaleoInstance)) {
+		if (!(object instanceof KaleoInstance)) {
 			return false;
 		}
 
-		KaleoInstance kaleoInstance = (KaleoInstance)obj;
+		KaleoInstance kaleoInstance = (KaleoInstance)object;
 
 		long primaryKey = kaleoInstance.getPrimaryKey();
 
@@ -817,19 +844,32 @@ public class KaleoInstanceModelImpl
 		return (int)getPrimaryKey();
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isEntityCacheEnabled() {
-		return _entityCacheEnabled;
+		return true;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isFinderCacheEnabled() {
-		return _finderCacheEnabled;
+		return true;
 	}
 
 	@Override
 	public void resetOriginalValues() {
 		KaleoInstanceModelImpl kaleoInstanceModelImpl = this;
+
+		kaleoInstanceModelImpl._originalKaleoInstanceId =
+			kaleoInstanceModelImpl._kaleoInstanceId;
+
+		kaleoInstanceModelImpl._setOriginalKaleoInstanceId = false;
 
 		kaleoInstanceModelImpl._originalCompanyId =
 			kaleoInstanceModelImpl._companyId;
@@ -841,6 +881,11 @@ public class KaleoInstanceModelImpl
 		kaleoInstanceModelImpl._setOriginalUserId = false;
 
 		kaleoInstanceModelImpl._setModifiedDate = false;
+
+		kaleoInstanceModelImpl._originalKaleoDefinitionId =
+			kaleoInstanceModelImpl._kaleoDefinitionId;
+
+		kaleoInstanceModelImpl._setOriginalKaleoDefinitionId = false;
 
 		kaleoInstanceModelImpl._originalKaleoDefinitionVersionId =
 			kaleoInstanceModelImpl._kaleoDefinitionVersionId;
@@ -1039,11 +1084,10 @@ public class KaleoInstanceModelImpl
 
 	}
 
-	private static boolean _entityCacheEnabled;
-	private static boolean _finderCacheEnabled;
-
 	private long _mvccVersion;
 	private long _kaleoInstanceId;
+	private long _originalKaleoInstanceId;
+	private boolean _setOriginalKaleoInstanceId;
 	private long _groupId;
 	private long _companyId;
 	private long _originalCompanyId;
@@ -1056,6 +1100,8 @@ public class KaleoInstanceModelImpl
 	private Date _modifiedDate;
 	private boolean _setModifiedDate;
 	private long _kaleoDefinitionId;
+	private long _originalKaleoDefinitionId;
+	private boolean _setOriginalKaleoDefinitionId;
 	private long _kaleoDefinitionVersionId;
 	private long _originalKaleoDefinitionVersionId;
 	private boolean _setOriginalKaleoDefinitionVersionId;

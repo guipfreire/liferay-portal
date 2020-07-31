@@ -132,15 +132,6 @@ export default function getAlloyEditorProcessor(
 					}
 				}),
 
-				nativeEditor.on(
-					'change',
-					debounce(() => {
-						if (_callbacks.changeCallback) {
-							_callbacks.changeCallback(nativeEditor.getData());
-						}
-					}, 500)
-				),
-
 				nativeEditor.on('blur', () => {
 					if (_editor._mainUI.state.hidden) {
 						if (_callbacks.changeCallback) {
@@ -165,11 +156,18 @@ export default function getAlloyEditorProcessor(
 						nativeEditor.execCommand('selectAll');
 					}
 				}),
-
-				_stopEventPropagation(element, 'keydown'),
-				_stopEventPropagation(element, 'keyup'),
-				_stopEventPropagation(element, 'keypress'),
 			];
+
+			_eventHandlers.push(
+				nativeEditor.on(
+					'saveSnapshot',
+					debounce(() => {
+						if (_callbacks.changeCallback) {
+							_callbacks.changeCallback(nativeEditor.getData());
+						}
+					}, 100)
+				)
+			);
 		},
 
 		/**
@@ -203,23 +201,6 @@ export default function getAlloyEditorProcessor(
 			if (element !== _element) {
 				render(element, value, editableConfig);
 			}
-		},
-	};
-}
-
-/**
- * Adds a listener to stop the given element event propagation
- * @param {HTMLElement} element
- * @param {string} eventName
- */
-function _stopEventPropagation(element, eventName) {
-	const handler = (event) => event.stopPropagation();
-
-	element.addEventListener(eventName, handler);
-
-	return {
-		removeListener: () => {
-			element.removeEventListener(eventName, handler);
 		},
 	};
 }

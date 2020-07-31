@@ -22,6 +22,7 @@ import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
+import com.liferay.portal.vulcan.util.ObjectMapperUtil;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -31,6 +32,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Generated;
+
+import javax.validation.Valid;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -43,6 +46,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @JsonFilter("Liferay.Vulcan")
 @XmlRootElement(name = "Mapping")
 public class Mapping {
+
+	public static Mapping toDTO(String json) {
+		return ObjectMapperUtil.readValue(Mapping.class, json);
+	}
 
 	@Schema
 	public String getFieldKey() {
@@ -73,20 +80,21 @@ public class Mapping {
 	protected String fieldKey;
 
 	@Schema
-	public String getItemClassName() {
-		return itemClassName;
+	@Valid
+	public Object getItemReference() {
+		return itemReference;
 	}
 
-	public void setItemClassName(String itemClassName) {
-		this.itemClassName = itemClassName;
+	public void setItemReference(Object itemReference) {
+		this.itemReference = itemReference;
 	}
 
 	@JsonIgnore
-	public void setItemClassName(
-		UnsafeSupplier<String, Exception> itemClassNameUnsafeSupplier) {
+	public void setItemReference(
+		UnsafeSupplier<Object, Exception> itemReferenceUnsafeSupplier) {
 
 		try {
-			itemClassName = itemClassNameUnsafeSupplier.get();
+			itemReference = itemReferenceUnsafeSupplier.get();
 		}
 		catch (RuntimeException re) {
 			throw re;
@@ -98,35 +106,7 @@ public class Mapping {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String itemClassName;
-
-	@Schema
-	public Long getItemClassPK() {
-		return itemClassPK;
-	}
-
-	public void setItemClassPK(Long itemClassPK) {
-		this.itemClassPK = itemClassPK;
-	}
-
-	@JsonIgnore
-	public void setItemClassPK(
-		UnsafeSupplier<Long, Exception> itemClassPKUnsafeSupplier) {
-
-		try {
-			itemClassPK = itemClassPKUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Long itemClassPK;
+	protected Object itemReference;
 
 	@Override
 	public boolean equals(Object object) {
@@ -169,28 +149,14 @@ public class Mapping {
 			sb.append("\"");
 		}
 
-		if (itemClassName != null) {
+		if (itemReference != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"itemClassName\": ");
+			sb.append("\"itemReference\": ");
 
-			sb.append("\"");
-
-			sb.append(_escape(itemClassName));
-
-			sb.append("\"");
-		}
-
-		if (itemClassPK != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"itemClassPK\": ");
-
-			sb.append(itemClassPK);
+			sb.append(String.valueOf(itemReference));
 		}
 
 		sb.append("}");
@@ -208,6 +174,16 @@ public class Mapping {
 		String string = String.valueOf(object);
 
 		return string.replaceAll("\"", "\\\\\"");
+	}
+
+	private static boolean _isArray(Object value) {
+		if (value == null) {
+			return false;
+		}
+
+		Class<?> clazz = value.getClass();
+
+		return clazz.isArray();
 	}
 
 	private static String _toJSON(Map<String, ?> map) {
@@ -228,9 +204,7 @@ public class Mapping {
 
 			Object value = entry.getValue();
 
-			Class<?> clazz = value.getClass();
-
-			if (clazz.isArray()) {
+			if (_isArray(value)) {
 				sb.append("[");
 
 				Object[] valueArray = (Object[])value;

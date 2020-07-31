@@ -5,6 +5,10 @@
 @import 'image_picker';
 @import 'utilities';
 
+.ddm-field [hidden] {
+	display: none !important;
+}
+
 %flex-space-between {
 	align-items: center;
 	display: flex;
@@ -14,6 +18,10 @@
 %text-ellipsis {
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.ddm-btn-cancel {
+	margin-right: 7px;
 }
 
 .ddm-btn-full button {
@@ -148,7 +156,7 @@ body .ddm-user-view-content {
 
 	.lfr-ddm-form-page {
 		display: none;
-		padding: 25px 0;
+		padding: 0;
 
 		&.active {
 			display: block;
@@ -453,6 +461,7 @@ body .ddm-user-view-content {
 	}
 
 	.ddm-form-field-repeatable-delete-button {
+		margin-right: 4px !important;
 		right: 26px;
 	}
 

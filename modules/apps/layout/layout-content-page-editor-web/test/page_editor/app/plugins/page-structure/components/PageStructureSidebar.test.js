@@ -19,21 +19,24 @@ import React from 'react';
 
 import {ControlsProvider} from '../../../../../../src/main/resources/META-INF/resources/page_editor/app/components/Controls';
 import {EDITABLE_FRAGMENT_ENTRY_PROCESSOR} from '../../../../../../src/main/resources/META-INF/resources/page_editor/app/config/constants/editableFragmentEntryProcessor';
-import {LAYOUT_DATA_ITEM_DEFAULT_CONFIGURATIONS} from '../../../../../../src/main/resources/META-INF/resources/page_editor/app/config/constants/layoutDataItemDefaultConfigurations';
 import {LAYOUT_DATA_ITEM_TYPE_LABELS} from '../../../../../../src/main/resources/META-INF/resources/page_editor/app/config/constants/layoutDataItemTypeLabels';
 import {LAYOUT_DATA_ITEM_TYPES} from '../../../../../../src/main/resources/META-INF/resources/page_editor/app/config/constants/layoutDataItemTypes';
+import {VIEWPORT_SIZES} from '../../../../../../src/main/resources/META-INF/resources/page_editor/app/config/constants/viewportSizes';
 import {StoreAPIContextProvider} from '../../../../../../src/main/resources/META-INF/resources/page_editor/app/store/index';
 import PageStructureSidebar from '../../../../../../src/main/resources/META-INF/resources/page_editor/plugins/page-structure/components/PageStructureSidebar';
 
 jest.mock(
 	'../../../../../../src/main/resources/META-INF/resources/page_editor/app/config',
-	() => ({config: {pageType: 'content'}})
+	() => ({config: {layoutType: 'content'}})
 );
 
 const renderComponent = ({
 	activeItemId = null,
+	hasUpdatePermissions = true,
+	lockedExperience = false,
 	masterRootItemChildren = ['11-container'],
 	rootItemChildren = ['01-container'],
+	viewportSize = VIEWPORT_SIZES.desktop,
 } = {}) => {
 	Liferay.Util.sub.mockImplementation((langKey, args) =>
 		[langKey, ...args].join('-')
@@ -41,12 +44,13 @@ const renderComponent = ({
 
 	return render(
 		<ControlsProvider
-			initialState={{
+			activeInitialState={{
 				activationOrigin: null,
 				activeItemId,
 				activeItemType: null,
+			}}
+			hoverInitialState={{
 				hoveredItemId: null,
-				selectedItemsIds: [],
 			}}
 		>
 			<StoreAPIContextProvider
@@ -74,9 +78,7 @@ const renderComponent = ({
 						items: {
 							'00-main': {
 								children: rootItemChildren,
-								config: {
-									...LAYOUT_DATA_ITEM_DEFAULT_CONFIGURATIONS.root,
-								},
+								config: {},
 								itemId: '00-main',
 								parentId: null,
 								type: LAYOUT_DATA_ITEM_TYPES.root,
@@ -126,40 +128,44 @@ const renderComponent = ({
 						version: 1,
 					},
 
-					masterLayoutData: {
-						items: {
-							'10-main': {
-								children: masterRootItemChildren,
-								config: {
-									...LAYOUT_DATA_ITEM_DEFAULT_CONFIGURATIONS.root,
+					masterLayout: {
+						masterLayoutData: {
+							items: {
+								'10-main': {
+									children: masterRootItemChildren,
+									config: {},
+									itemId: '10-main',
+									parentId: null,
+									type: LAYOUT_DATA_ITEM_TYPES.root,
 								},
-								itemId: '10-main',
-								parentId: null,
-								type: LAYOUT_DATA_ITEM_TYPES.root,
+								'11-container': {
+									children: ['12-dropzone'],
+									config: {},
+									itemId: '11-container',
+									parentId: '10-main',
+									type: LAYOUT_DATA_ITEM_TYPES.container,
+								},
+								'12-dropzone': {
+									children: [],
+									config: {},
+									itemId: '12-dropzone',
+									parentId: '11-container',
+									type: LAYOUT_DATA_ITEM_TYPES.dropZone,
+								},
 							},
-							'11-container': {
-								children: ['12-dropzone'],
-								config: {},
-								itemId: '11-container',
-								parentId: '10-main',
-								type: LAYOUT_DATA_ITEM_TYPES.container,
-							},
-							'12-dropzone': {
-								children: [],
-								config: {},
-								itemId: '12-dropzone',
-								parentId: '11-container',
-								type: LAYOUT_DATA_ITEM_TYPES.dropZone,
-							},
-						},
 
-						rootItems: {main: '10-main'},
-						version: 1,
+							rootItems: {main: '10-main'},
+							version: 1,
+						},
+						masterLayoutPlid: '0',
 					},
 
 					permissions: {
-						UPDATE_LAYOUT_CONTENT: true,
+						LOCKED_SEGMENTS_EXPERIMENT: lockedExperience,
+						UPDATE: hasUpdatePermissions,
 					},
+
+					selectedViewportSize: viewportSize,
 				})}
 			>
 				<PageStructureSidebar />
@@ -215,7 +221,7 @@ describe('PageStructureSidebar', () => {
 			activeItemId: '11-container',
 		});
 
-		expect(getByLabelText('Collapse section')).toHaveAttribute(
+		expect(getByLabelText('Collapse container')).toHaveAttribute(
 			'aria-expanded',
 			'true'
 		);
@@ -223,7 +229,7 @@ describe('PageStructureSidebar', () => {
 
 	it('disables items that are in masterLayout', () => {
 		const {getByLabelText} = renderComponent();
-		const button = getByLabelText('select-x-section');
+		const button = getByLabelText('select-x-container');
 		expect(button).toBeDisabled();
 	});
 
@@ -238,9 +244,9 @@ describe('PageStructureSidebar', () => {
 			],
 		});
 
-		expect(queryByLabelText('remove-x-section')).toBeInTheDocument();
-		expect(queryByLabelText('remove-x-row')).toBeInTheDocument();
-		expect(queryByLabelText('remove-x-column')).toBe(null);
+		expect(queryByLabelText('remove-x-container')).toBeInTheDocument();
+		expect(queryByLabelText('remove-x-grid')).toBeInTheDocument();
+		expect(queryByLabelText('remove-x-module')).toBe(null);
 		expect(queryByLabelText('remove-x-Fragment 1')).toBeInTheDocument();
 	});
 
@@ -258,7 +264,7 @@ describe('PageStructureSidebar', () => {
 		const {getByLabelText} = renderComponent({
 			activeItemId: '03-column',
 		});
-		const button = getByLabelText('select-x-row');
+		const button = getByLabelText('select-x-grid');
 
 		userEvent.click(button);
 
@@ -280,10 +286,33 @@ describe('PageStructureSidebar', () => {
 		const {getByLabelText} = renderComponent({
 			activeItemId: '02-row',
 		});
-		const button = getByLabelText('select-x-column');
+		const button = getByLabelText('select-x-module');
 
 		userEvent.click(button);
 
 		expect(button.parentElement).toHaveAttribute('aria-selected', 'false');
+	});
+
+	it('does not allow removing items if user has no permissions', () => {
+		const {queryByLabelText} = renderComponent({
+			hasUpdatePermissions: false,
+			rootItemChildren: ['01-container', '02-row', '04-fragment'],
+		});
+
+		expect(queryByLabelText('remove-x-container')).toBe(null);
+		expect(queryByLabelText('remove-x-grid')).toBe(null);
+		expect(queryByLabelText('remove-x-Fragment 1')).toBe(null);
+	});
+
+	it('does not allow removing items if viewport is not desktop', () => {
+		const {queryByLabelText} = renderComponent({
+			activeItemId: '11-container',
+			rootItemChildren: ['01-container', '02-row', '04-fragment'],
+			viewportSize: VIEWPORT_SIZES.portraitMobile,
+		});
+
+		expect(queryByLabelText('remove-x-container')).toBe(null);
+		expect(queryByLabelText('remove-x-grid')).toBe(null);
+		expect(queryByLabelText('remove-x-Fragment 1')).toBe(null);
 	});
 });

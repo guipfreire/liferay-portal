@@ -48,6 +48,18 @@ public class RedirectEntryServiceUtil {
 			serviceContext);
 	}
 
+	public static com.liferay.redirect.model.RedirectEntry addRedirectEntry(
+			long groupId, String destinationURL, java.util.Date expirationDate,
+			String groupBaseURL, boolean permanent, String sourceURL,
+			boolean updateChainedRedirectEntries,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().addRedirectEntry(
+			groupId, destinationURL, expirationDate, groupBaseURL, permanent,
+			sourceURL, updateChainedRedirectEntries, serviceContext);
+	}
+
 	public static com.liferay.redirect.model.RedirectEntry deleteRedirectEntry(
 			long redirectEntryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -75,24 +87,18 @@ public class RedirectEntryServiceUtil {
 			getRedirectEntries(
 				long groupId, int start, int end,
 				com.liferay.portal.kernel.util.OrderByComparator
-					<com.liferay.redirect.model.RedirectEntry> obc)
+					<com.liferay.redirect.model.RedirectEntry>
+						orderByComparator)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
-		return getService().getRedirectEntries(groupId, start, end, obc);
+		return getService().getRedirectEntries(
+			groupId, start, end, orderByComparator);
 	}
 
 	public static int getRedirectEntriesCount(long groupId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().getRedirectEntriesCount(groupId);
-	}
-
-	public static void updateChainedRedirectEntries(
-			long groupId, String destinationURL, String sourceURL)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		getService().updateChainedRedirectEntries(
-			groupId, destinationURL, sourceURL);
 	}
 
 	public static com.liferay.redirect.model.RedirectEntry updateRedirectEntry(
@@ -103,6 +109,18 @@ public class RedirectEntryServiceUtil {
 		return getService().updateRedirectEntry(
 			redirectEntryId, destinationURL, expirationDate, permanent,
 			sourceURL);
+	}
+
+	public static com.liferay.redirect.model.RedirectEntry updateRedirectEntry(
+			long redirectEntryId, String destinationURL,
+			java.util.Date expirationDate, String groupBaseURL,
+			boolean permanent, String sourceURL,
+			boolean updateChainedRedirectEntries)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().updateRedirectEntry(
+			redirectEntryId, destinationURL, expirationDate, groupBaseURL,
+			permanent, sourceURL, updateChainedRedirectEntries);
 	}
 
 	public static RedirectEntryService getService() {

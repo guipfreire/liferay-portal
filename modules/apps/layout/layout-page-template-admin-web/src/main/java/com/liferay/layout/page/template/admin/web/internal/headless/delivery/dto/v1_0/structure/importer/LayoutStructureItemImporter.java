@@ -19,6 +19,8 @@ import com.liferay.layout.util.structure.LayoutStructure;
 import com.liferay.layout.util.structure.LayoutStructureItem;
 import com.liferay.portal.kernel.model.Layout;
 
+import java.util.Set;
+
 /**
  * @author Jürgen Kappler
  */
@@ -26,7 +28,8 @@ public interface LayoutStructureItemImporter {
 
 	public LayoutStructureItem addLayoutStructureItem(
 			Layout layout, LayoutStructure layoutStructure,
-			PageElement pageElement, String parentItemId, int position)
+			PageElement pageElement, String parentItemId, int position,
+			Set<String> warningMessages)
 		throws Exception;
 
 	public PageElement.Type getPageElementType();

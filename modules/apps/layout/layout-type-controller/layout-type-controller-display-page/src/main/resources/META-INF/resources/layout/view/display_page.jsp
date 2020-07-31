@@ -52,9 +52,9 @@ String ppid = ParamUtil.getString(request, "p_p_id");
 	<c:otherwise>
 
 		<%
-		AssetRendererFactory assetRendererFactory = displayPageLayoutTypeControllerDisplayContext.getAssetRendererFactory();
+		AssetRendererFactory<?> assetRendererFactory = displayPageLayoutTypeControllerDisplayContext.getAssetRendererFactory();
 
-		InfoDisplayObjectProvider infoDisplayObjectProvider = displayPageLayoutTypeControllerDisplayContext.getInfoDisplayObjectProvider();
+		InfoDisplayObjectProvider<?> infoDisplayObjectProvider = displayPageLayoutTypeControllerDisplayContext.getInfoDisplayObjectProvider();
 		%>
 
 		<c:if test="<%= assetRendererFactory != null %>">
@@ -64,28 +64,23 @@ String ppid = ParamUtil.getString(request, "p_p_id");
 		<c:choose>
 			<c:when test="<%= (assetRendererFactory != null) && !assetRendererFactory.hasPermission(permissionChecker, infoDisplayObjectProvider.getClassPK(), ActionKeys.VIEW) %>">
 				<div class="layout-content" id="main-content" role="main">
-					<div class="container-fluid-1280 pt-3">
+					<clay:container-fluid
+						cssClass="pt-3"
+					>
 						<div class="alert alert-danger">
 							<liferay-ui:message key="you-do-not-have-permission-to-view-this-page" />
 						</div>
-					</div>
+					</clay:container-fluid>
 				</div>
 			</c:when>
-			<c:when test="<%= infoDisplayObjectProvider != null %>">
-
-				<%
-				LayoutPageTemplateEntry layoutPageTemplateEntry = LayoutPageTemplateEntryLocalServiceUtil.getLayoutPageTemplateEntry(displayPageLayoutTypeControllerDisplayContext.getLayoutPageTemplateEntryId());
-				%>
-
+			<c:otherwise>
 				<div class="layout-content portlet-layout" id="main-content" role="main">
 					<liferay-layout:render-fragment-layout
 						fieldValues="<%= displayPageLayoutTypeControllerDisplayContext.getInfoDisplayFieldsValues() %>"
-						groupId="<%= infoDisplayObjectProvider.getGroupId() %>"
 						mode="<%= FragmentEntryLinkConstants.ASSET_DISPLAY_PAGE %>"
-						plid="<%= layoutPageTemplateEntry.getPlid() %>"
 					/>
 				<div
-			</c:when>
+			</c:otherwise>
 		</c:choose>
 	</c:otherwise>
 </c:choose>

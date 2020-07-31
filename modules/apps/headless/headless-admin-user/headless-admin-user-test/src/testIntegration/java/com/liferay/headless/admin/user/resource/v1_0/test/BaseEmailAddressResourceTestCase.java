@@ -107,7 +107,9 @@ public abstract class BaseEmailAddressResourceTestCase {
 
 		EmailAddressResource.Builder builder = EmailAddressResource.builder();
 
-		emailAddressResource = builder.locale(
+		emailAddressResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -229,6 +231,26 @@ public abstract class BaseEmailAddressResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/emailAddress"))));
+	}
+
+	@Test
+	public void testGraphQLGetEmailAddressNotFound() throws Exception {
+		Long irrelevantEmailAddressId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"emailAddress",
+						new HashMap<String, Object>() {
+							{
+								put("emailAddressId", irrelevantEmailAddressId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

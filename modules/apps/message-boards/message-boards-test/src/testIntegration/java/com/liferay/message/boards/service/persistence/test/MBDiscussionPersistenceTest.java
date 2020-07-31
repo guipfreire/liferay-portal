@@ -124,6 +124,10 @@ public class MBDiscussionPersistenceTest {
 
 		MBDiscussion newMBDiscussion = _persistence.create(pk);
 
+		newMBDiscussion.setMvccVersion(RandomTestUtil.nextLong());
+
+		newMBDiscussion.setCtCollectionId(RandomTestUtil.nextLong());
+
 		newMBDiscussion.setUuid(RandomTestUtil.randomString());
 
 		newMBDiscussion.setGroupId(RandomTestUtil.nextLong());
@@ -151,6 +155,12 @@ public class MBDiscussionPersistenceTest {
 		MBDiscussion existingMBDiscussion = _persistence.findByPrimaryKey(
 			newMBDiscussion.getPrimaryKey());
 
+		Assert.assertEquals(
+			existingMBDiscussion.getMvccVersion(),
+			newMBDiscussion.getMvccVersion());
+		Assert.assertEquals(
+			existingMBDiscussion.getCtCollectionId(),
+			newMBDiscussion.getCtCollectionId());
 		Assert.assertEquals(
 			existingMBDiscussion.getUuid(), newMBDiscussion.getUuid());
 		Assert.assertEquals(
@@ -211,13 +221,6 @@ public class MBDiscussionPersistenceTest {
 	}
 
 	@Test
-	public void testCountByClassNameId() throws Exception {
-		_persistence.countByClassNameId(RandomTestUtil.nextLong());
-
-		_persistence.countByClassNameId(0L);
-	}
-
-	@Test
 	public void testCountByThreadId() throws Exception {
 		_persistence.countByThreadId(RandomTestUtil.nextLong());
 
@@ -257,9 +260,10 @@ public class MBDiscussionPersistenceTest {
 
 	protected OrderByComparator<MBDiscussion> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create(
-			"MBDiscussion", "uuid", true, "discussionId", true, "groupId", true,
-			"companyId", true, "userId", true, "userName", true, "createDate",
-			true, "modifiedDate", true, "classNameId", true, "classPK", true,
+			"MBDiscussion", "mvccVersion", true, "ctCollectionId", true, "uuid",
+			true, "discussionId", true, "groupId", true, "companyId", true,
+			"userId", true, "userName", true, "createDate", true,
+			"modifiedDate", true, "classNameId", true, "classPK", true,
 			"threadId", true, "lastPublishDate", true);
 	}
 
@@ -515,6 +519,10 @@ public class MBDiscussionPersistenceTest {
 		long pk = RandomTestUtil.nextLong();
 
 		MBDiscussion mbDiscussion = _persistence.create(pk);
+
+		mbDiscussion.setMvccVersion(RandomTestUtil.nextLong());
+
+		mbDiscussion.setCtCollectionId(RandomTestUtil.nextLong());
 
 		mbDiscussion.setUuid(RandomTestUtil.randomString());
 

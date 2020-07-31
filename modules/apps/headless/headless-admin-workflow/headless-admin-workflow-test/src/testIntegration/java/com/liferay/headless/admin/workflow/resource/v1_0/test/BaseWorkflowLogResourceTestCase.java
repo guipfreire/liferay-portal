@@ -109,7 +109,9 @@ public abstract class BaseWorkflowLogResourceTestCase {
 
 		WorkflowLogResource.Builder builder = WorkflowLogResource.builder();
 
-		workflowLogResource = builder.locale(
+		workflowLogResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -351,6 +353,26 @@ public abstract class BaseWorkflowLogResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/workflowLog"))));
+	}
+
+	@Test
+	public void testGraphQLGetWorkflowLogNotFound() throws Exception {
+		Long irrelevantWorkflowLogId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"workflowLog",
+						new HashMap<String, Object>() {
+							{
+								put("workflowLogId", irrelevantWorkflowLogId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

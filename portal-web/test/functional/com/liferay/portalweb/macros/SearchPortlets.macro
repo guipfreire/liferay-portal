@@ -9,15 +9,11 @@ definition {
 			Click.clickAt(locator1 = "ControlMenu#ADD");
 		}
 
-		AssertElementPresent(locator1 = "ControlMenuAddPanel#APPLICATIONS_ACCORDION_PANEL_TITLE");
+		AssertElementPresent(locator1 = "ControlMenuAddPanel#SIDEBAR_HEADER");
 
-		AssertVisible(
-			locator1 = "ControlMenuAddPanel#APPLICATIONS_ACCORDION_PANEL_TITLE",
-			value1 = "Widgets");
+		Navigator.gotoNavTab(navTab = "Widgets");
 
 		Pause(locator1 = "5000");
-
-		Panel.expandSidebarApplicationsPanel();
 
 		Type.sendKeysApplicationSearch(
 			locator1 = "NavBar#APPLICATION_SEARCH_FIELD",
@@ -170,10 +166,31 @@ definition {
 		IFrame.closeFrame();
 	}
 
+	macro configureSearchBarWidget {
+		SearchPortlets.gotoWidgetOptions(portletOption = "Configuration");
+
+		SelectFrame(locator1 = "IFrame#CONFIGURATION");
+
+		if (isSet(federatedSearchKey)) {
+			Type(
+				key_fieldLabel = "Federated Search Key",
+				locator1 = "TextInput#GENERIC_TEXT_INPUT",
+				value1 = "${federatedSearchKey}");
+		}
+
+		PortletEntry.save();
+
+		IFrame.closeFrame();
+	}
+
 	macro configureSearchOptions {
 		Portlet.gotoPortletOptions(
 			portletName = "Search Options",
 			portletOption = "Configuration");
+
+		WaitForLiferayEvent.initializeLiferayEventLog();
+
+		SelectFrameTop();
 
 		SelectFrame(locator1 = "IFrame#CONFIGURATION");
 
@@ -350,6 +367,14 @@ definition {
 		return "${searchURL}";
 	}
 
+	macro gotoConfigureSuggestionsOptions {
+		MouseOver.mouseOverNotVisible(locator1 = "Search#SUGGESTION_WIDGET_ELLIPSIS_ICON");
+
+		Click.waitForMenuToggleJSClick(locator1 = "Search#SUGGESTION_WIDGET_ELLIPSIS_ICON");
+
+		MenuItem.click(menuItem = "Configuration");
+	}
+
 	macro gotoEmbeddedOptions {
 		MouseOver.mouseOverNotVisible(locator1 = "Search#EMBEDDED_SEARCH_BAR_ELLIPSIS_ICON");
 
@@ -389,9 +414,18 @@ definition {
 			locator1 = "Search#EMBEDDED_SEARCH_BAR",
 			value1 = "${searchTerm}");
 
-		KeyPress(
-			locator1 = "Search#EMBEDDED_SEARCH_BAR",
-			value1 = "\RETURN");
+		var browserType = PropsUtil.get("browser.type");
+
+		if ("${browserType}" == "safari") {
+			Click(locator1 = "Icon#BASIC_SEARCH");
+		}
+		else {
+			KeyPress(
+				locator1 = "Search#EMBEDDED_SEARCH_BAR",
+				value1 = "\RETURN");
+		}
+
+		WaitForLiferayEvent.initializeLiferayEventLog();
 	}
 
 	macro searchWidget {
@@ -402,6 +436,8 @@ definition {
 		KeyPress(
 			locator1 = "Search#SEARCH_BAR_WIDGET",
 			value1 = "\RETURN");
+
+		WaitForLiferayEvent.initializeLiferayEventLog();
 	}
 
 	macro selectEmbeddedScopeInput {
@@ -437,14 +473,18 @@ definition {
 			layoutName = "Similar Results Page",
 			widgetName = "Asset Publisher");
 
-		Navigator.gotoPage(pageName = "Similar Results Page");
+		JSONLayout.addWidgetToPublicLayout(
+			column = "2",
+			groupName = "Guest",
+			layoutName = "Similar Results Page",
+			widgetName = "Similar Results");
 
-		Portlet.addPG(portletName = "Similar Results");
+		Navigator.gotoPage(pageName = "Similar Results Page");
 	}
 
 	macro viewResultDetails {
 		AssertTextEquals(
-			locator1 = "Portlet#H3_HEADER",
+			locator1 = "SearchResults#ASSET_DETAILS_TITLE",
 			value1 = "${searchAssetTitle}");
 	}
 

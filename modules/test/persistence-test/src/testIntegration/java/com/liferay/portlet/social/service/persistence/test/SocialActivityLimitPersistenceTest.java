@@ -124,6 +124,10 @@ public class SocialActivityLimitPersistenceTest {
 
 		SocialActivityLimit newSocialActivityLimit = _persistence.create(pk);
 
+		newSocialActivityLimit.setMvccVersion(RandomTestUtil.nextLong());
+
+		newSocialActivityLimit.setCtCollectionId(RandomTestUtil.nextLong());
+
 		newSocialActivityLimit.setGroupId(RandomTestUtil.nextLong());
 
 		newSocialActivityLimit.setCompanyId(RandomTestUtil.nextLong());
@@ -147,6 +151,12 @@ public class SocialActivityLimitPersistenceTest {
 			_persistence.findByPrimaryKey(
 				newSocialActivityLimit.getPrimaryKey());
 
+		Assert.assertEquals(
+			existingSocialActivityLimit.getMvccVersion(),
+			newSocialActivityLimit.getMvccVersion());
+		Assert.assertEquals(
+			existingSocialActivityLimit.getCtCollectionId(),
+			newSocialActivityLimit.getCtCollectionId());
 		Assert.assertEquals(
 			existingSocialActivityLimit.getActivityLimitId(),
 			newSocialActivityLimit.getActivityLimitId());
@@ -237,10 +247,10 @@ public class SocialActivityLimitPersistenceTest {
 
 	protected OrderByComparator<SocialActivityLimit> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create(
-			"SocialActivityLimit", "activityLimitId", true, "groupId", true,
-			"companyId", true, "userId", true, "classNameId", true, "classPK",
-			true, "activityType", true, "activityCounterName", true, "value",
-			true);
+			"SocialActivityLimit", "mvccVersion", true, "ctCollectionId", true,
+			"activityLimitId", true, "groupId", true, "companyId", true,
+			"userId", true, "classNameId", true, "classPK", true,
+			"activityType", true, "activityCounterName", true, "value", true);
 	}
 
 	@Test
@@ -511,6 +521,10 @@ public class SocialActivityLimitPersistenceTest {
 		long pk = RandomTestUtil.nextLong();
 
 		SocialActivityLimit socialActivityLimit = _persistence.create(pk);
+
+		socialActivityLimit.setMvccVersion(RandomTestUtil.nextLong());
+
+		socialActivityLimit.setCtCollectionId(RandomTestUtil.nextLong());
 
 		socialActivityLimit.setGroupId(RandomTestUtil.nextLong());
 

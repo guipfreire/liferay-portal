@@ -120,7 +120,9 @@ public abstract class BaseWikiNodeResourceTestCase {
 
 		WikiNodeResource.Builder builder = WikiNodeResource.builder();
 
-		wikiNodeResource = builder.locale(
+		wikiNodeResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -637,6 +639,26 @@ public abstract class BaseWikiNodeResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/wikiNode"))));
+	}
+
+	@Test
+	public void testGraphQLGetWikiNodeNotFound() throws Exception {
+		Long irrelevantWikiNodeId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"wikiNode",
+						new HashMap<String, Object>() {
+							{
+								put("wikiNodeId", irrelevantWikiNodeId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

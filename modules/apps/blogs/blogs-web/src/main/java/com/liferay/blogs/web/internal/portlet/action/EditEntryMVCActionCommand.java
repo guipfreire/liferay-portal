@@ -37,7 +37,7 @@ import com.liferay.document.library.kernel.exception.FileSizeException;
 import com.liferay.friendly.url.exception.DuplicateFriendlyURLEntryException;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.editor.EditorConstants;
+import com.liferay.portal.kernel.editor.constants.EditorConstants;
 import com.liferay.portal.kernel.exception.ImageResolutionException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -276,11 +276,11 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 			blogsEntry -> _deleteEntry(blogsEntry, moveToTrash, trashedModels));
 
 		if (moveToTrash && !trashedModels.isEmpty()) {
-			Map<String, Object> data = HashMapBuilder.<String, Object>put(
-				"trashedModels", trashedModels
-			).build();
-
-			addDeleteSuccessData(actionRequest, data);
+			addDeleteSuccessData(
+				actionRequest,
+				HashMapBuilder.<String, Object>put(
+					"trashedModels", trashedModels
+				).build());
 		}
 	}
 
@@ -303,7 +303,7 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	private Map<String, String[]> _getParameterMap(ActionRequest actionRequest)
-		throws PortalException {
+		throws Exception {
 
 		Map<String, String[]> parameterMap = new HashMap<>(
 			actionRequest.getParameterMap());
@@ -418,7 +418,7 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 
 	private String _updateContent(
 			BlogsEntry entry, String content, ThemeDisplay themeDisplay)
-		throws PortalException {
+		throws Exception {
 
 		return _attachmentContentUpdater.updateContent(
 			content, ContentTypes.TEXT_HTML,

@@ -30,6 +30,8 @@ public class ExpandoTableSoap implements Serializable {
 	public static ExpandoTableSoap toSoapModel(ExpandoTable model) {
 		ExpandoTableSoap soapModel = new ExpandoTableSoap();
 
+		soapModel.setMvccVersion(model.getMvccVersion());
+		soapModel.setCtCollectionId(model.getCtCollectionId());
 		soapModel.setTableId(model.getTableId());
 		soapModel.setCompanyId(model.getCompanyId());
 		soapModel.setClassNameId(model.getClassNameId());
@@ -87,6 +89,22 @@ public class ExpandoTableSoap implements Serializable {
 		setTableId(pk);
 	}
 
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	public long getCtCollectionId() {
+		return _ctCollectionId;
+	}
+
+	public void setCtCollectionId(long ctCollectionId) {
+		_ctCollectionId = ctCollectionId;
+	}
+
 	public long getTableId() {
 		return _tableId;
 	}
@@ -119,6 +137,8 @@ public class ExpandoTableSoap implements Serializable {
 		_name = name;
 	}
 
+	private long _mvccVersion;
+	private long _ctCollectionId;
 	private long _tableId;
 	private long _companyId;
 	private long _classNameId;

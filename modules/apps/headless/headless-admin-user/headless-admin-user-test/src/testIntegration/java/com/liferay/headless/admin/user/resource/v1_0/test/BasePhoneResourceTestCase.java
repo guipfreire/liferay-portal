@@ -107,7 +107,9 @@ public abstract class BasePhoneResourceTestCase {
 
 		PhoneResource.Builder builder = PhoneResource.builder();
 
-		phoneResource = builder.locale(
+		phoneResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -288,6 +290,26 @@ public abstract class BasePhoneResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/phone"))));
+	}
+
+	@Test
+	public void testGraphQLGetPhoneNotFound() throws Exception {
+		Long irrelevantPhoneId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"phone",
+						new HashMap<String, Object>() {
+							{
+								put("phoneId", irrelevantPhoneId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

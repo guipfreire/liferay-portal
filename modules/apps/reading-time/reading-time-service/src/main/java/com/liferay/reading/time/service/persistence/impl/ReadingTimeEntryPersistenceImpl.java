@@ -30,7 +30,6 @@ import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
@@ -38,6 +37,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.reading.time.exception.NoSuchEntryException;
 import com.liferay.reading.time.model.ReadingTimeEntry;
+import com.liferay.reading.time.model.ReadingTimeEntryTable;
 import com.liferay.reading.time.model.impl.ReadingTimeEntryImpl;
 import com.liferay.reading.time.model.impl.ReadingTimeEntryModelImpl;
 import com.liferay.reading.time.service.persistence.ReadingTimeEntryPersistence;
@@ -258,10 +258,6 @@ public class ReadingTimeEntryPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(finderPath, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -615,8 +611,6 @@ public class ReadingTimeEntryPersistenceImpl
 				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(finderPath, finderArgs);
-
 				throw processException(exception);
 			}
 			finally {
@@ -774,11 +768,6 @@ public class ReadingTimeEntryPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(
-						_finderPathFetchByUUID_G, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -867,8 +856,6 @@ public class ReadingTimeEntryPersistenceImpl
 				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(finderPath, finderArgs);
-
 				throw processException(exception);
 			}
 			finally {
@@ -1069,10 +1056,6 @@ public class ReadingTimeEntryPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(finderPath, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -1456,8 +1439,6 @@ public class ReadingTimeEntryPersistenceImpl
 				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(finderPath, finderArgs);
-
 				throw processException(exception);
 			}
 			finally {
@@ -1620,11 +1601,6 @@ public class ReadingTimeEntryPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(
-						_finderPathFetchByG_C_C, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -1708,8 +1684,6 @@ public class ReadingTimeEntryPersistenceImpl
 				finderCache.putResult(finderPath, finderArgs, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(finderPath, finderArgs);
-
 				throw processException(exception);
 			}
 			finally {
@@ -1730,16 +1704,18 @@ public class ReadingTimeEntryPersistenceImpl
 		"readingTimeEntry.classPK = ?";
 
 	public ReadingTimeEntryPersistenceImpl() {
-		setModelClass(ReadingTimeEntry.class);
-
-		setModelImplClass(ReadingTimeEntryImpl.class);
-		setModelPKClass(long.class);
-
 		Map<String, String> dbColumnNames = new HashMap<String, String>();
 
 		dbColumnNames.put("uuid", "uuid_");
 
 		setDBColumnNames(dbColumnNames);
+
+		setModelClass(ReadingTimeEntry.class);
+
+		setModelImplClass(ReadingTimeEntryImpl.class);
+		setModelPKClass(long.class);
+
+		setTable(ReadingTimeEntryTable.INSTANCE);
 	}
 
 	/**
@@ -1750,8 +1726,8 @@ public class ReadingTimeEntryPersistenceImpl
 	@Override
 	public void cacheResult(ReadingTimeEntry readingTimeEntry) {
 		entityCache.putResult(
-			entityCacheEnabled, ReadingTimeEntryImpl.class,
-			readingTimeEntry.getPrimaryKey(), readingTimeEntry);
+			ReadingTimeEntryImpl.class, readingTimeEntry.getPrimaryKey(),
+			readingTimeEntry);
 
 		finderCache.putResult(
 			_finderPathFetchByUUID_G,
@@ -1780,7 +1756,7 @@ public class ReadingTimeEntryPersistenceImpl
 	public void cacheResult(List<ReadingTimeEntry> readingTimeEntries) {
 		for (ReadingTimeEntry readingTimeEntry : readingTimeEntries) {
 			if (entityCache.getResult(
-					entityCacheEnabled, ReadingTimeEntryImpl.class,
+					ReadingTimeEntryImpl.class,
 					readingTimeEntry.getPrimaryKey()) == null) {
 
 				cacheResult(readingTimeEntry);
@@ -1817,8 +1793,7 @@ public class ReadingTimeEntryPersistenceImpl
 	@Override
 	public void clearCache(ReadingTimeEntry readingTimeEntry) {
 		entityCache.removeResult(
-			entityCacheEnabled, ReadingTimeEntryImpl.class,
-			readingTimeEntry.getPrimaryKey());
+			ReadingTimeEntryImpl.class, readingTimeEntry.getPrimaryKey());
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
@@ -1834,8 +1809,7 @@ public class ReadingTimeEntryPersistenceImpl
 
 		for (ReadingTimeEntry readingTimeEntry : readingTimeEntries) {
 			entityCache.removeResult(
-				entityCacheEnabled, ReadingTimeEntryImpl.class,
-				readingTimeEntry.getPrimaryKey());
+				ReadingTimeEntryImpl.class, readingTimeEntry.getPrimaryKey());
 
 			clearUniqueFindersCache(
 				(ReadingTimeEntryModelImpl)readingTimeEntry, true);
@@ -1849,8 +1823,7 @@ public class ReadingTimeEntryPersistenceImpl
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		for (Serializable primaryKey : primaryKeys) {
-			entityCache.removeResult(
-				entityCacheEnabled, ReadingTimeEntryImpl.class, primaryKey);
+			entityCache.removeResult(ReadingTimeEntryImpl.class, primaryKey);
 		}
 	}
 
@@ -2117,10 +2090,7 @@ public class ReadingTimeEntryPersistenceImpl
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (!_columnBitmaskEnabled) {
-			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
-		}
-		else if (isNew) {
+		if (isNew) {
 			Object[] args = new Object[] {readingTimeEntryModelImpl.getUuid()};
 
 			finderCache.removeResult(_finderPathCountByUuid, args);
@@ -2185,8 +2155,8 @@ public class ReadingTimeEntryPersistenceImpl
 		}
 
 		entityCache.putResult(
-			entityCacheEnabled, ReadingTimeEntryImpl.class,
-			readingTimeEntry.getPrimaryKey(), readingTimeEntry, false);
+			ReadingTimeEntryImpl.class, readingTimeEntry.getPrimaryKey(),
+			readingTimeEntry, false);
 
 		clearUniqueFindersCache(readingTimeEntryModelImpl, false);
 		cacheUniqueFindersCache(readingTimeEntryModelImpl);
@@ -2372,10 +2342,6 @@ public class ReadingTimeEntryPersistenceImpl
 				}
 			}
 			catch (Exception exception) {
-				if (useFinderCache) {
-					finderCache.removeResult(finderPath, finderArgs);
-				}
-
 				throw processException(exception);
 			}
 			finally {
@@ -2421,9 +2387,6 @@ public class ReadingTimeEntryPersistenceImpl
 					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
 			}
 			catch (Exception exception) {
-				finderCache.removeResult(
-					_finderPathCountAll, FINDER_ARGS_EMPTY);
-
 				throw processException(exception);
 			}
 			finally {
@@ -2464,58 +2427,53 @@ public class ReadingTimeEntryPersistenceImpl
 	 */
 	@Activate
 	public void activate() {
-		ReadingTimeEntryModelImpl.setEntityCacheEnabled(entityCacheEnabled);
-		ReadingTimeEntryModelImpl.setFinderCacheEnabled(finderCacheEnabled);
-
 		_finderPathWithPaginationFindAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, ReadingTimeEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
+			ReadingTimeEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"findAll", new String[0]);
 
 		_finderPathWithoutPaginationFindAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, ReadingTimeEntryImpl.class,
+			ReadingTimeEntryImpl.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
 			new String[0]);
 
 		_finderPathCountAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
 			new String[0]);
 
 		_finderPathWithPaginationFindByUuid = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, ReadingTimeEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid",
+			ReadingTimeEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"findByUuid",
 			new String[] {
 				String.class.getName(), Integer.class.getName(),
 				Integer.class.getName(), OrderByComparator.class.getName()
 			});
 
 		_finderPathWithoutPaginationFindByUuid = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, ReadingTimeEntryImpl.class,
+			ReadingTimeEntryImpl.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid",
 			new String[] {String.class.getName()},
 			ReadingTimeEntryModelImpl.UUID_COLUMN_BITMASK |
 			ReadingTimeEntryModelImpl.CREATEDATE_COLUMN_BITMASK);
 
 		_finderPathCountByUuid = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid",
-			new String[] {String.class.getName()});
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"countByUuid", new String[] {String.class.getName()});
 
 		_finderPathFetchByUUID_G = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, ReadingTimeEntryImpl.class,
-			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
+			ReadingTimeEntryImpl.class, FINDER_CLASS_NAME_ENTITY,
+			"fetchByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()},
 			ReadingTimeEntryModelImpl.UUID_COLUMN_BITMASK |
 			ReadingTimeEntryModelImpl.GROUPID_COLUMN_BITMASK);
 
 		_finderPathCountByUUID_G = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUUID_G",
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"countByUUID_G",
 			new String[] {String.class.getName(), Long.class.getName()});
 
 		_finderPathWithPaginationFindByUuid_C = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, ReadingTimeEntryImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByUuid_C",
+			ReadingTimeEntryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"findByUuid_C",
 			new String[] {
 				String.class.getName(), Long.class.getName(),
 				Integer.class.getName(), Integer.class.getName(),
@@ -2523,7 +2481,7 @@ public class ReadingTimeEntryPersistenceImpl
 			});
 
 		_finderPathWithoutPaginationFindByUuid_C = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, ReadingTimeEntryImpl.class,
+			ReadingTimeEntryImpl.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()},
 			ReadingTimeEntryModelImpl.UUID_COLUMN_BITMASK |
@@ -2531,13 +2489,13 @@ public class ReadingTimeEntryPersistenceImpl
 			ReadingTimeEntryModelImpl.CREATEDATE_COLUMN_BITMASK);
 
 		_finderPathCountByUuid_C = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUuid_C",
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"countByUuid_C",
 			new String[] {String.class.getName(), Long.class.getName()});
 
 		_finderPathFetchByG_C_C = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, ReadingTimeEntryImpl.class,
-			FINDER_CLASS_NAME_ENTITY, "fetchByG_C_C",
+			ReadingTimeEntryImpl.class, FINDER_CLASS_NAME_ENTITY,
+			"fetchByG_C_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(), Long.class.getName()
 			},
@@ -2546,8 +2504,8 @@ public class ReadingTimeEntryPersistenceImpl
 			ReadingTimeEntryModelImpl.CLASSPK_COLUMN_BITMASK);
 
 		_finderPathCountByG_C_C = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
-			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByG_C_C",
+			Long.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"countByG_C_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(), Long.class.getName()
 			});
@@ -2567,12 +2525,6 @@ public class ReadingTimeEntryPersistenceImpl
 		unbind = "-"
 	)
 	public void setConfiguration(Configuration configuration) {
-		super.setConfiguration(configuration);
-
-		_columnBitmaskEnabled = GetterUtil.getBoolean(
-			configuration.get(
-				"value.object.column.bitmask.enabled.com.liferay.reading.time.model.ReadingTimeEntry"),
-			true);
 	}
 
 	@Override
@@ -2592,8 +2544,6 @@ public class ReadingTimeEntryPersistenceImpl
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		super.setSessionFactory(sessionFactory);
 	}
-
-	private boolean _columnBitmaskEnabled;
 
 	@Reference
 	protected EntityCache entityCache;

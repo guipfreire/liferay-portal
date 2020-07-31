@@ -14,30 +14,68 @@
 
 import {openToast} from 'frontend-js-web';
 
-export default function ({checkDestinationURL, namespace}) {
-	var form = document[`${namespace}fm`];
+export default function ({
+	getRedirectEntryChainCauseURL,
+	initialDestinationURL,
+	initialIsPermanent,
+	namespace,
+}) {
+	const form = document[`${namespace}fm`];
 	form.addEventListener('submit', saveRedirectEntry);
+	const typeInfoAlert = document.getElementById(`${namespace}typeInfoAlert`);
+	const destinationURLInput = document.getElementById(
+		`${namespace}destinationURL`
+	);
+	const permanentSelect = document.getElementById(`${namespace}permanent`);
+
+	if (typeInfoAlert && initialIsPermanent) {
+		destinationURLInput.addEventListener('input', showTypeInfoAlert);
+		permanentSelect.addEventListener('input', showTypeInfoAlert);
+	}
+
+	function showTypeInfoAlert() {
+		typeInfoAlert.classList.toggle(
+			'hide',
+			permanentSelect.value === 'true' &&
+				destinationURLInput.value === initialDestinationURL
+		);
+	}
 
 	function saveRedirectEntry() {
-		var destinationURL = form.elements[`${namespace}destinationURL`];
-		var sourceURL = form.elements[`${namespace}sourceURL`];
+		const destinationURL = form.elements[`${namespace}destinationURL`];
+		const sourceURL = form.elements[`${namespace}sourceURL`];
 
-		if (destinationURL.value && sourceURL.value) {
-			Liferay.Util.fetch(checkDestinationURL, {
-				body: Liferay.Util.objectToFormData({
-					[`${namespace}sourceURL`]: sourceURL.value,
-				}),
-				method: 'POST',
-			})
+		if (!sourceURL.value) {
+			sourceURL.focus();
+		}
+		else if (
+			!destinationURL.value ||
+			destinationURL
+				.closest('.form-group')
+				.classList.contains('has-error')
+		) {
+			destinationURL.focus();
+			destinationURL.blur();
+		}
+		else {
+			Liferay.Util.fetch(
+				Liferay.Util.PortletURL.createResourceURL(
+					getRedirectEntryChainCauseURL,
+					{
+						destinationURL: destinationURL.value,
+						sourceURL: sourceURL.value,
+					}
+				)
+			)
 				.then((response) => {
 					return response.json();
 				})
 				.then((response) => {
-					if (response.success) {
-						submitForm(form);
+					if (response.redirectEntryChainCause) {
+						showModal(response.redirectEntryChainCause);
 					}
 					else {
-						showModal();
+						submitForm(form);
 					}
 				})
 				.catch(() => {
@@ -50,22 +88,21 @@ export default function ({checkDestinationURL, namespace}) {
 					});
 				});
 		}
-		else {
-			destinationURL.focus();
-			destinationURL.blur();
-		}
 	}
 
-	function showModal() {
+	function showModal(redirectEntryChainCause) {
 		Liferay.componentReady(`${namespace}RedirectsChainedRedirections`).then(
 			(ChainedRedirections) => {
-				ChainedRedirections.open((updateReferences) => {
-					Liferay.Util.postForm(form, {
-						data: {
-							updateReferences,
-						},
-					});
-				});
+				ChainedRedirections.open(
+					redirectEntryChainCause,
+					(updateChainedRedirectEntries) => {
+						Liferay.Util.postForm(form, {
+							data: {
+								updateChainedRedirectEntries,
+							},
+						});
+					}
+				);
 			}
 		);
 	}

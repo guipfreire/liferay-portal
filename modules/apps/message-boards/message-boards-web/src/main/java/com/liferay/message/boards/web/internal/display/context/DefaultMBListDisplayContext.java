@@ -176,7 +176,7 @@ public class DefaultMBListDisplayContext implements MBListDisplayContext {
 			long searchCategoryId = ParamUtil.getLong(
 				_httpServletRequest, "searchCategoryId");
 
-			List categoryIds = new ArrayList();
+			List<Long> categoryIds = new ArrayList<>();
 
 			categoryIds.add(Long.valueOf(searchCategoryId));
 
@@ -186,7 +186,8 @@ public class DefaultMBListDisplayContext implements MBListDisplayContext {
 			long[] categoryIdsArray = StringUtil.split(
 				StringUtil.merge(categoryIds), 0L);
 
-			Indexer indexer = IndexerRegistryUtil.getIndexer(MBMessage.class);
+			Indexer<MBMessage> indexer = IndexerRegistryUtil.getIndexer(
+				MBMessage.class);
 
 			SearchContext searchContext = SearchContextFactory.getInstance(
 				_httpServletRequest);

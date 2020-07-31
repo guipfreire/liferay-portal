@@ -33,21 +33,23 @@ import com.liferay.portal.tools.rest.builder.internal.freemarker.tool.java.parse
 import com.liferay.portal.tools.rest.builder.internal.freemarker.util.FreeMarkerUtil;
 import com.liferay.portal.tools.rest.builder.internal.freemarker.util.OpenAPIUtil;
 import com.liferay.portal.tools.rest.builder.internal.util.FileUtil;
-import com.liferay.portal.vulcan.yaml.YAMLUtil;
-import com.liferay.portal.vulcan.yaml.config.Application;
-import com.liferay.portal.vulcan.yaml.config.ConfigYAML;
-import com.liferay.portal.vulcan.yaml.openapi.Components;
-import com.liferay.portal.vulcan.yaml.openapi.Content;
-import com.liferay.portal.vulcan.yaml.openapi.Info;
-import com.liferay.portal.vulcan.yaml.openapi.Items;
-import com.liferay.portal.vulcan.yaml.openapi.License;
-import com.liferay.portal.vulcan.yaml.openapi.OpenAPIYAML;
-import com.liferay.portal.vulcan.yaml.openapi.Operation;
-import com.liferay.portal.vulcan.yaml.openapi.Parameter;
-import com.liferay.portal.vulcan.yaml.openapi.PathItem;
-import com.liferay.portal.vulcan.yaml.openapi.RequestBody;
-import com.liferay.portal.vulcan.yaml.openapi.Response;
-import com.liferay.portal.vulcan.yaml.openapi.Schema;
+import com.liferay.portal.tools.rest.builder.internal.yaml.YAMLUtil;
+import com.liferay.portal.tools.rest.builder.internal.yaml.config.Application;
+import com.liferay.portal.tools.rest.builder.internal.yaml.config.ConfigYAML;
+import com.liferay.portal.tools.rest.builder.internal.yaml.exception.OpenAPIValidatorException;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.Components;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.Content;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.Info;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.Items;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.License;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.OpenAPIYAML;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.Operation;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.Parameter;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.PathItem;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.RequestBody;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.Response;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.ResponseCode;
+import com.liferay.portal.tools.rest.builder.internal.yaml.openapi.Schema;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -115,9 +117,13 @@ public class RESTBuilder {
 			}
 		}
 		catch (ParameterException parameterException) {
-			System.err.println(parameterException.getMessage());
-
 			_printHelp(jCommander);
+
+			throw new RuntimeException(parameterException.getMessage());
+		}
+		catch (Exception exception) {
+			throw new RuntimeException(
+				"Error generating REST API\n" + exception.getMessage());
 		}
 	}
 
@@ -130,6 +136,11 @@ public class RESTBuilder {
 
 		try (InputStream is = new FileInputStream(configFile)) {
 			_configYAML = YAMLUtil.loadConfigYAML(StringUtil.read(is));
+		}
+		catch (Exception exception) {
+			throw new RuntimeException(
+				"Error in file \"rest-config.yaml\": " +
+					exception.getMessage());
 		}
 	}
 
@@ -157,7 +168,9 @@ public class RESTBuilder {
 		}
 
 		if (Validator.isNotNull(_configYAML.getClientDir())) {
+			_createClientAggregationFile(context);
 			_createClientBaseJSONParserFile(context);
+			_createClientFacetFile(context);
 			_createClientHttpInvokerFile(context);
 			_createClientPageFile(context);
 			_createClientPaginationFile(context);
@@ -166,18 +179,30 @@ public class RESTBuilder {
 			_createClientUnsafeSupplierFile(context);
 		}
 
+		List<String> validationErrorMessages = new ArrayList<>();
+
 		File[] files = FileUtil.getFiles(_configDir, "rest-openapi", ".yaml");
 
 		for (File file : files) {
-			_checkOpenAPIYAMLFile(freeMarkerTool, file);
+			try {
+				_checkOpenAPIYAMLFile(freeMarkerTool, file);
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(
+					StringBundler.concat(
+						"Error in file \"", file.getName(), "\": ",
+						exception.getMessage()));
+			}
 
-			OpenAPIYAML openAPIYAML = _loadOpenAPIYAML(FileUtil.read(file));
+			String yamlString = FileUtil.read(file);
 
-			Info info = openAPIYAML.getInfo();
+			if (!_validateOpenAPIYAML(
+					file.getName(), yamlString, validationErrorMessages)) {
 
-			if (Validator.isNull(info.getVersion())) {
 				continue;
 			}
+
+			OpenAPIYAML openAPIYAML = _loadOpenAPIYAML(yamlString);
 
 			Map<String, Schema> allSchemas = OpenAPIUtil.getAllSchemas(
 				openAPIYAML);
@@ -200,6 +225,8 @@ public class RESTBuilder {
 				_createGraphQLQueryFile(context, escapedVersion);
 				_createGraphQLServletDataFile(context, escapedVersion);
 			}
+
+			context.put("schemaName", "openapi");
 
 			_createOpenAPIResourceFile(context, escapedVersion);
 			_createPropertiesFile(context, escapedVersion, "openapi");
@@ -242,7 +269,7 @@ public class RESTBuilder {
 				}
 			}
 
-			_addTags(openAPIYAML, schemas);
+			schemas = freeMarkerTool.getAllSchemas(openAPIYAML, schemas);
 
 			for (Map.Entry<String, Schema> entry : schemas.entrySet()) {
 				String schemaName = entry.getKey();
@@ -283,6 +310,14 @@ public class RESTBuilder {
 						context, escapedVersion, schemaName);
 				}
 			}
+		}
+
+		if (!validationErrorMessages.isEmpty()) {
+			String validationErrorMessagesString = StringUtil.merge(
+				validationErrorMessages, StringPool.NEW_LINE);
+
+			throw new RuntimeException(
+				"OpenAPI validation errors:\n" + validationErrorMessagesString);
 		}
 
 		FileUtil.deleteFiles(_configYAML.getApiDir(), _files);
@@ -357,29 +392,6 @@ public class RESTBuilder {
 					"    description:", yamlString.indexOf("info:")),
 				yamlString.indexOf("    license:")),
 			descriptionBlock);
-	}
-
-	private void _addTags(
-		OpenAPIYAML openAPIYAML, Map<String, Schema> schemas) {
-
-		Map<String, PathItem> pathItems = openAPIYAML.getPathItems();
-
-		Set<Map.Entry<String, PathItem>> entries = pathItems.entrySet();
-
-		for (Map.Entry<String, PathItem> entry : entries) {
-			List<Operation> operations = OpenAPIParserUtil.getOperations(
-				entry.getValue());
-
-			for (Operation operation : operations) {
-				List<String> tags = operation.getTags();
-
-				for (String tag : tags) {
-					if (!schemas.containsKey(tag)) {
-						schemas.put(tag, new Schema());
-					}
-				}
-			}
-		}
 	}
 
 	private void _checkOpenAPIYAMLFile(FreeMarkerTool freeMarkerTool, File file)
@@ -494,6 +506,27 @@ public class RESTBuilder {
 				_copyrightFile, "base_resource_test_case", context));
 	}
 
+	private void _createClientAggregationFile(Map<String, Object> context)
+		throws Exception {
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(_configYAML.getClientDir());
+		sb.append("/");
+		sb.append(
+			StringUtil.replace(_configYAML.getApiPackagePath(), '.', '/'));
+		sb.append("/client/aggregation/Aggregation.java");
+
+		File file = new File(sb.toString());
+
+		_files.add(file);
+
+		FileUtil.write(
+			file,
+			FreeMarkerUtil.processTemplate(
+				_copyrightFile, "client_aggregation", context));
+	}
+
 	private void _createClientBaseJSONParserFile(Map<String, Object> context)
 		throws Exception {
 
@@ -567,6 +600,27 @@ public class RESTBuilder {
 			file,
 			FreeMarkerUtil.processTemplate(
 				_copyrightFile, "client_enum", context));
+	}
+
+	private void _createClientFacetFile(Map<String, Object> context)
+		throws Exception {
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(_configYAML.getClientDir());
+		sb.append("/");
+		sb.append(
+			StringUtil.replace(_configYAML.getApiPackagePath(), '.', '/'));
+		sb.append("/client/aggregation/Facet.java");
+
+		File file = new File(sb.toString());
+
+		_files.add(file);
+
+		FileUtil.write(
+			file,
+			FreeMarkerUtil.processTemplate(
+				_copyrightFile, "client_facet", context));
 	}
 
 	private void _createClientHttpInvokerFile(Map<String, Object> context)
@@ -1077,11 +1131,7 @@ public class RESTBuilder {
 		int startIndex =
 			s.lastIndexOf("\n", s.indexOf("application/json", index)) + 1;
 
-		int endIndex = s.indexOf("\n", startIndex);
-
-		if (endIndex < 0) {
-			endIndex = s.length();
-		}
+		int endIndex = _getLineEndIndex(s, startIndex);
 
 		String line = s.substring(startIndex, endIndex);
 
@@ -1093,12 +1143,18 @@ public class RESTBuilder {
 
 			startIndex = endIndex + 1;
 
+			endIndex = _getLineEndIndex(s, startIndex);
+
 			line = s.substring(Math.min(startIndex, endIndex), endIndex);
 		}
 
+		sb.setLength(sb.length() - 1);
+
 		String oldSub = sb.toString();
 
-		String replacement = StringUtil.replace(
+		String replacement = "\n";
+
+		replacement += StringUtil.replace(
 			oldSub, "application/json", "application/xml");
 
 		return StringUtil.replaceFirst(s, oldSub, oldSub + replacement, index);
@@ -1139,9 +1195,10 @@ public class RESTBuilder {
 						contents, index, yamlString);
 				}
 
-				Map<Integer, Response> responses = operation.getResponses();
+				Map<ResponseCode, Response> responses =
+					operation.getResponses();
 
-				for (Map.Entry<Integer, Response> entry2 :
+				for (Map.Entry<ResponseCode, Response> entry2 :
 						responses.entrySet()) {
 
 					Response response = entry2.getValue();
@@ -1782,6 +1839,16 @@ public class RESTBuilder {
 		}
 	}
 
+	private int _getLineEndIndex(String s, int startIndex) {
+		int endIndex = s.indexOf("\n", startIndex);
+
+		if (endIndex < 0) {
+			endIndex = s.length();
+		}
+
+		return endIndex;
+	}
+
 	private Set<String> _getRelatedSchemaNames(
 		Map<String, Schema> schemas,
 		List<JavaMethodSignature> javaMethodSignatures) {
@@ -1964,6 +2031,21 @@ public class RESTBuilder {
 					System.out.println(sb.toString());
 				}
 			}
+		}
+	}
+
+	private boolean _validateOpenAPIYAML(
+		String fileName, String yamlString, List<String> validationErrors) {
+
+		try {
+			YAMLUtil.validateOpenAPIYAML(fileName, yamlString);
+
+			return true;
+		}
+		catch (OpenAPIValidatorException openAPIValidatorException) {
+			validationErrors.add(openAPIValidatorException.getMessage());
+
+			return false;
 		}
 	}
 

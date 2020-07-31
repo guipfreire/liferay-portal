@@ -43,7 +43,9 @@ portletURL.setParameter("eventName", eventName);
 	<span class="error-message"><liferay-ui:message key="the-field-value-is-invalid" /></span>
 </div>
 
-<div class="container-fluid-1280" id="<portlet:namespace />selectDDMStructureFieldForm">
+<clay:container-fluid
+	id='<%= liferayPortletResponse.getNamespace() + "selectDDMStructureFieldForm" %>'
+>
 	<liferay-ui:search-container
 		iteratorURL="<%= portletURL %>"
 		total="<%= classType.getClassTypeFieldsCount() %>"
@@ -64,7 +66,7 @@ portletURL.setParameter("eventName", eventName);
 			%>
 
 			<liferay-ui:search-container-column-text>
-				<input data-button-id="<%= renderResponse.getNamespace() + "applyButton" + name %>" data-form-id="<%= renderResponse.getNamespace() + name + "fieldForm" %>" name="<portlet:namespace />selectStructureFieldSubtype" type="radio" <%= name.equals(ddmStructureFieldName) ? "checked" : StringPool.BLANK %> />
+				<input data-button-id="<%= liferayPortletResponse.getNamespace() + "applyButton" + name %>" data-form-id="<%= liferayPortletResponse.getNamespace() + name + "fieldForm" %>" name="<portlet:namespace />selectStructureFieldSubtype" type="radio" <%= name.equals(ddmStructureFieldName) ? "checked" : StringPool.BLANK %> />
 			</liferay-ui:search-container-column-text>
 
 			<%
@@ -82,7 +84,7 @@ portletURL.setParameter("eventName", eventName);
 				</liferay-portlet:resourceURL>
 
 				<aui:form action="<%= structureFieldURL %>" disabled="<%= !name.equals(ddmStructureFieldName) %>" name='<%= name + "fieldForm" %>' onSubmit="event.preventDefault()">
-					<aui:input disabled="<%= true %>" name="buttonId" type="hidden" value='<%= renderResponse.getNamespace() + "applyButton" + name %>' />
+					<aui:input disabled="<%= true %>" name="buttonId" type="hidden" value='<%= liferayPortletResponse.getNamespace() + "applyButton" + name %>' />
 
 					<%
 					com.liferay.dynamic.data.mapping.storage.Field ddmField = new com.liferay.dynamic.data.mapping.storage.Field();
@@ -111,7 +113,7 @@ portletURL.setParameter("eventName", eventName);
 				Map<String, Object> data = HashMapBuilder.<String, Object>put(
 					"fieldsnamespace", fieldsNamespace
 				).put(
-					"form", renderResponse.getNamespace() + name + "fieldForm"
+					"form", liferayPortletResponse.getNamespace() + name + "fieldForm"
 				).put(
 					"label", label
 				).put(
@@ -127,9 +129,19 @@ portletURL.setParameter("eventName", eventName);
 			markupView="lexicon"
 		/>
 	</liferay-ui:search-container>
-</div>
+</clay:container-fluid>
 
 <aui:script use="aui-base">
+	A.on('domready', function (event) {
+		A.all('.selector-button').each(function () {
+			var selectorButton = this;
+
+			Liferay.component(
+				'<portlet:namespace />' + this.getData().fieldsnamespace + 'ddmForm'
+			);
+		});
+	});
+
 	var Util = Liferay.Util;
 
 	var structureFormContainer = A.one(

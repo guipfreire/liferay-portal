@@ -18,10 +18,11 @@
 			"config": {
 				"backgroundImage": {
 				},
-				"paddingBottom": 3,
-				"paddingHorizontal": 3,
-				"paddingTop": 3,
-				"type": "fixed"
+				"paddingBottom": 0,
+				"paddingLeft": 0,
+				"paddingRight": 0,
+				"paddingTop": 0,
+				"widthType": "fluid"
 			},
 			"itemId": "ROOT-CONTAINER0",
 			"parentId": "ROOT",
@@ -35,16 +36,16 @@
 				"gutters": true,
 				"landscapeMobile": {
 					"gutters": true,
-					"modulesPerRow": 3,
+					"modulesPerRow": 1,
 					"numberOfColumns": 1,
 					"reverseOrder": false,
 					"verticalAlignment": "top"
 				},
-				"modulesPerRow": 3,
+				"modulesPerRow": 1,
 				"numberOfColumns": 1,
 				"portraitMobile": {
 					"gutters": true,
-					"modulesPerRow": 3,
+					"modulesPerRow": 1,
 					"numberOfColumns": 1,
 					"reverseOrder": false,
 					"verticalAlignment": "top"
@@ -52,7 +53,7 @@
 				"reverseOrder": false,
 				"tablet": {
 					"gutters": true,
-					"modulesPerRow": 3,
+					"modulesPerRow": 1,
 					"numberOfColumns": 1,
 					"reverseOrder": false,
 					"verticalAlignment": "top"
@@ -80,10 +81,11 @@
 			"config": {
 				"backgroundImage": {
 				},
-				"paddingBottom": 3,
-				"paddingHorizontal": 3,
-				"paddingTop": 3,
-				"type": "fixed"
+				"paddingBottom": 0,
+				"paddingLeft": 0,
+				"paddingRight": 0,
+				"paddingTop": 0,
+				"widthType": "fluid"
 			},
 			"itemId": "ROOT-CONTAINER1",
 			"parentId": "ROOT",
@@ -98,16 +100,16 @@
 				"gutters": true,
 				"landscapeMobile": {
 					"gutters": true,
-					"modulesPerRow": 3,
+					"modulesPerRow": 2,
 					"numberOfColumns": 2,
 					"reverseOrder": false,
 					"verticalAlignment": "top"
 				},
-				"modulesPerRow": 3,
+				"modulesPerRow": 2,
 				"numberOfColumns": 2,
 				"portraitMobile": {
 					"gutters": true,
-					"modulesPerRow": 3,
+					"modulesPerRow": 2,
 					"numberOfColumns": 2,
 					"reverseOrder": false,
 					"verticalAlignment": "top"
@@ -115,7 +117,7 @@
 				"reverseOrder": false,
 				"tablet": {
 					"gutters": true,
-					"modulesPerRow": 3,
+					"modulesPerRow": 2,
 					"numberOfColumns": 2,
 					"reverseOrder": false,
 					"verticalAlignment": "top"

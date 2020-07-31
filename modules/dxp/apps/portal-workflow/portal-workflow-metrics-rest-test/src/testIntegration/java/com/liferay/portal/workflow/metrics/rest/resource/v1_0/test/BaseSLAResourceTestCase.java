@@ -113,7 +113,9 @@ public abstract class BaseSLAResourceTestCase {
 
 		SLAResource.Builder builder = SLAResource.builder();
 
-		slaResource = builder.locale(
+		slaResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -396,6 +398,26 @@ public abstract class BaseSLAResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/sLA"))));
+	}
+
+	@Test
+	public void testGraphQLGetSLANotFound() throws Exception {
+		Long irrelevantSlaId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"sLA",
+						new HashMap<String, Object>() {
+							{
+								put("slaId", irrelevantSlaId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

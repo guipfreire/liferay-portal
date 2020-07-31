@@ -21,10 +21,12 @@
 	<%
 	AppBuilderApp appBuilderApp = (AppBuilderApp)request.getAttribute(AppBuilderWebKeys.APP);
 
-	Map<String, Object> data = HashMapBuilder.<String, Object>put(
+	Map<String, Object> props = HashMapBuilder.<String, Object>put(
 		"appDeploymentType", request.getAttribute(AppBuilderWebKeys.APP_DEPLOYMENT_TYPE)
 	).put(
 		"appId", appBuilderApp.getAppBuilderAppId()
+	).put(
+		"appTab", request.getAttribute(AppBuilderWebKeys.APP_TAB)
 	).put(
 		"basePortletURL", String.valueOf(renderResponse.createRenderURL())
 	).put(
@@ -34,6 +36,10 @@
 	).put(
 		"dataListViewId", appBuilderApp.getDeDataListViewId()
 	).put(
+		"defaultDelta", PropsValues.SEARCH_CONTAINER_PAGE_DEFAULT_DELTA
+	).put(
+		"deltaValues", PropsValues.SEARCH_CONTAINER_PAGE_DELTA_VALUES
+	).put(
 		"showFormView", request.getAttribute(AppBuilderWebKeys.SHOW_FORM_VIEW)
 	).put(
 		"showTableView", request.getAttribute(AppBuilderWebKeys.SHOW_TABLE_VIEW)
@@ -41,7 +47,7 @@
 	%>
 
 	<react:component
-		data="<%= data %>"
 		module="js/pages/entry/ViewEntriesApp.es"
+		props="<%= props %>"
 	/>
 </div>

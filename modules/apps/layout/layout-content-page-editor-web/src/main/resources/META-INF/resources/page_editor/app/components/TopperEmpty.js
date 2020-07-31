@@ -19,17 +19,15 @@ import {
 	LayoutDataPropTypes,
 	getLayoutDataItemPropTypes,
 } from '../../prop-types/index';
-import {LAYOUT_DATA_ITEM_TYPES} from '../config/constants/layoutDataItemTypes';
-import selectCanUpdate from '../selectors/selectCanUpdate';
+import selectCanUpdatePageStructure from '../selectors/selectCanUpdatePageStructure';
 import {useSelector} from '../store/index';
-import useDragAndDrop, {TARGET_POSITION} from '../utils/useDragAndDrop';
-import {useToControlsId} from './CollectionItemContext';
-import getLabelName from './layout-data-items/getLabelName';
+import getLayoutDataItemLabel from '../utils/getLayoutDataItemLabel';
+import {TARGET_POSITION, useDropTarget} from '../utils/useDragAndDrop';
 
 export default function ({children, ...props}) {
-	const canUpdate = useSelector(selectCanUpdate);
+	const canUpdatePageStructure = useSelector(selectCanUpdatePageStructure);
 
-	return canUpdate ? (
+	return canUpdatePageStructure ? (
 		<TopperEmpty {...props}>{children}</TopperEmpty>
 	) : (
 		children
@@ -38,47 +36,26 @@ export default function ({children, ...props}) {
 
 function TopperEmpty({children, item, layoutData}) {
 	const containerRef = useRef(null);
-	const store = useSelector((state) => state);
-	const fragmentEntryLinks = store.fragmentEntryLinks;
-
-	const toControlsId = useToControlsId();
+	const fragmentEntryLinks = useSelector((state) => state.fragmentEntryLinks);
 
 	const {
-		drop,
-		isDragging,
-		state: {
-			dropItem,
-			dropTargetItemId,
-			droppable,
-			targetPositionWithMiddle,
-			targetPositionWithoutMiddle,
-		},
-	} = useDragAndDrop({
-		containerRef,
-		dropTargetItem: item,
-		layoutData,
-	});
-
-	const targetPosition =
-		item.type === LAYOUT_DATA_ITEM_TYPES.fragment ||
-		item.type === LAYOUT_DATA_ITEM_TYPES.collection
-			? targetPositionWithoutMiddle
-			: targetPositionWithMiddle;
+		canDropOverTarget,
+		isOverTarget,
+		sourceItem,
+		targetPosition,
+		targetRef,
+	} = useDropTarget(item, layoutData);
 
 	const isFragment = children.type === React.Fragment;
 	const realChildren = isFragment ? children.props.children : children;
 
-	const isDraggableInPosition = (position) =>
-		targetPosition === position &&
-		dropTargetItemId === toControlsId(item.itemId);
-
-	const dataAdvice =
-		!droppable && isDraggableInPosition(TARGET_POSITION.MIDDLE)
+	const notDroppableMessage =
+		isOverTarget && !canDropOverTarget
 			? Liferay.Util.sub(
 					Liferay.Language.get('a-x-cannot-be-dropped-inside-a-x'),
 					[
-						getLabelName(dropItem, fragmentEntryLinks),
-						getLabelName(item, fragmentEntryLinks),
+						getLayoutDataItemLabel(sourceItem, fragmentEntryLinks),
+						getLayoutDataItemLabel(item, fragmentEntryLinks),
 					]
 			  )
 			: null;
@@ -93,30 +70,30 @@ function TopperEmpty({children, item, layoutData}) {
 				{React.cloneElement(child, {
 					...child.props,
 					className: classNames(child.props.className, {
-						'drag-over-bottom': isDraggableInPosition(
-							TARGET_POSITION.BOTTOM
-						),
-						'drag-over-middle': isDraggableInPosition(
-							TARGET_POSITION.MIDDLE
-						),
-						'drag-over-top': isDraggableInPosition(
-							TARGET_POSITION.TOP
-						),
-						dragged: isDragging,
-						'not-droppable':
-							!droppable &&
-							isDraggableInPosition(TARGET_POSITION.MIDDLE),
+						'drag-over-bottom':
+							isOverTarget &&
+							targetPosition === TARGET_POSITION.BOTTOM,
+						'drag-over-middle':
+							isOverTarget &&
+							targetPosition === TARGET_POSITION.MIDDLE,
+						'drag-over-top':
+							isOverTarget &&
+							targetPosition === TARGET_POSITION.TOP,
+						'not-droppable': !!notDroppableMessage,
 						'page-editor__topper': true,
 					}),
-					'data-advice': dataAdvice,
+					'data-not-droppable-message': notDroppableMessage,
 					ref: (node) => {
 						containerRef.current = node;
-						drop(node);
+						targetRef(node);
 
 						// Call the original ref, if any.
 
 						if (typeof child.ref === 'function') {
 							child.ref(node);
+						}
+						else if (child.ref && 'current' in child.ref) {
+							child.ref.current = node;
 						}
 					},
 				})}

@@ -111,7 +111,9 @@ public abstract class BaseFormResourceTestCase {
 
 		FormResource.Builder builder = FormResource.builder();
 
-		formResource = builder.locale(
+		formResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -230,6 +232,26 @@ public abstract class BaseFormResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/form"))));
+	}
+
+	@Test
+	public void testGraphQLGetFormNotFound() throws Exception {
+		Long irrelevantFormId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"form",
+						new HashMap<String, Object>() {
+							{
+								put("formId", irrelevantFormId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

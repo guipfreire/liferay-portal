@@ -14,6 +14,7 @@
 
 package com.liferay.portal.tools.service.builder.test.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -72,6 +73,10 @@ public abstract class EagerBlobEntityLocalServiceBaseImpl
 	/**
 	 * Adds the eager blob entity to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect EagerBlobEntityLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param eagerBlobEntity the eager blob entity
 	 * @return the eager blob entity that was added
 	 */
@@ -98,6 +103,10 @@ public abstract class EagerBlobEntityLocalServiceBaseImpl
 	/**
 	 * Deletes the eager blob entity with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect EagerBlobEntityLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param eagerBlobEntityId the primary key of the eager blob entity
 	 * @return the eager blob entity that was removed
 	 * @throws PortalException if a eager blob entity with the primary key could not be found
@@ -113,6 +122,10 @@ public abstract class EagerBlobEntityLocalServiceBaseImpl
 	/**
 	 * Deletes the eager blob entity from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect EagerBlobEntityLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param eagerBlobEntity the eager blob entity
 	 * @return the eager blob entity that was removed
 	 */
@@ -122,6 +135,11 @@ public abstract class EagerBlobEntityLocalServiceBaseImpl
 		EagerBlobEntity eagerBlobEntity) {
 
 		return eagerBlobEntityPersistence.remove(eagerBlobEntity);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return eagerBlobEntityPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -365,6 +383,10 @@ public abstract class EagerBlobEntityLocalServiceBaseImpl
 
 	/**
 	 * Updates the eager blob entity in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect EagerBlobEntityLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param eagerBlobEntity the eager blob entity
 	 * @return the eager blob entity that was updated

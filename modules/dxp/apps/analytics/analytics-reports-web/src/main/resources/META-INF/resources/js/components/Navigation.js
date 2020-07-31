@@ -15,7 +15,6 @@ import React, {useCallback, useContext, useState} from 'react';
 
 import ConnectionContext from '../context/ConnectionContext';
 import {StoreContext, useHistoricalWarning, useWarning} from '../context/store';
-import {numberFormat} from '../utils/numberFormat';
 import Detail from './Detail';
 import Main from './Main';
 
@@ -47,46 +46,37 @@ export default function Navigation({
 	}, []);
 
 	const handleTotalReads = useCallback(() => {
-		return api.getTotalReads().then((response) => {
-			return numberFormat(
-				languageTag,
-				response.analyticsReportsTotalReads
-			);
-		});
-	}, [api, languageTag]);
+		return api
+			.getTotalReads()
+			.then((response) => response.analyticsReportsTotalReads);
+	}, [api]);
 
 	const handleTotalViews = useCallback(() => {
-		return api.getTotalViews().then((response) => {
-			return numberFormat(
-				languageTag,
-				response.analyticsReportsTotalViews
-			);
-		});
-	}, [api, languageTag]);
+		return api
+			.getTotalViews()
+			.then((response) => response.analyticsReportsTotalViews);
+	}, [api]);
 
 	const handleTrafficShare = useCallback(() => {
 		const trafficSource = trafficSources.find((trafficSource) => {
 			return trafficSource['name'] === trafficSourceName;
 		});
 
-		return Promise.resolve(trafficSource ? trafficSource.share : '-');
+		return Promise.resolve(trafficSource?.share ?? '-');
 	}, [trafficSourceName, trafficSources]);
 
-	const handleTrafficSourceClick = useCallback(
-		(trafficSourceName) => {
-			setTrafficSourceName(trafficSourceName);
+	const handleTrafficSourceClick = (trafficSourceName) => {
+		setTrafficSourceName(trafficSourceName);
 
-			api.getTrafficSourceDetails(trafficSourceName).then(
-				(trafficSourceData) => {
-					setCurrentPage({
-						data: trafficSourceData,
-						view: 'traffic-source-detail',
-					});
-				}
-			);
-		},
-		[api]
-	);
+		const trafficSource = trafficSources.find((trafficSource) => {
+			return trafficSource['name'] === trafficSourceName;
+		});
+
+		setCurrentPage({
+			data: trafficSource,
+			view: 'traffic-source-detail',
+		});
+	};
 
 	const handleTrafficSourceName = useCallback((trafficSourceName) => {
 		setTrafficSourceName(trafficSourceName);
@@ -97,44 +87,50 @@ export default function Navigation({
 			return trafficSource['name'] === trafficSourceName;
 		});
 
-		return Promise.resolve(trafficSource ? trafficSource.value : '-');
+		return Promise.resolve(trafficSource?.value ?? '-');
 	}, [trafficSourceName, trafficSources]);
 
-	const [{readsEnabled}] = useContext(StoreContext);
-
-	const chartDataProviders = readsEnabled
-		? [getHistoricalViews, getHistoricalReads]
-		: [getHistoricalViews];
+	const [{publishedToday}] = useContext(StoreContext);
 
 	return (
 		<>
 			{!validAnalyticsConnection && (
-				<ClayAlert
-					className="p-0"
-					displayType="danger"
-					variant="stripe"
-				>
+				<ClayAlert displayType="danger" variant="stripe">
 					{Liferay.Language.get('an-unexpected-error-occurred')}
 				</ClayAlert>
 			)}
 
 			{validAnalyticsConnection && (hasWarning || hasHistoricalWarning) && (
-				<ClayAlert
-					className="p-0"
-					displayType="warning"
-					variant="stripe"
-				>
+				<ClayAlert displayType="warning" variant="stripe">
 					{Liferay.Language.get(
 						'some-data-is-temporarily-unavailable'
 					)}
 				</ClayAlert>
 			)}
 
+			{validAnalyticsConnection &&
+				publishedToday &&
+				!hasWarning &&
+				!hasHistoricalWarning && (
+					<ClayAlert
+						displayType="info"
+						title={Liferay.Language.get('no-data-is-available-yet')}
+						variant="stripe"
+					>
+						{Liferay.Language.get(
+							'content-has-just-been-published'
+						)}
+					</ClayAlert>
+				)}
+
 			{currentPage.view === 'main' && (
-				<div className="p-3">
+				<div>
 					<Main
 						authorName={authorName}
-						chartDataProviders={chartDataProviders}
+						chartDataProviders={[
+							getHistoricalViews,
+							getHistoricalReads,
+						]}
 						defaultTimeRange={defaultTimeRange}
 						defaultTimeSpanOption={defaultTimeSpanKey}
 						languageTag={languageTag}
@@ -149,16 +145,17 @@ export default function Navigation({
 				</div>
 			)}
 
-			{currentPage.view === 'traffic-source-detail' && (
-				<Detail
-					currentPage={currentPage}
-					languageTag={languageTag}
-					onCurrentPageChange={handleCurrentPage}
-					onTrafficSourceNameChange={handleTrafficSourceName}
-					trafficShareDataProvider={handleTrafficShare}
-					trafficVolumeDataProvider={handleTrafficVolume}
-				/>
-			)}
+			{currentPage.view === 'traffic-source-detail' &&
+				currentPage.data.countryKeywords.length > 0 && (
+					<Detail
+						currentPage={currentPage}
+						languageTag={languageTag}
+						onCurrentPageChange={handleCurrentPage}
+						onTrafficSourceNameChange={handleTrafficSourceName}
+						trafficShareDataProvider={handleTrafficShare}
+						trafficVolumeDataProvider={handleTrafficVolume}
+					/>
+				)}
 		</>
 	);
 }

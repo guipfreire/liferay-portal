@@ -120,7 +120,9 @@ public abstract class BaseKeywordResourceTestCase {
 
 		KeywordResource.Builder builder = KeywordResource.builder();
 
-		keywordResource = builder.locale(
+		keywordResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -204,7 +206,7 @@ public abstract class BaseKeywordResourceTestCase {
 	@Test
 	public void testGetKeywordsRankedPage() throws Exception {
 		Page<Keyword> page = keywordResource.getKeywordsRankedPage(
-			null, Pagination.of(1, 2));
+			null, RandomTestUtil.randomString(), Pagination.of(1, 2));
 
 		Assert.assertEquals(0, page.getTotalCount());
 
@@ -214,7 +216,8 @@ public abstract class BaseKeywordResourceTestCase {
 		Keyword keyword2 = testGetKeywordsRankedPage_addKeyword(
 			randomKeyword());
 
-		page = keywordResource.getKeywordsRankedPage(null, Pagination.of(1, 2));
+		page = keywordResource.getKeywordsRankedPage(
+			null, null, Pagination.of(1, 2));
 
 		Assert.assertEquals(2, page.getTotalCount());
 
@@ -239,14 +242,14 @@ public abstract class BaseKeywordResourceTestCase {
 			randomKeyword());
 
 		Page<Keyword> page1 = keywordResource.getKeywordsRankedPage(
-			null, Pagination.of(1, 2));
+			null, null, Pagination.of(1, 2));
 
 		List<Keyword> keywords1 = (List<Keyword>)page1.getItems();
 
 		Assert.assertEquals(keywords1.toString(), 2, keywords1.size());
 
 		Page<Keyword> page2 = keywordResource.getKeywordsRankedPage(
-			null, Pagination.of(2, 2));
+			null, null, Pagination.of(2, 2));
 
 		Assert.assertEquals(3, page2.getTotalCount());
 
@@ -255,7 +258,7 @@ public abstract class BaseKeywordResourceTestCase {
 		Assert.assertEquals(keywords2.toString(), 1, keywords2.size());
 
 		Page<Keyword> page3 = keywordResource.getKeywordsRankedPage(
-			null, Pagination.of(1, 3));
+			null, null, Pagination.of(1, 3));
 
 		assertEqualsIgnoringOrder(
 			Arrays.asList(keyword1, keyword2, keyword3),
@@ -360,6 +363,26 @@ public abstract class BaseKeywordResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/keyword"))));
+	}
+
+	@Test
+	public void testGraphQLGetKeywordNotFound() throws Exception {
+		Long irrelevantKeywordId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"keyword",
+						new HashMap<String, Object>() {
+							{
+								put("keywordId", irrelevantKeywordId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

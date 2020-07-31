@@ -106,7 +106,9 @@ public abstract class BaseStatusResourceTestCase {
 
 		StatusResource.Builder builder = StatusResource.builder();
 
-		statusResource = builder.locale(
+		statusResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -190,6 +192,11 @@ public abstract class BaseStatusResourceTestCase {
 
 	@Test
 	public void testGraphQLGetStatus() throws Exception {
+		Assert.assertTrue(true);
+	}
+
+	@Test
+	public void testGraphQLGetStatusNotFound() throws Exception {
 		Assert.assertTrue(true);
 	}
 

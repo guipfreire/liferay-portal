@@ -114,7 +114,9 @@ public abstract class BaseWorkflowInstanceResourceTestCase {
 		WorkflowInstanceResource.Builder builder =
 			WorkflowInstanceResource.builder();
 
-		workflowInstanceResource = builder.locale(
+		workflowInstanceResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -455,6 +457,28 @@ public abstract class BaseWorkflowInstanceResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/workflowInstance"))));
+	}
+
+	@Test
+	public void testGraphQLGetWorkflowInstanceNotFound() throws Exception {
+		Long irrelevantWorkflowInstanceId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"workflowInstance",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"workflowInstanceId",
+									irrelevantWorkflowInstanceId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

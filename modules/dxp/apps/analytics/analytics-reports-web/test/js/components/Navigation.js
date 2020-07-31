@@ -129,43 +129,6 @@ const mockApi = {
 	getTotalViews: jest.fn(() => {
 		return Promise.resolve(12345);
 	}),
-	getTrafficSourceDetails: jest.fn(() => {
-		return Promise.resolve({
-			keywords: [
-				{
-					position: 1,
-					title: 'commerce',
-					value: 90000,
-					volume: 12300,
-				},
-				{
-					position: 2,
-					title: 'e-commerce',
-					value: 14800,
-					volume: 9800,
-				},
-				{
-					position: 3,
-					title: 'what is commerce',
-					value: 14000,
-					volume: 9500,
-				},
-				{
-					position: 4,
-					title: 'what is e-commerce',
-					value: 12100,
-					volume: 8700,
-				},
-				{
-					position: 5,
-					title: 'commerce definition for new business strategy',
-					value: 10100,
-					volume: 7100,
-				},
-			],
-			title: 'Organic Traffic',
-		});
-	}),
 };
 
 const mockTimeSpanOptions = [
@@ -185,14 +148,18 @@ const mockTimeSpanOptions = [
 
 const mockTrafficSources = [
 	{
+		countryKeywords: [],
 		helpMessage: 'Testing Help Message',
 		name: 'testing',
+		share: 100,
 		title: 'Testing',
 		value: 32178,
 	},
 	{
+		countryKeywords: [],
 		helpMessage: 'Second Testing Help Message',
 		name: 'second-testing',
+		share: 0,
 		title: 'Second Testing',
 	},
 ];
@@ -236,7 +203,7 @@ describe('Navigation', () => {
 		expect(getByText('an-unexpected-error-occurred')).toBeInTheDocument();
 	});
 
-	it('displays an alert warning message if some data is not available', async () => {
+	it('displays an alert warning message if some data is temporarily unavailable', async () => {
 		const testProps = {
 			authorName: 'John Tester',
 			defaultTimeRange: {endDate: '2020-01-27', startDate: '2020-02-02'},

@@ -14,15 +14,13 @@
 
 package com.liferay.change.tracking.internal.reference.portal;
 
-import com.liferay.change.tracking.reference.TableReferenceDefinition;
-import com.liferay.change.tracking.reference.helper.TableReferenceInfoDefiner;
-import com.liferay.portal.kernel.model.ClassNameTable;
+import com.liferay.change.tracking.spi.reference.TableReferenceDefinition;
+import com.liferay.change.tracking.spi.reference.builder.ChildTableReferenceInfoBuilder;
+import com.liferay.change.tracking.spi.reference.builder.ParentTableReferenceInfoBuilder;
 import com.liferay.portal.kernel.model.CompanyTable;
 import com.liferay.portal.kernel.model.GroupTable;
-import com.liferay.portal.kernel.model.ResourcePermissionTable;
 import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.model.UserGroupTable;
-import com.liferay.portal.kernel.model.UserTable;
 import com.liferay.portal.kernel.service.persistence.BasePersistence;
 import com.liferay.portal.kernel.service.persistence.UserGroupPersistence;
 
@@ -37,78 +35,31 @@ public class UserGroupTableReferenceDefinition
 	implements TableReferenceDefinition<UserGroupTable> {
 
 	@Override
-	public void defineTableReferences(
-		TableReferenceInfoDefiner<UserGroupTable> tableReferenceInfoDefiner) {
+	public void defineChildTableReferences(
+		ChildTableReferenceInfoBuilder<UserGroupTable>
+			childTableReferenceInfoBuilder) {
 
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			UserGroupTable.INSTANCE.uuid);
+		childTableReferenceInfoBuilder.classNameReference(
+			UserGroupTable.INSTANCE.userGroupId, GroupTable.INSTANCE.classPK,
+			UserGroup.class
+		).resourcePermissionReference(
+			UserGroupTable.INSTANCE.userGroupId, UserGroup.class
+		).systemEventReference(
+			UserGroupTable.INSTANCE.userGroupId, UserGroup.class
+		);
+	}
 
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			UserGroupTable.INSTANCE.externalReferenceCode);
+	@Override
+	public void defineParentTableReferences(
+		ParentTableReferenceInfoBuilder<UserGroupTable>
+			parentTableReferenceInfoBuilder) {
 
-		tableReferenceInfoDefiner.defineSingleColumnReference(
-			UserGroupTable.INSTANCE.companyId, CompanyTable.INSTANCE.companyId);
-
-		tableReferenceInfoDefiner.defineSingleColumnReference(
-			UserGroupTable.INSTANCE.userId, UserTable.INSTANCE.userId);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			UserGroupTable.INSTANCE.userName);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			UserGroupTable.INSTANCE.createDate);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			UserGroupTable.INSTANCE.modifiedDate);
-
-		tableReferenceInfoDefiner.defineParentColumnReference(
+		parentTableReferenceInfoBuilder.singleColumnReference(
+			UserGroupTable.INSTANCE.companyId, CompanyTable.INSTANCE.companyId
+		).parentColumnReference(
 			UserGroupTable.INSTANCE.userGroupId,
-			UserGroupTable.INSTANCE.parentUserGroupId);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			UserGroupTable.INSTANCE.name);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			UserGroupTable.INSTANCE.description);
-
-		tableReferenceInfoDefiner.defineNonreferenceColumn(
-			UserGroupTable.INSTANCE.addedByLDAPImport);
-
-		tableReferenceInfoDefiner.defineReferenceInnerJoin(
-			fromStep -> fromStep.from(
-				GroupTable.INSTANCE
-			).innerJoinON(
-				UserGroupTable.INSTANCE,
-				UserGroupTable.INSTANCE.companyId.eq(
-					GroupTable.INSTANCE.companyId
-				).and(
-					UserGroupTable.INSTANCE.userGroupId.eq(
-						GroupTable.INSTANCE.classPK)
-				)
-			).innerJoinON(
-				ClassNameTable.INSTANCE,
-				ClassNameTable.INSTANCE.classNameId.eq(
-					GroupTable.INSTANCE.classNameId
-				).and(
-					ClassNameTable.INSTANCE.value.eq(UserGroup.class.getName())
-				)
-			));
-
-		tableReferenceInfoDefiner.defineReferenceInnerJoin(
-			fromStep -> fromStep.from(
-				ResourcePermissionTable.INSTANCE
-			).innerJoinON(
-				UserGroupTable.INSTANCE,
-				UserGroupTable.INSTANCE.companyId.eq(
-					ResourcePermissionTable.INSTANCE.companyId
-				).and(
-					ResourcePermissionTable.INSTANCE.name.eq(
-						UserGroup.class.getName())
-				).and(
-					ResourcePermissionTable.INSTANCE.primKeyId.eq(
-						UserGroupTable.INSTANCE.userGroupId)
-				)
-			));
+			UserGroupTable.INSTANCE.parentUserGroupId
+		);
 	}
 
 	@Override

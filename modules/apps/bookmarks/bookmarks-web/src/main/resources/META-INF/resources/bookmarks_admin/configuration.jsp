@@ -43,7 +43,7 @@ catch (NoSuchFolderException nsfe) {
 	action="<%= configurationActionURL %>"
 	method="post"
 	name="fm"
-	onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveConfiguration();" %>'
+	onSubmit='<%= "event.preventDefault(); " + liferayPortletResponse.getNamespace() + "saveConfiguration();" %>'
 >
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.UPDATE %>" />
 	<aui:input name="redirect" type="hidden" value="<%= configurationRenderURL %>" />
@@ -78,7 +78,7 @@ catch (NoSuchFolderException nsfe) {
 							<aui:button name="selectFolderButton" value="select" />
 
 							<%
-							String taglibRemoveFolder = "Liferay.Util.removeEntitySelection('rootFolderId', 'rootFolderName', this, '" + renderResponse.getNamespace() + "');";
+							String taglibRemoveFolder = "Liferay.Util.removeEntitySelection('rootFolderId', 'rootFolderName', this, '" + liferayPortletResponse.getNamespace() + "');";
 							%>
 
 							<aui:button disabled="<%= rootFolderId <= 0 %>" name="removeFolderButton" onClick="<%= taglibRemoveFolder %>" value="remove" />
@@ -95,7 +95,7 @@ catch (NoSuchFolderException nsfe) {
 
 							// Left list
 
-							List leftList = new ArrayList();
+							List<KeyValuePair> leftList = new ArrayList<>();
 
 							for (String folderColumn : folderColumns) {
 								leftList.add(new KeyValuePair(folderColumn, LanguageUtil.get(request, folderColumn)));
@@ -103,7 +103,7 @@ catch (NoSuchFolderException nsfe) {
 
 							// Right list
 
-							List rightList = new ArrayList();
+							List<KeyValuePair> rightList = new ArrayList<>();
 
 							Arrays.sort(folderColumns);
 
@@ -142,7 +142,7 @@ catch (NoSuchFolderException nsfe) {
 
 							// Left list
 
-							List leftList = new ArrayList();
+							List<KeyValuePair> leftList = new ArrayList<>();
 
 							for (int i = 0; i < entryColumns.length; i++) {
 								String entryColumn = entryColumns[i];
@@ -152,7 +152,7 @@ catch (NoSuchFolderException nsfe) {
 
 							// Right list
 
-							List rightList = new ArrayList();
+							List<KeyValuePair> rightList = new ArrayList<>();
 
 							Arrays.sort(entryColumns);
 

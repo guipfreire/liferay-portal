@@ -24,24 +24,26 @@ const {assignees, items, processSteps} = {
 	assignees: [{id: 1, name: 'Test Test'}],
 	items: [
 		{
-			assigneePerson: {
+			assetTitle: 'Blog 1',
+			assetType: 'Blog',
+			assignee: {
 				id: 1,
 				name: 'Test Test',
 			},
 			id: 1,
+			instanceId: 1,
 			label: 'Review',
-			objectReviewed: {assetTitle: 'Blog 1', assetType: 'Blog'},
-			workflowInstanceId: 1,
 		},
 		{
-			assigneePerson: {
+			assetTitle: 'Blog 2',
+			assetType: 'Blog',
+			assignee: {
 				id: 1,
 				name: 'Test Test',
 			},
 			id: 2,
+			instanceId: 2,
 			label: 'Update',
-			objectReviewed: {assetTitle: 'Blog 2', assetType: 'Blog'},
-			workflowInstanceId: 2,
 		},
 	],
 	processSteps: [
@@ -77,52 +79,12 @@ const ContainerMock = ({children}) => {
 	const processId = '12345';
 	const [selectAll, setSelectAll] = useState(false);
 	const [visibleModal, setVisibleModal] = useState('bulkUpdateDueDate');
-	const task = (id) => ({
-		assignees: [{id, name: 'Test Test'}],
-		items: [
-			{
-				assigneePerson: {
-					id,
-					name: 'Test Test',
-				},
-				id,
-				label: 'Review',
-				objectReviewed: {
-					assetTitle: 'Blog 1',
-					assetType: 'Blog',
-				},
-				workflowInstanceId: 1,
-			},
-			{
-				assigneePerson: {
-					id,
-					name: 'Test Test',
-				},
-				id: id + 1,
-				label: 'Update',
-				objectReviewed: {
-					assetTitle: 'Blog 2',
-					assetType: 'Blog',
-				},
-				workflowInstanceId: 2,
-			},
-		],
-		processSteps: [
-			{key: 'review', name: 'Review'},
-			{key: 'update', name: 'Update'},
-		],
-	});
-
 	const [selectTasks, setSelectTasks] = useState({
 		selectAll: false,
 		tasks: [],
 	});
 
-	const [selectedItems, setSelectedItems] = useState([
-		task(1),
-		task(2),
-		task(3),
-	]);
+	const [selectedItems, setSelectedItems] = useState([]);
 
 	return (
 		<MockRouter client={clientMock}>
@@ -194,8 +156,8 @@ describe('The BulkReassignModal component should', () => {
 		const processStepFilter = getByTestId('processStepFilter');
 		const assigneeFilter = getByTestId('assigneeFilter');
 
-		const content = modal.children[0].children[0].children[0];
-		const header = content.children[0].children[0];
+		const content = modal.children[0].children[0];
+		const header = content.children[0];
 
 		expect(header).toHaveTextContent('select-tasks-to-update');
 
@@ -300,8 +262,8 @@ describe('The BulkReassignModal component should', () => {
 		const previousBtn = getByTestId('previousButton');
 		const nextBtn = getByTestId('nextButton');
 
-		const content = modal.children[0].children[0].children[0];
-		const header = content.children[0].children[0];
+		const content = modal.children[0].children[0];
+		const header = content.children[0];
 
 		expect(header).toHaveTextContent('update-tasks-due-dates');
 

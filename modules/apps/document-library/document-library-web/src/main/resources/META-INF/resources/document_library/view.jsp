@@ -84,8 +84,8 @@ String navigation = ParamUtil.getString(request, "navigation");
 
 		<div>
 			<react:component
-				data="<%= context %>"
 				module="document_library/js/bulk/BulkStatus.es"
+				props="<%= context %>"
 			/>
 		</div>
 
@@ -171,7 +171,7 @@ String navigation = ParamUtil.getString(request, "navigation");
 			uploadable = false;
 		}
 		else {
-			List<AssetVocabulary> assetVocabularies = AssetVocabularyServiceUtil.getGroupVocabularies(scopeGroupId);
+			List<AssetVocabulary> assetVocabularies = AssetVocabularyServiceUtil.getGroupVocabularies(PortalUtil.getCurrentAndAncestorSiteGroupIds(scopeGroupId));
 
 			if (!assetVocabularies.isEmpty()) {
 				long classNameId = ClassNameLocalServiceUtil.getClassNameId(DLFileEntryConstants.getClassName());
@@ -274,9 +274,9 @@ String navigation = ParamUtil.getString(request, "navigation");
 					trashEnabled: <%= (scopeGroupId == repositoryId) && dlTrashHelper.isTrashEnabled(scopeGroupId, repositoryId) %>,
 					uploadable: <%= uploadable %>,
 					uploadURL: '<%= uploadURL %>',
+					viewFileEntryTypeURL: '<%= viewFileEntryTypeURL %>',
 					viewFileEntryURL:
 						'<portlet:renderURL><portlet:param name="mvcRenderCommandName" value="/document_library/view_file_entry" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>',
-					viewFileEntryTypeURL: '<%= viewFileEntryTypeURL %>',
 				}),
 				{
 					destroyOnNavigate: true,
@@ -333,8 +333,8 @@ String navigation = ParamUtil.getString(request, "navigation");
 
 		<div>
 			<react:component
-				data="<%= editTagsData %>"
 				module="document_library/js/categorization/tags/EditTags.es"
+				props="<%= editTagsData %>"
 			/>
 		</div>
 
@@ -358,8 +358,8 @@ String navigation = ParamUtil.getString(request, "navigation");
 
 		<div>
 			<react:component
-				data="<%= editCategoriesData %>"
 				module="document_library/js/categorization/categories/EditCategories.es"
+				props="<%= editCategoriesData %>"
 			/>
 		</div>
 

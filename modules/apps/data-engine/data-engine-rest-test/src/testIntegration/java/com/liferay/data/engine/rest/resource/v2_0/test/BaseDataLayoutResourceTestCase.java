@@ -118,7 +118,9 @@ public abstract class BaseDataLayoutResourceTestCase {
 
 		DataLayoutResource.Builder builder = DataLayoutResource.builder();
 
-		dataLayoutResource = builder.locale(
+		dataLayoutResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -588,6 +590,26 @@ public abstract class BaseDataLayoutResourceTestCase {
 	}
 
 	@Test
+	public void testGraphQLGetDataLayoutNotFound() throws Exception {
+		Long irrelevantDataLayoutId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"dataLayout",
+						new HashMap<String, Object>() {
+							{
+								put("dataLayoutId", irrelevantDataLayoutId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
+	}
+
+	@Test
 	public void testPutDataLayout() throws Exception {
 		DataLayout postDataLayout = testPutDataLayout_addDataLayout();
 
@@ -669,6 +691,35 @@ public abstract class BaseDataLayoutResourceTestCase {
 								getGraphQLFields())),
 						"JSONObject/data",
 						"Object/dataLayoutByContentTypeByDataLayoutKey"))));
+	}
+
+	@Test
+	public void testGraphQLGetSiteDataLayoutByContentTypeByDataLayoutKeyNotFound()
+		throws Exception {
+
+		String irrelevantContentType =
+			"\"" + RandomTestUtil.randomString() + "\"";
+		String irrelevantDataLayoutKey =
+			"\"" + RandomTestUtil.randomString() + "\"";
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"dataLayoutByContentTypeByDataLayoutKey",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"siteKey",
+									"\"" + irrelevantGroup.getGroupId() + "\"");
+								put("contentType", irrelevantContentType);
+								put("dataLayoutKey", irrelevantDataLayoutKey);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	protected DataLayout testGraphQLDataLayout_addDataLayout()

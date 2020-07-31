@@ -11,6 +11,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.petra.io.AutoDeleteFileInputStream;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
@@ -206,6 +207,10 @@ import org.osgi.service.component.annotations.Reference;
 		/**
 		 * Adds the ${entity.humanName} to the database. Also notifies the appropriate model listeners.
 		 *
+		 * <p>
+		 * <strong>Important:</strong> Inspect ${entity.name}LocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+		 * </p>
+		 *
 		 * @param ${entity.varName} the ${entity.humanName}
 		 * @return the ${entity.humanName} that was added
 		<#list serviceBaseExceptions as exception>
@@ -256,6 +261,10 @@ import org.osgi.service.component.annotations.Reference;
 		/**
 		 * Deletes the ${entity.humanName} with the primary key from the database. Also notifies the appropriate model listeners.
 		 *
+		 * <p>
+		 * <strong>Important:</strong> Inspect ${entity.name}LocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+		 * </p>
+		 *
 		 * @param ${entity.PKVarName} the primary key of the ${entity.humanName}
 		 * @return the ${entity.humanName} that was removed
 		<#list serviceBaseExceptions as exception>
@@ -298,6 +307,10 @@ import org.osgi.service.component.annotations.Reference;
 		/**
 		 * Deletes the ${entity.humanName} from the database. Also notifies the appropriate model listeners.
 		 *
+		 * <p>
+		 * <strong>Important:</strong> Inspect ${entity.name}LocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+		 * </p>
+		 *
 		 * @param ${entity.varName} the ${entity.humanName}
 		 * @return the ${entity.humanName} that was removed
 		<#list serviceBaseExceptions as exception>
@@ -326,6 +339,13 @@ import org.osgi.service.component.annotations.Reference;
 				return ${entity.varName}Persistence.remove(${entity.varName});
 			</#if>
 		}
+
+		<#if serviceBuilder.isDSLEnabled()>
+			@Override
+			public <T> T dslQuery(DSLQuery dslQuery) {
+				return ${entity.varName}Persistence.dslQuery(dslQuery);
+			}
+		</#if>
 
 		@Override
 		public DynamicQuery dynamicQuery() {
@@ -888,6 +908,10 @@ import org.osgi.service.component.annotations.Reference;
 
 		/**
 		 * Updates the ${entity.humanName} in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+		 *
+		 * <p>
+		 * <strong>Important:</strong> Inspect ${entity.name}LocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+		 * </p>
 		 *
 		 * @param ${entity.varName} the ${entity.humanName}
 		 * @return the ${entity.humanName} that was updated
@@ -1903,7 +1927,7 @@ import org.osgi.service.component.annotations.Reference;
 	}
 
 	<#if entity.hasEntityColumns()>
-		<#if entity.isChangeTrackingEnabled() && stringUtil.equals(sessionTypeName, "Local")>
+		<#if entity.hasPersistence() && entity.isChangeTrackingEnabled() && stringUtil.equals(sessionTypeName, "Local")>
 			@Override
 			public CTPersistence<${entity.name}> getCTPersistence() {
 				return ${entity.varName}Persistence;

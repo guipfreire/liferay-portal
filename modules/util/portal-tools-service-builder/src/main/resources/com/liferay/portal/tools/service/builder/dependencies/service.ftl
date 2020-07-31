@@ -3,6 +3,7 @@ package ${apiPackagePath}.service;
 import ${serviceBuilder.getCompatJavaClassName("ProviderType")};
 
 import com.liferay.petra.function.UnsafeFunction;
+import com.liferay.portal.kernel.change.tracking.CTAware;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
@@ -60,6 +61,10 @@ import ${import};
 </#if>
  * @generated
  */
+</#if>
+
+<#if entity.isChangeTrackingEnabled()>
+	@CTAware
 </#if>
 
 <#if classDeprecated>
@@ -157,7 +162,7 @@ public interface ${entity.name}${sessionTypeName}Service
 			</#if>
 			public
 
-			<#if method.name = "dynamicQuery" && (serviceBuilder.getTypeGenericsName(method.returns) == "java.util.List<T>")>
+			<#if (method.name = "dslQuery" && (serviceBuilder.getTypeGenericsName(method.returns) == "T")) || (method.name = "dynamicQuery" && (serviceBuilder.getTypeGenericsName(method.returns) == "java.util.List<T>"))>
 				<T>
 			</#if>
 

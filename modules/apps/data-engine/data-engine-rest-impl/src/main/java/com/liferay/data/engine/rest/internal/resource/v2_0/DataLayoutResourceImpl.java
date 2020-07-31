@@ -17,9 +17,9 @@ package com.liferay.data.engine.rest.internal.resource.v2_0;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import com.liferay.data.engine.constants.DataActionKeys;
 import com.liferay.data.engine.field.type.util.LocalizedValueUtil;
 import com.liferay.data.engine.rest.dto.v2_0.DataLayout;
-import com.liferay.data.engine.rest.internal.constants.DataActionKeys;
 import com.liferay.data.engine.rest.internal.content.type.DataDefinitionContentTypeTracker;
 import com.liferay.data.engine.rest.internal.dto.v2_0.util.DataDefinitionUtil;
 import com.liferay.data.engine.rest.internal.dto.v2_0.util.DataLayoutUtil;
@@ -31,6 +31,8 @@ import com.liferay.data.engine.service.DEDataDefinitionFieldLinkLocalService;
 import com.liferay.dynamic.data.mapping.form.builder.rule.DDMFormRuleDeserializer;
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldTypeServicesTracker;
 import com.liferay.dynamic.data.mapping.io.DDMFormLayoutSerializer;
+import com.liferay.dynamic.data.mapping.model.DDMForm;
+import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMStructureLayout;
 import com.liferay.dynamic.data.mapping.model.DDMStructureVersion;
@@ -54,6 +56,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.odata.entity.EntityModel;
@@ -96,7 +99,7 @@ public class DataLayoutResourceImpl
 			PermissionThreadLocal.getPermissionChecker(),
 			ddmStructure.getStructureId(), ActionKeys.DELETE);
 
-		_deleteDataLayout(dataLayoutId, ddmStructure);
+		_deleteDataLayout(dataLayoutId);
 	}
 
 	@Override
@@ -117,8 +120,7 @@ public class DataLayoutResourceImpl
 					ddmStructureVersion.getStructureVersionId());
 
 			for (DDMStructureLayout ddmStructureLayout : ddmStructureLayouts) {
-				_deleteDataLayout(
-					ddmStructureLayout.getStructureLayoutId(), ddmStructure);
+				_deleteDataLayout(ddmStructureLayout.getStructureLayoutId());
 			}
 		}
 	}
@@ -193,6 +195,7 @@ public class DataLayoutResourceImpl
 				dataLayout,
 				DataDefinitionUtil.toDDMForm(
 					DataDefinitionUtil.toDataDefinition(
+						_dataDefinitionContentTypeTracker,
 						_ddmFormFieldTypeServicesTracker, ddmStructure,
 						_spiDDMFormRuleConverter),
 					_ddmFormFieldTypeServicesTracker),
@@ -220,6 +223,7 @@ public class DataLayoutResourceImpl
 				dataLayout,
 				DataDefinitionUtil.toDDMForm(
 					DataDefinitionUtil.toDataDefinition(
+						_dataDefinitionContentTypeTracker,
 						_ddmFormFieldTypeServicesTracker,
 						_ddmStructureLocalService.getStructure(
 							ddmStructureLayout.getDDMStructureId()),
@@ -230,13 +234,34 @@ public class DataLayoutResourceImpl
 	}
 
 	private void _addDataDefinitionFieldLinks(
-			long classNameId, long dataDefinitionId, long dataLayoutId,
+			long dataDefinitionId, long dataLayoutId, DDMForm ddmForm,
 			List<String> fieldNames, long siteId)
-		throws PortalException {
+		throws Exception {
+
+		Map<String, DDMFormField> ddmFormFieldsMap =
+			ddmForm.getDDMFormFieldsMap(true);
 
 		for (String fieldName : fieldNames) {
 			_deDataDefinitionFieldLinkLocalService.addDEDataDefinitionFieldLink(
-				siteId, classNameId, dataLayoutId, dataDefinitionId, fieldName);
+				siteId, _portal.getClassNameId(DDMStructureLayout.class),
+				dataLayoutId, dataDefinitionId, fieldName);
+
+			DDMFormField ddmFormField = ddmFormFieldsMap.get(fieldName);
+
+			if ((ddmFormField != null) &&
+				Validator.isNotNull(
+					GetterUtil.getLong(
+						ddmFormField.getProperty("ddmStructureId")))) {
+
+				_deDataDefinitionFieldLinkLocalService.
+					addDEDataDefinitionFieldLink(
+						siteId,
+						_portal.getClassNameId(DDMStructureLayout.class),
+						dataLayoutId,
+						GetterUtil.getLong(
+							ddmFormField.getProperty("ddmStructureId")),
+						fieldName);
+			}
 		}
 	}
 
@@ -260,21 +285,19 @@ public class DataLayoutResourceImpl
 				serviceContext);
 
 		_addDataDefinitionFieldLinks(
-			ddmStructure.getClassNameId(), dataDefinitionId,
-			ddmStructureLayout.getStructureLayoutId(), _getFieldNames(content),
+			dataDefinitionId, ddmStructureLayout.getStructureLayoutId(),
+			ddmStructure.getDDMForm(), _getFieldNames(content),
 			ddmStructureLayout.getGroupId());
 
 		return DataLayoutUtil.toDataLayout(
 			ddmStructureLayout, _spiDDMFormRuleConverter);
 	}
 
-	private void _deleteDataLayout(long dataLayoutId, DDMStructure ddmStructure)
-		throws PortalException {
-
+	private void _deleteDataLayout(long dataLayoutId) throws Exception {
 		_ddmStructureLayoutLocalService.deleteDDMStructureLayout(dataLayoutId);
 
 		_deDataDefinitionFieldLinkLocalService.deleteDEDataDefinitionFieldLinks(
-			ddmStructure.getClassNameId(), dataLayoutId);
+			_portal.getClassNameId(DDMStructureLayout.class), dataLayoutId);
 	}
 
 	private DataLayout _getDataLayout(long dataLayoutId) throws Exception {
@@ -458,11 +481,13 @@ public class DataLayoutResourceImpl
 				new ServiceContext());
 
 		_deDataDefinitionFieldLinkLocalService.deleteDEDataDefinitionFieldLinks(
-			ddmStructure.getClassNameId(), dataLayoutId);
+			_portal.getClassNameId(DDMStructureLayout.class), dataLayoutId);
 
 		_addDataDefinitionFieldLinks(
-			ddmStructure.getClassNameId(), ddmStructure.getStructureId(),
-			dataLayoutId, _getFieldNames(content), ddmStructure.getGroupId());
+			ddmStructure.getStructureId(),
+			ddmStructureLayout.getStructureLayoutId(),
+			ddmStructure.getDDMForm(), _getFieldNames(content),
+			ddmStructureLayout.getGroupId());
 
 		return DataLayoutUtil.toDataLayout(
 			ddmStructureLayout, _spiDDMFormRuleConverter);
@@ -519,6 +544,9 @@ public class DataLayoutResourceImpl
 	@Reference
 	private DEDataDefinitionFieldLinkLocalService
 		_deDataDefinitionFieldLinkLocalService;
+
+	@Reference
+	private Portal _portal;
 
 	@Reference
 	private SPIDDMFormRuleConverter _spiDDMFormRuleConverter;

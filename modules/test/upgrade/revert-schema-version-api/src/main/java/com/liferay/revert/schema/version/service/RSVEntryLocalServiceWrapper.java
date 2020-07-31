@@ -35,6 +35,10 @@ public class RSVEntryLocalServiceWrapper
 	/**
 	 * Adds the rsv entry to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RSVEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param rsvEntry the rsv entry
 	 * @return the rsv entry that was added
 	 */
@@ -83,6 +87,10 @@ public class RSVEntryLocalServiceWrapper
 	/**
 	 * Deletes the rsv entry with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RSVEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param rsvEntryId the primary key of the rsv entry
 	 * @return the rsv entry that was removed
 	 * @throws PortalException if a rsv entry with the primary key could not be found
@@ -98,6 +106,10 @@ public class RSVEntryLocalServiceWrapper
 	/**
 	 * Deletes the rsv entry from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RSVEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param rsvEntry the rsv entry
 	 * @return the rsv entry that was removed
 	 */
@@ -106,6 +118,11 @@ public class RSVEntryLocalServiceWrapper
 		com.liferay.revert.schema.version.model.RSVEntry rsvEntry) {
 
 		return _rsvEntryLocalService.deleteRSVEntry(rsvEntry);
+	}
+
+	@Override
+	public <T> T dslQuery(com.liferay.petra.sql.dsl.query.DSLQuery dslQuery) {
+		return _rsvEntryLocalService.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -285,6 +302,10 @@ public class RSVEntryLocalServiceWrapper
 
 	/**
 	 * Updates the rsv entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect RSVEntryLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param rsvEntry the rsv entry
 	 * @return the rsv entry that was updated

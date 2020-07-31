@@ -14,6 +14,7 @@
 
 import React from 'react';
 
+import MappingSelector from '../../../common/components/MappingSelector';
 import {getEditableItemPropTypes} from '../../../prop-types/index';
 import {BACKGROUND_IMAGE_FRAGMENT_ENTRY_PROCESSOR} from '../../config/constants/backgroundImageFragmentEntryProcessor';
 import {EDITABLE_FRAGMENT_ENTRY_PROCESSOR} from '../../config/constants/editableFragmentEntryProcessor';
@@ -22,10 +23,9 @@ import selectEditableValue from '../../selectors/selectEditableValue';
 import {useDispatch, useSelector} from '../../store/index';
 import updateEditableValues from '../../thunks/updateEditableValues';
 import isMapped from '../fragment-content/isMapped';
-import MappingSelector from './MappingSelector';
 
 export function MappingPanel({item}) {
-	const {editableId, editableType, fragmentEntryLinkId} = item;
+	const {editableId, fragmentEntryLinkId, type} = item;
 
 	const dispatch = useDispatch();
 	const state = useSelector((state) => state);
@@ -33,7 +33,7 @@ export function MappingPanel({item}) {
 	const fragmentEntryLink = state.fragmentEntryLinks[fragmentEntryLinkId];
 
 	const processoryKey =
-		editableType === EDITABLE_TYPES.backgroundImage
+		type === EDITABLE_TYPES.backgroundImage
 			? BACKGROUND_IMAGE_FRAGMENT_ENTRY_PROCESSOR
 			: EDITABLE_FRAGMENT_ENTRY_PROCESSOR;
 
@@ -70,7 +70,7 @@ export function MappingPanel({item}) {
 
 	return (
 		<MappingSelector
-			fieldType={editableType}
+			fieldType={type}
 			mappedItem={editableValue}
 			onMappingSelect={updateEditableValue}
 		/>

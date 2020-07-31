@@ -115,7 +115,9 @@ public abstract class BaseKnowledgeBaseFolderResourceTestCase {
 		KnowledgeBaseFolderResource.Builder builder =
 			KnowledgeBaseFolderResource.builder();
 
-		knowledgeBaseFolderResource = builder.locale(
+		knowledgeBaseFolderResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -313,6 +315,28 @@ public abstract class BaseKnowledgeBaseFolderResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/knowledgeBaseFolder"))));
+	}
+
+	@Test
+	public void testGraphQLGetKnowledgeBaseFolderNotFound() throws Exception {
+		Long irrelevantKnowledgeBaseFolderId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"knowledgeBaseFolder",
+						new HashMap<String, Object>() {
+							{
+								put(
+									"knowledgeBaseFolderId",
+									irrelevantKnowledgeBaseFolderId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	@Test

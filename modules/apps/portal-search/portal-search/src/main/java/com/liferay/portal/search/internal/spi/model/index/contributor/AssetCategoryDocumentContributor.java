@@ -16,6 +16,7 @@ package com.liferay.portal.search.internal.spi.model.index.contributor;
 
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.service.AssetCategoryLocalService;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.search.Document;
@@ -39,10 +40,13 @@ import org.osgi.service.component.annotations.Reference;
  * @author Michael C. Han
  */
 @Component(immediate = true, service = DocumentContributor.class)
-public class AssetCategoryDocumentContributor implements DocumentContributor {
+public class AssetCategoryDocumentContributor
+	implements DocumentContributor<AssetCategory> {
 
 	@Override
-	public void contribute(Document document, BaseModel baseModel) {
+	public void contribute(
+		Document document, BaseModel<AssetCategory> baseModel) {
+
 		String className = document.get(Field.ENTRY_CLASS_NAME);
 		long classPK = GetterUtil.getLong(document.get(Field.ENTRY_CLASS_PK));
 
@@ -92,11 +96,8 @@ public class AssetCategoryDocumentContributor implements DocumentContributor {
 			String[] titlesArray = titles.toArray(new String[0]);
 
 			document.addText(
-				field.concat(
-					StringPool.UNDERLINE
-				).concat(
-					locale.toString()
-				),
+				StringBundler.concat(
+					field, StringPool.UNDERLINE, locale.toString()),
 				titlesArray);
 		}
 	}

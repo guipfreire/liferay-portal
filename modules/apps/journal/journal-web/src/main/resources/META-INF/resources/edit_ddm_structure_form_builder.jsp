@@ -48,7 +48,7 @@ else {
 editDDMStructureURL.setParameter("mvcPath", "/edit_ddm_structure.jsp");
 %>
 
-<aui:form action="<%= editDDMStructureURL.toString() %>" cssClass="edit-article-form" enctype="multipart/form-data" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveDDMStructure();" %>'>
+<aui:form action="<%= editDDMStructureURL.toString() %>" cssClass="edit-article-form" enctype="multipart/form-data" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + liferayPortletResponse.getNamespace() + "saveDDMStructure();" %>'>
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
 	<aui:input name="groupId" type="hidden" value="<%= groupId %>" />
 	<aui:input name="ddmStructureId" type="hidden" value="<%= journalEditDDMStructuresDisplayContext.getDDMStructureId() %>" />
@@ -58,7 +58,7 @@ editDDMStructureURL.setParameter("mvcPath", "/edit_ddm_structure.jsp");
 	<aui:model-context bean="<%= ddmStructure %>" model="<%= DDMStructure.class %>" />
 
 	<nav class="component-tbar subnav-tbar-light tbar tbar-article">
-		<div class="container-fluid container-fluid-max-xl">
+		<clay:container-fluid>
 			<ul class="tbar-nav">
 				<li class="tbar-item tbar-item-expand">
 					<aui:input cssClass="form-control-inline" defaultLanguageId="<%= (ddmForm == null) ? LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault()): LocaleUtil.toLanguageId(ddmForm.getDefaultLocale()) %>" label="" name="name" placeholder='<%= LanguageUtil.format(request, "untitled-x", "structure") %>' wrapperCssClass="article-content-title mb-0" />
@@ -70,16 +70,15 @@ editDDMStructureURL.setParameter("mvcPath", "/edit_ddm_structure.jsp");
 						<aui:button cssClass="btn-sm mr-3" type="submit" value="<%= journalEditDDMStructuresDisplayContext.getSaveButtonLabel() %>" />
 
 						<clay:button
+							borderless="<%= true %>"
 							icon="cog"
-							id='<%= renderResponse.getNamespace() + "contextualSidebarButton" %>'
-							monospaced="<%= true %>"
-							size="sm"
-							style="borderless"
+							id='<%= liferayPortletResponse.getNamespace() + "contextualSidebarButton" %>'
+							small="<%= true %>"
 						/>
 					</div>
 				</li>
 			</ul>
-		</div>
+		</clay:container-fluid>
 	</nav>
 
 	<div class="contextual-sidebar edit-article-sidebar sidebar-light sidebar-sm" id="<portlet:namespace />contextualSidebarContainer">
@@ -100,7 +99,9 @@ editDDMStructureURL.setParameter("mvcPath", "/edit_ddm_structure.jsp");
 	</div>
 
 	<div class="contextual-sidebar-content">
-		<div class="container-fluid container-fluid-max-xl container-view">
+		<clay:container-fluid
+			cssClass="container-view"
+		>
 			<liferay-ui:error exception="<%= DDMFormLayoutValidationException.class %>" message="please-enter-a-valid-form-layout" />
 
 			<liferay-ui:error exception="<%= DDMFormLayoutValidationException.MustNotDuplicateFieldName.class %>">
@@ -143,6 +144,15 @@ editDDMStructureURL.setParameter("mvcPath", "/edit_ddm_structure.jsp");
 				<liferay-ui:message arguments="<%= HtmlUtil.escape(msvcffn.getFieldName()) %>" key="invalid-characters-were-defined-for-field-name-x" translateArguments="<%= false %>" />
 			</liferay-ui:error>
 
+			<liferay-ui:error exception="<%= InvalidDDMStructureFieldNameException.class %>">
+
+				<%
+				InvalidDDMStructureFieldNameException iddmsfne = (InvalidDDMStructureFieldNameException)errorException;
+				%>
+
+				<liferay-ui:message arguments="<%= HtmlUtil.escape(iddmsfne.getFieldName()) %>" key="you-cannot-use-x-as-a-field-name" translateArguments="<%= false %>" />
+			</liferay-ui:error>
+
 			<liferay-ui:error exception="<%= LocaleException.class %>">
 
 				<%
@@ -179,31 +189,21 @@ editDDMStructureURL.setParameter("mvcPath", "/edit_ddm_structure.jsp");
 			<div class="sheet">
 				<%@ include file="/ddm_form_builder.jspf" %>
 			</div>
-		</div>
+		</clay:container-fluid>
 	</div>
 </aui:form>
 
 <aui:script>
 	function <portlet:namespace />openParentDDMStructureSelector() {
-		Liferay.Util.selectEntity(
-			{
-				dialog: {
-					constrain: true,
-					modal: true,
-				},
-				eventName: '<portlet:namespace />selectDDMStructure',
-				id: '<portlet:namespace />selectDDMStructure',
-				title:
-					'<%= UnicodeLanguageUtil.get(request, "select-structure") %>',
-				uri:
-					'<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="mvcPath" value="/select_ddm_structure.jsp" /><portlet:param name="classPK" value="<%= String.valueOf(journalEditDDMStructuresDisplayContext.getDDMStructureId()) %>" /></portlet:renderURL>',
-			},
-			function (event) {
+		Liferay.Util.openModal({
+			onSelect: function (selectedItem) {
 				var form = document.<portlet:namespace />fm;
 
 				Liferay.Util.setFormValues(form, {
-					parentDDMStructureId: event.ddmstructureid,
-					parentDDMStructureName: Liferay.Util.unescape(event.name),
+					parentDDMStructureId: selectedItem.ddmstructureid,
+					parentDDMStructureName: Liferay.Util.unescape(
+						selectedItem.name
+					),
 				});
 
 				var removeParentDDMStructureButton = Liferay.Util.getFormElement(
@@ -217,8 +217,12 @@ editDDMStructureURL.setParameter("mvcPath", "/edit_ddm_structure.jsp");
 						false
 					);
 				}
-			}
-		);
+			},
+			selectEventName: '<portlet:namespace />selectDDMStructure',
+			title: '<%= UnicodeLanguageUtil.get(request, "select-structure") %>',
+			url:
+				'<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="mvcPath" value="/select_ddm_structure.jsp" /><portlet:param name="classPK" value="<%= String.valueOf(journalEditDDMStructuresDisplayContext.getDDMStructureId()) %>" /></portlet:renderURL>',
+		});
 	}
 
 	function <portlet:namespace />removeParentDDMStructure() {

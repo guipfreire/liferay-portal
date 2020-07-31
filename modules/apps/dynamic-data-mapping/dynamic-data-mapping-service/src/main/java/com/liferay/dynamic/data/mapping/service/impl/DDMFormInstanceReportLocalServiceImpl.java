@@ -18,21 +18,23 @@ import com.liferay.dynamic.data.mapping.constants.DDMFormInstanceReportConstants
 import com.liferay.dynamic.data.mapping.model.DDMFormInstance;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstanceRecordVersion;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstanceReport;
-import com.liferay.dynamic.data.mapping.model.Value;
+import com.liferay.dynamic.data.mapping.report.DDMFormFieldTypeReportProcessor;
+import com.liferay.dynamic.data.mapping.report.DDMFormFieldTypeReportProcessorTracker;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionLocalService;
 import com.liferay.dynamic.data.mapping.service.base.DDMFormInstanceReportLocalServiceBaseImpl;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMFormInstancePersistence;
 import com.liferay.dynamic.data.mapping.storage.DDMFormFieldValue;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
-import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import java.util.Date;
-import java.util.Locale;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -51,104 +53,170 @@ public class DDMFormInstanceReportLocalServiceImpl
 	public DDMFormInstanceReport addFormInstanceReport(long formInstanceId)
 		throws PortalException {
 
-		DDMFormInstanceReport formInstanceReport =
+		DDMFormInstanceReport ddmFormInstanceReport =
 			ddmFormInstanceReportPersistence.create(
 				counterLocalService.increment());
 
-		DDMFormInstance formInstance =
-			_formInstancePersistence.findByPrimaryKey(formInstanceId);
+		DDMFormInstance ddmFormInstance =
+			_ddmFormInstancePersistence.findByPrimaryKey(formInstanceId);
 
-		formInstanceReport.setGroupId(formInstance.getGroupId());
-		formInstanceReport.setCompanyId(formInstance.getCompanyId());
+		ddmFormInstanceReport.setGroupId(ddmFormInstance.getGroupId());
+		ddmFormInstanceReport.setCompanyId(ddmFormInstance.getCompanyId());
 
-		formInstanceReport.setCreateDate(new Date());
-		formInstanceReport.setFormInstanceId(formInstance.getFormInstanceId());
+		ddmFormInstanceReport.setCreateDate(new Date());
+		ddmFormInstanceReport.setFormInstanceId(
+			ddmFormInstance.getFormInstanceId());
 
-		return ddmFormInstanceReportPersistence.update(formInstanceReport);
+		return ddmFormInstanceReportPersistence.update(ddmFormInstanceReport);
+	}
+
+	@Override
+	public DDMFormInstanceReport getFormInstanceReportByFormInstanceId(
+			long formInstanceId)
+		throws PortalException {
+
+		return ddmFormInstanceReportPersistence.findByFormInstanceId(
+			formInstanceId);
+	}
+
+	@Override
+	public void processFormInstanceReportEvent(
+		long formInstanceReportId, long formInstanceRecordVersionId,
+		String ddmFormInstanceReportEvent) {
+
+		try {
+			ddmFormInstanceReportLocalService.updateFormInstanceReport(
+				formInstanceReportId, formInstanceRecordVersionId,
+				ddmFormInstanceReportEvent);
+		}
+		catch (Exception exception) {
+			if (_log.isWarnEnabled()) {
+				StringBundler sb = new StringBundler(3);
+
+				sb.append("Unable to update dynamic data mapping form ");
+				sb.append("instance report ");
+				sb.append(formInstanceReportId);
+
+				_log.warn(sb.toString(), exception);
+			}
+		}
 	}
 
 	@Override
 	public DDMFormInstanceReport updateFormInstanceReport(
 			long formInstanceReportId, long formInstanceRecordVersionId,
-			String formInstanceReportEvent)
+			String ddmFormInstanceReportEvent)
 		throws PortalException {
 
-		DDMFormInstanceReport formInstanceReport =
+		DDMFormInstanceReport ddmFormInstanceReport =
 			ddmFormInstanceReportPersistence.findByPrimaryKey(
 				formInstanceReportId);
 
-		formInstanceReport.setModifiedDate(new Date());
-		formInstanceReport.setData(
-			_getData(formInstanceRecordVersionId, formInstanceReportEvent));
+		ddmFormInstanceReport.setModifiedDate(new Date());
+		ddmFormInstanceReport.setData(
+			_getData(formInstanceRecordVersionId, ddmFormInstanceReportEvent));
 
-		return ddmFormInstanceReportPersistence.update(formInstanceReport);
+		return ddmFormInstanceReportPersistence.update(ddmFormInstanceReport);
 	}
 
 	private String _getData(
-			long formInstanceRecordVersionId, String formInstanceReportEvent)
+			long formInstanceRecordVersionId, String ddmFormInstanceReportEvent)
 		throws PortalException {
 
-		DDMFormInstanceRecordVersion formInstanceRecordVersion =
-			_formInstanceRecordVersionLocalService.
-				getDDMFormInstanceRecordVersion(formInstanceRecordVersionId);
+		try {
+			DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion =
+				_ddmFormInstanceRecordVersionLocalService.
+					getDDMFormInstanceRecordVersion(
+						formInstanceRecordVersionId);
 
-		DDMFormInstanceReport formInstanceReport =
-			ddmFormInstanceReportPersistence.findByFormInstanceId(
-				formInstanceRecordVersion.getFormInstanceId());
+			DDMFormInstanceReport ddmFormInstanceReport =
+				ddmFormInstanceReportPersistence.findByFormInstanceId(
+					ddmFormInstanceRecordVersion.getFormInstanceId());
 
-		JSONObject formInstanceReportDataJSONObject =
-			JSONFactoryUtil.createJSONObject(formInstanceReport.getData());
+			JSONObject ddmFormInstanceReportDataJSONObject =
+				JSONFactoryUtil.createJSONObject(
+					ddmFormInstanceReport.getData());
 
-		DDMFormValues ddmFormValues =
-			formInstanceRecordVersion.getDDMFormValues();
+			DDMFormValues ddmFormValues =
+				ddmFormInstanceRecordVersion.getDDMFormValues();
 
-		for (DDMFormFieldValue ddmFormFieldValue :
-				ddmFormValues.getDDMFormFieldValues()) {
+			for (DDMFormFieldValue ddmFormFieldValue :
+					ddmFormValues.getDDMFormFieldValues()) {
 
-			JSONObject fieldJSONObject =
-				formInstanceReportDataJSONObject.getJSONObject(
-					ddmFormFieldValue.getName());
+				DDMFormFieldTypeReportProcessor
+					ddmFormFieldTypeReportProcessor =
+						_ddmFormFieldTypeReportProcessorTracker.
+							getDDMFormFieldTypeReportProcessor(
+								ddmFormFieldValue.getType());
 
-			if (fieldJSONObject == null) {
-				formInstanceReportDataJSONObject.put(
-					ddmFormFieldValue.getName(),
-					JSONUtil.put(
-						"type", ddmFormFieldValue.getType()
-					).put(
-						"values", JSONFactoryUtil.createJSONObject()
-					));
-			}
+				if (ddmFormFieldTypeReportProcessor != null) {
+					String fieldName = ddmFormFieldValue.getName();
 
-			if (StringUtil.equals(ddmFormFieldValue.getType(), "radio")) {
-				JSONObject valuesJSONObject = fieldJSONObject.getJSONObject(
-					"values");
+					JSONObject fieldJSONObject =
+						ddmFormInstanceReportDataJSONObject.getJSONObject(
+							fieldName);
 
-				Value value = ddmFormFieldValue.getValue();
-
-				for (Locale availableLocale : value.getAvailableLocales()) {
-					String key = value.getString(availableLocale);
-
-					int count = valuesJSONObject.getInt(key);
-
-					if (DDMFormInstanceReportConstants.EVENT_ADD_RECORD_VERSION.
-							equals(formInstanceReportEvent)) {
-
-						count = count + 1;
+					if (fieldJSONObject == null) {
+						fieldJSONObject = JSONUtil.put(
+							"type", ddmFormFieldValue.getType()
+						).put(
+							"values", JSONFactoryUtil.createJSONObject()
+						);
 					}
 
-					valuesJSONObject.put(key, count);
+					JSONObject processedFieldJSONObject =
+						ddmFormFieldTypeReportProcessor.process(
+							ddmFormFieldValue,
+							JSONFactoryUtil.createJSONObject(
+								fieldJSONObject.toJSONString()),
+							ddmFormInstanceRecordVersion.
+								getFormInstanceRecordId(),
+							ddmFormInstanceReportEvent);
+
+					ddmFormInstanceReportDataJSONObject.put(
+						fieldName, processedFieldJSONObject);
 				}
 			}
-		}
 
-		return formInstanceReportDataJSONObject.toString();
+			int totalItems = ddmFormInstanceReportDataJSONObject.getInt(
+				"totalItems");
+
+			if (ddmFormInstanceReportEvent.equals(
+					DDMFormInstanceReportConstants.EVENT_ADD_RECORD_VERSION)) {
+
+				totalItems++;
+			}
+			else if (ddmFormInstanceReportEvent.equals(
+						DDMFormInstanceReportConstants.
+							EVENT_DELETE_RECORD_VERSION)) {
+
+				totalItems--;
+			}
+
+			ddmFormInstanceReportDataJSONObject.put("totalItems", totalItems);
+
+			return ddmFormInstanceReportDataJSONObject.toString();
+		}
+		catch (Exception exception) {
+			throw new PortalException(
+				"Unable to process data for form instance record version " +
+					formInstanceRecordVersionId,
+				exception);
+		}
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		DDMFormInstanceReportLocalServiceImpl.class);
+
 	@Reference
-	private DDMFormInstancePersistence _formInstancePersistence;
+	private DDMFormFieldTypeReportProcessorTracker
+		_ddmFormFieldTypeReportProcessorTracker;
+
+	@Reference
+	private DDMFormInstancePersistence _ddmFormInstancePersistence;
 
 	@Reference
 	private DDMFormInstanceRecordVersionLocalService
-		_formInstanceRecordVersionLocalService;
+		_ddmFormInstanceRecordVersionLocalService;
 
 }

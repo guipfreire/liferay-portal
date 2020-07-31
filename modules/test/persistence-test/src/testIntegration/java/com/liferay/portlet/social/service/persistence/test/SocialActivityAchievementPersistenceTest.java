@@ -127,6 +127,11 @@ public class SocialActivityAchievementPersistenceTest {
 		SocialActivityAchievement newSocialActivityAchievement =
 			_persistence.create(pk);
 
+		newSocialActivityAchievement.setMvccVersion(RandomTestUtil.nextLong());
+
+		newSocialActivityAchievement.setCtCollectionId(
+			RandomTestUtil.nextLong());
+
 		newSocialActivityAchievement.setGroupId(RandomTestUtil.nextLong());
 
 		newSocialActivityAchievement.setCompanyId(RandomTestUtil.nextLong());
@@ -147,6 +152,12 @@ public class SocialActivityAchievementPersistenceTest {
 			_persistence.findByPrimaryKey(
 				newSocialActivityAchievement.getPrimaryKey());
 
+		Assert.assertEquals(
+			existingSocialActivityAchievement.getMvccVersion(),
+			newSocialActivityAchievement.getMvccVersion());
+		Assert.assertEquals(
+			existingSocialActivityAchievement.getCtCollectionId(),
+			newSocialActivityAchievement.getCtCollectionId());
 		Assert.assertEquals(
 			existingSocialActivityAchievement.getActivityAchievementId(),
 			newSocialActivityAchievement.getActivityAchievementId());
@@ -251,9 +262,10 @@ public class SocialActivityAchievementPersistenceTest {
 		getOrderByComparator() {
 
 		return OrderByComparatorFactoryUtil.create(
-			"SocialActivityAchievement", "activityAchievementId", true,
-			"groupId", true, "companyId", true, "userId", true, "createDate",
-			true, "name", true, "firstInGroup", true);
+			"SocialActivityAchievement", "mvccVersion", true, "ctCollectionId",
+			true, "activityAchievementId", true, "groupId", true, "companyId",
+			true, "userId", true, "createDate", true, "name", true,
+			"firstInGroup", true);
 	}
 
 	@Test
@@ -535,6 +547,10 @@ public class SocialActivityAchievementPersistenceTest {
 
 		SocialActivityAchievement socialActivityAchievement =
 			_persistence.create(pk);
+
+		socialActivityAchievement.setMvccVersion(RandomTestUtil.nextLong());
+
+		socialActivityAchievement.setCtCollectionId(RandomTestUtil.nextLong());
 
 		socialActivityAchievement.setGroupId(RandomTestUtil.nextLong());
 

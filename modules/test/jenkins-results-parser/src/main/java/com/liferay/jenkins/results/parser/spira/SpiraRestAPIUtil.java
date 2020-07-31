@@ -20,6 +20,7 @@ import com.liferay.jenkins.results.parser.JenkinsResultsParserUtil.HttpRequestMe
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -37,15 +38,16 @@ public class SpiraRestAPIUtil {
 			HttpRequestMethod httpRequestMethod, String requestData)
 		throws IOException {
 
-		String spiraBaseURL = _SPIRA_BASE_URL;
+		String spiraRestAPIURL =
+			SpiraArtifact.SPIRA_BASE_URL + "services/v6_0/RestService.svc";
 
 		if (urlPath.contains("/test-sets/search")) {
-			spiraBaseURL = spiraBaseURL.replace("v6_0", "v5_0");
+			spiraRestAPIURL = spiraRestAPIURL.replace("v6_0", "v5_0");
 		}
 
 		return JenkinsResultsParserUtil.toString(
 			JenkinsResultsParserUtil.combine(
-				spiraBaseURL,
+				spiraRestAPIURL,
 				_applyURLPathReplacements(urlPath, urlPathReplacements),
 				_toURLParametersString(urlParameters)),
 			false, httpRequestMethod, requestData);
@@ -73,6 +75,11 @@ public class SpiraRestAPIUtil {
 			request(
 				urlPath, urlParameters, urlPathReplacements, httpRequestMethod,
 				requestData));
+	}
+
+	protected static String toDateString(long timestamp) {
+		return JenkinsResultsParserUtil.toDateString(
+			new Date(timestamp), "yyyy-MM-dd'T'HH:mm:ss", "UTC");
 	}
 
 	private static String _applyURLPathReplacements(
@@ -125,8 +132,5 @@ public class SpiraRestAPIUtil {
 
 		return "?" + JenkinsResultsParserUtil.join("&", urlParameterStrings);
 	}
-
-	private static final String _SPIRA_BASE_URL =
-		"https://liferay.spiraservice.net/services/v6_0/RestService.svc";
 
 }

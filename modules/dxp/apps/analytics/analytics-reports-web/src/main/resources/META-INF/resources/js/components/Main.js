@@ -10,9 +10,8 @@
  */
 
 import PropTypes from 'prop-types';
-import React, {useContext} from 'react';
+import React from 'react';
 
-import {StoreContext} from '../context/store';
 import BasicInformation from './BasicInformation';
 import Chart from './Chart';
 import TotalCount from './TotalCount';
@@ -32,10 +31,8 @@ export default function Main({
 	totalViewsDataProvider,
 	trafficSources,
 }) {
-	const [{readsEnabled}] = useContext(StoreContext);
-
 	return (
-		<>
+		<div className="c-p-3">
 			<BasicInformation
 				authorName={authorName}
 				languageTag={languageTag}
@@ -43,34 +40,30 @@ export default function Main({
 				title={pageTitle}
 			/>
 
-			<h5 className="mt-4 sheet-subtitle text-secondary">
-				{readsEnabled
-					? Liferay.Language.get('views-and-reads')
-					: Liferay.Language.get('views-metric')}
+			<h5 className="mt-3 sheet-subtitle">
+				{Liferay.Language.get('engagement')}
 			</h5>
 
 			<TotalCount
 				className="mb-2"
 				dataProvider={totalViewsDataProvider}
 				label={Liferay.Util.sub(Liferay.Language.get('total-views'))}
+				languageTag={languageTag}
 				popoverHeader={Liferay.Language.get('total-views')}
 				popoverMessage={Liferay.Language.get(
 					'this-number-refers-to-the-total-number-of-views-since-the-content-was-published'
 				)}
 			/>
 
-			{readsEnabled && (
-				<TotalCount
-					dataProvider={totalReadsDataProvider}
-					label={Liferay.Util.sub(
-						Liferay.Language.get('total-reads')
-					)}
-					popoverHeader={Liferay.Language.get('total-reads')}
-					popoverMessage={Liferay.Language.get(
-						'this-number-refers-to-the-total-number-of-reads-since-the-content-was-published'
-					)}
-				/>
-			)}
+			<TotalCount
+				dataProvider={totalReadsDataProvider}
+				label={Liferay.Util.sub(Liferay.Language.get('total-reads'))}
+				languageTag={languageTag}
+				popoverHeader={Liferay.Language.get('total-reads')}
+				popoverMessage={Liferay.Language.get(
+					'this-number-refers-to-the-total-number-of-reads-since-the-content-was-published'
+				)}
+			/>
 
 			<Chart
 				dataProviders={chartDataProviders}
@@ -88,7 +81,7 @@ export default function Main({
 					trafficSources={trafficSources}
 				/>
 			)}
-		</>
+		</div>
 	);
 }
 

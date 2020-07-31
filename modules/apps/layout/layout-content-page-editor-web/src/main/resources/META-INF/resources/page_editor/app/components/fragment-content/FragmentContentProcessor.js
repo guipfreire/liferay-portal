@@ -51,18 +51,25 @@ export default function FragmentContentProcessor({
 
 		if (editables) {
 			enabledEditable =
-				editables.find((editable) =>
-					isProcessorEnabled(
-						getEditableUniqueId(
-							fragmentEntryLinkId,
-							editable.editableId
+				editables.find(
+					(editable) =>
+						editableProcessorUniqueId &&
+						isProcessorEnabled(
+							getEditableUniqueId(
+								fragmentEntryLinkId,
+								editable.editableId
+							)
 						)
-					)
 				) || enabledEditable;
 		}
 
 		return enabledEditable;
-	}, [editables, isProcessorEnabled, fragmentEntryLinkId]);
+	}, [
+		editableProcessorUniqueId,
+		editables,
+		isProcessorEnabled,
+		fragmentEntryLinkId,
+	]);
 
 	const editableValues = useSelector(
 		(state) =>
@@ -84,6 +91,13 @@ export default function FragmentContentProcessor({
 			editable.element,
 			(value) => {
 				const previousValue = editableValue[languageId];
+
+				if (
+					!previousValue &&
+					value === editableValue.defaultValue.trim()
+				) {
+					return;
+				}
 
 				if (previousValue === value) {
 					return;

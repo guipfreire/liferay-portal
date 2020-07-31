@@ -14,6 +14,7 @@
 
 package com.liferay.portal.workflow.kaleo.service.base;
 
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -93,6 +94,10 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 	/**
 	 * Adds the kaleo instance token to the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoInstanceTokenLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoInstanceToken the kaleo instance token
 	 * @return the kaleo instance token that was added
 	 */
@@ -123,6 +128,10 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 	/**
 	 * Deletes the kaleo instance token with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoInstanceTokenLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoInstanceTokenId the primary key of the kaleo instance token
 	 * @return the kaleo instance token that was removed
 	 * @throws PortalException if a kaleo instance token with the primary key could not be found
@@ -139,6 +148,10 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 	/**
 	 * Deletes the kaleo instance token from the database. Also notifies the appropriate model listeners.
 	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoInstanceTokenLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
+	 *
 	 * @param kaleoInstanceToken the kaleo instance token
 	 * @return the kaleo instance token that was removed
 	 */
@@ -148,6 +161,11 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 		KaleoInstanceToken kaleoInstanceToken) {
 
 		return kaleoInstanceTokenPersistence.remove(kaleoInstanceToken);
+	}
+
+	@Override
+	public <T> T dslQuery(DSLQuery dslQuery) {
+		return kaleoInstanceTokenPersistence.dslQuery(dslQuery);
 	}
 
 	@Override
@@ -370,6 +388,10 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 
 	/**
 	 * Updates the kaleo instance token in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	 *
+	 * <p>
+	 * <strong>Important:</strong> Inspect KaleoInstanceTokenLocalServiceImpl for overloaded versions of the method. If provided, use these entry points to the API, as the implementation logic may require the additional parameters defined there.
+	 * </p>
 	 *
 	 * @param kaleoInstanceToken the kaleo instance token
 	 * @return the kaleo instance token that was updated

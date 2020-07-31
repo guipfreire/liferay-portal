@@ -72,13 +72,9 @@ definition {
 		DMDocument.addMultiplePG(dmDocumentFileList = "Document_1.doc,Document_2.jpg");
 
 		for (var categoryName : list "Books,Plants,Pets") {
-			ProductMenu.gotoPortlet(
-				category = "Categorization",
-				panel = "Site Administration",
-				portlet = "Categories");
-
-			Category.addCP(
-				categoryName = "${categoryName}",
+			JSONCategory.addCategory(
+				groupName = "Guest",
+				title = "${categoryName}",
 				vocabularyName = "Topic");
 		}
 
@@ -128,7 +124,6 @@ definition {
 
 		ProductMenu.gotoPortlet(
 			category = "Categorization",
-			panel = "Site Administration",
 			portlet = "Categories");
 
 		Category.addCP(
@@ -336,18 +331,12 @@ definition {
 	@description = "This test covers LPS-94994. It ensures that users can edit category tags by using the bulk append action."
 	@priority = "5"
 	test ReplaceUncommonCategoryTags {
-		property portal.upstream = "quarantine";
-
 		DMDocument.addMultiplePG(dmDocumentFileList = "Document_1.doc,Document_2.jpg");
 
 		for (var categoryName : list "Books,Plants,Pets,Furniture") {
-			ProductMenu.gotoPortlet(
-				category = "Categorization",
-				panel = "Site Administration",
-				portlet = "Categories");
-
-			Category.addCP(
-				categoryName = "${categoryName}",
+			JSONCategory.addCategory(
+				groupName = "Guest",
+				title = "${categoryName}",
 				vocabularyName = "Topic");
 		}
 

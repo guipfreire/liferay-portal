@@ -19,7 +19,6 @@ import FragmentService from '../services/FragmentService';
 export default function updateFragmentConfiguration({
 	configurationValues,
 	fragmentEntryLink,
-	isUndo = false,
 }) {
 	const {editableValues, fragmentEntryLinkId} = fragmentEntryLink;
 
@@ -37,7 +36,7 @@ export default function updateFragmentConfiguration({
 			dispatch(
 				updateFragmentEntryLinkConfiguration({
 					fragmentEntryLink,
-					isUndo,
+					fragmentEntryLinkId,
 					layoutData,
 				})
 			);

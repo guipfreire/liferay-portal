@@ -27,22 +27,28 @@ export const createField = (props, event) => {
 		fieldNameGenerator,
 		spritemap,
 	} = props;
-	const {fieldType, skipFieldNameGeneration = false} = event;
+	const {
+		fieldType,
+		skipFieldNameGeneration = false,
+		useFieldName = '',
+	} = event;
 
-	let newFieldName;
+	let newFieldName = useFieldName;
 
-	if (skipFieldNameGeneration) {
-		const {settingsContext} = fieldType;
-		const visitor = new PagesVisitor(settingsContext.pages);
+	if (!useFieldName) {
+		if (skipFieldNameGeneration) {
+			const {settingsContext} = fieldType;
+			const visitor = new PagesVisitor(settingsContext.pages);
 
-		visitor.mapFields(({fieldName, value}) => {
-			if (fieldName === 'name') {
-				newFieldName = value;
-			}
-		});
-	}
-	else {
-		newFieldName = fieldNameGenerator(fieldType.label);
+			visitor.mapFields(({fieldName, value}) => {
+				if (fieldName === 'name') {
+					newFieldName = value;
+				}
+			});
+		}
+		else {
+			newFieldName = fieldNameGenerator(fieldType.label);
+		}
 	}
 
 	const newField = {
@@ -166,7 +172,7 @@ export const getParentFieldSet = (pages, fieldName) => {
 };
 
 export const isFieldSet = (field) =>
-	field.type === FIELD_TYPE_FIELDSET && field.dataDefinitionId;
+	field.type === FIELD_TYPE_FIELDSET && field.ddmStructureId;
 
 export const isFieldSetChild = (pages, fieldName) => {
 	return !!getParentFieldSet(pages, fieldName);

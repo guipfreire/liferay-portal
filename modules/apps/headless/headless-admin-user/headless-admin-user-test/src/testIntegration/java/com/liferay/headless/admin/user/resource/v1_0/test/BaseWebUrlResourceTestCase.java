@@ -107,7 +107,9 @@ public abstract class BaseWebUrlResourceTestCase {
 
 		WebUrlResource.Builder builder = WebUrlResource.builder();
 
-		webUrlResource = builder.locale(
+		webUrlResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -348,6 +350,26 @@ public abstract class BaseWebUrlResourceTestCase {
 								},
 								getGraphQLFields())),
 						"JSONObject/data", "Object/webUrl"))));
+	}
+
+	@Test
+	public void testGraphQLGetWebUrlNotFound() throws Exception {
+		Long irrelevantWebUrlId = RandomTestUtil.randomLong();
+
+		Assert.assertEquals(
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"webUrl",
+						new HashMap<String, Object>() {
+							{
+								put("webUrlId", irrelevantWebUrlId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
 	protected WebUrl testGraphQLWebUrl_addWebUrl() throws Exception {

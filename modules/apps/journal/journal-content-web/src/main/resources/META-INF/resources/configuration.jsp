@@ -40,7 +40,7 @@ String redirect = ParamUtil.getString(request, "redirect");
 			<liferay-frontend:fieldset>
 				<div id="<portlet:namespace />articlePreview">
 					<liferay-util:include page="/journal_resources.jsp" servletContext="<%= application %>">
-						<liferay-util:param name="refererPortletName" value="<%= renderResponse.getNamespace() %>" />
+						<liferay-util:param name="refererPortletName" value="<%= liferayPortletResponse.getNamespace() %>" />
 					</liferay-util:include>
 				</div>
 			</liferay-frontend:fieldset>
@@ -99,6 +99,6 @@ String redirect = ParamUtil.getString(request, "redirect");
 			uri
 		);
 
-		location.href = uri;
+		Liferay.Util.navigate(uri);
 	}
 </aui:script>

@@ -40,7 +40,7 @@ public class ${entity.name}${sessionTypeName}ServiceWrapper implements ${entity.
 			@Override
 			public
 
-			<#if method.name = "dynamicQuery" && (serviceBuilder.getTypeGenericsName(method.returns) == "java.util.List<T>")>
+			<#if (method.name = "dslQuery" && (serviceBuilder.getTypeGenericsName(method.returns) == "T")) || (method.name = "dynamicQuery" && (serviceBuilder.getTypeGenericsName(method.returns) == "java.util.List<T>"))>
 				<T>
 			</#if>
 
@@ -88,7 +88,7 @@ public class ${entity.name}${sessionTypeName}ServiceWrapper implements ${entity.
 		</#if>
 	</#list>
 
-	<#if entity.isChangeTrackingEnabled() && stringUtil.equals(sessionTypeName, "Local")>
+	<#if entity.hasPersistence() && entity.isChangeTrackingEnabled() && stringUtil.equals(sessionTypeName, "Local") && entity.hasEntityColumns()>
 		@Override
 		public CTPersistence<${entity.name}> getCTPersistence() {
 			return _${entity.varName}LocalService.getCTPersistence();

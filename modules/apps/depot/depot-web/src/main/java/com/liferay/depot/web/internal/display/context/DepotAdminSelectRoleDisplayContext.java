@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.service.GroupServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
-import com.liferay.portal.kernel.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.kernel.service.permission.RolePermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -166,7 +165,9 @@ public class DepotAdminSelectRoleDisplayContext {
 		}
 
 		@Override
-		public SearchContainer getSearchContainer() throws PortalException {
+		public SearchContainer<Group> getSearchContainer()
+			throws PortalException {
+
 			if (_groupSearch != null) {
 				return _groupSearch;
 			}
@@ -174,6 +175,8 @@ public class DepotAdminSelectRoleDisplayContext {
 			GroupSearch groupSearch = new GroupSearch(
 				_renderRequest,
 				_getPortletURL(_renderRequest, _renderResponse, _user));
+
+			groupSearch.setEmptyResultsMessage("no-asset-libraries-were-found");
 
 			GroupSearchTerms groupSearchTerms =
 				(GroupSearchTerms)groupSearch.getSearchTerms();
@@ -213,13 +216,13 @@ public class DepotAdminSelectRoleDisplayContext {
 			if (!groupSearchTerms.hasSearchTerms()) {
 				List<Group> groups = ListUtil.copy(_user.getGroups());
 
-				Iterator<Group> itr = groups.iterator();
+				Iterator<Group> iterator = groups.iterator();
 
-				while (itr.hasNext()) {
-					Group group = itr.next();
+				while (iterator.hasNext()) {
+					Group group = iterator.next();
 
 					if (group.getType() != GroupConstants.TYPE_DEPOT) {
-						itr.remove();
+						iterator.remove();
 					}
 				}
 
@@ -289,14 +292,14 @@ public class DepotAdminSelectRoleDisplayContext {
 
 		public Map<String, Object> getData(Role role) throws PortalException {
 			return HashMapBuilder.<String, Object>put(
+				"entityid", role.getRoleId()
+			).put(
 				"groupdescriptivename",
 				_group.getDescriptiveName(_themeDisplay.getLocale())
 			).put(
 				"groupid", _group.getGroupId()
 			).put(
 				"iconcssclass", RolesAdminUtil.getIconCssClass(role)
-			).put(
-				"roleid", role.getRoleId()
 			).put(
 				"rolename", role.getTitle(_themeDisplay.getLocale())
 			).build();
@@ -306,7 +309,9 @@ public class DepotAdminSelectRoleDisplayContext {
 			return _renderResponse.getNamespace() + "selectDepotRole";
 		}
 
-		public SearchContainer getSearchContainer() throws PortalException {
+		public SearchContainer<Role> getSearchContainer()
+			throws PortalException {
+
 			if (_roleSearch != null) {
 				return _roleSearch;
 			}
@@ -390,6 +395,10 @@ public class DepotAdminSelectRoleDisplayContext {
 			return false;
 		}
 
+		/**
+		 * @see com.liferay.site.memberships.web.internal.display.context.UserRolesDisplayContext#_filterGroupRoles(
+		 *      PermissionChecker, long, List)
+		 */
 		private List<Role> _filterGroupRoles(List<Role> roles)
 			throws PortalException {
 
@@ -402,19 +411,21 @@ public class DepotAdminSelectRoleDisplayContext {
 				Stream<Role> stream = roles.stream();
 
 				return stream.filter(
-					role -> !Objects.equals(
-						role.getName(),
-						DepotRolesConstants.ASSET_LIBRARY_MEMBER)
+					role ->
+						!Objects.equals(
+							role.getName(),
+							DepotRolesConstants.
+								ASSET_LIBRARY_CONNECTED_SITE_MEMBER) &&
+						!Objects.equals(
+							role.getName(),
+							DepotRolesConstants.ASSET_LIBRARY_MEMBER)
 				).collect(
 					Collectors.toList()
 				);
 			}
 
 			if (!GroupPermissionUtil.contains(
-					permissionChecker, _group, ActionKeys.ASSIGN_USER_ROLES) &&
-				!OrganizationPermissionUtil.contains(
-					permissionChecker, _group.getOrganizationId(),
-					ActionKeys.ASSIGN_USER_ROLES)) {
+					permissionChecker, _group, ActionKeys.ASSIGN_USER_ROLES)) {
 
 				return Collections.emptyList();
 			}
@@ -423,6 +434,10 @@ public class DepotAdminSelectRoleDisplayContext {
 
 			return stream.filter(
 				role ->
+					!Objects.equals(
+						role.getName(),
+						DepotRolesConstants.
+							ASSET_LIBRARY_CONNECTED_SITE_MEMBER) &&
 					!Objects.equals(
 						role.getName(),
 						DepotRolesConstants.ASSET_LIBRARY_MEMBER) &&
@@ -463,7 +478,7 @@ public class DepotAdminSelectRoleDisplayContext {
 
 	public interface Step {
 
-		public SearchContainer getSearchContainer() throws PortalException;
+		public SearchContainer<?> getSearchContainer() throws PortalException;
 
 		public int getType();
 

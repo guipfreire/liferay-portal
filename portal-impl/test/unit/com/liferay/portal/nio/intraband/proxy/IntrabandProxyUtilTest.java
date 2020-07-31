@@ -1203,13 +1203,13 @@ public class IntrabandProxyUtilTest {
 	}
 
 	private void _assertLdcInsnNode(
-		AbstractInsnNode abstractInsnNode, int opcode, Object obj) {
+		AbstractInsnNode abstractInsnNode, int opcode, Object object) {
 
 		Assert.assertEquals(opcode, abstractInsnNode.getOpcode());
 
 		LdcInsnNode ldcInsnNode = (LdcInsnNode)abstractInsnNode;
 
-		Assert.assertEquals(obj, ldcInsnNode.cst);
+		Assert.assertEquals(object, ldcInsnNode.cst);
 	}
 
 	private void _assertMethodInsnNode(
@@ -1285,11 +1285,8 @@ public class IntrabandProxyUtilTest {
 
 			String name = proxyMethod.getName();
 
-			proxyMethodSignatures[i] = name.concat(
-				StringPool.DASH
-			).concat(
-				Type.getMethodDescriptor(proxyMethod)
-			);
+			proxyMethodSignatures[i] = StringBundler.concat(
+				name, StringPool.DASH, Type.getMethodDescriptor(proxyMethod));
 		}
 
 		return proxyMethodSignatures;
@@ -1758,7 +1755,7 @@ public class IntrabandProxyUtilTest {
 			_buildProxyMethodSignatures(clazz), proxyMethodSignatures);
 
 		StringBundler sb = new StringBundler(
-			proxyMethodSignatures.length * 4 + 1);
+			(proxyMethodSignatures.length * 4) + 1);
 
 		sb.append(StringPool.OPEN_CURLY_BRACE);
 
@@ -2465,11 +2462,11 @@ public class IntrabandProxyUtilTest {
 			classLoader.getResourceAsStream(name.concat(".class")));
 	}
 
-	private ClassNode _loadClass(InputStream is) {
+	private ClassNode _loadClass(InputStream inputStream) {
 		ClassReader classReader = null;
 
 		try {
-			classReader = new ClassReader(is);
+			classReader = new ClassReader(inputStream);
 		}
 		catch (IOException ioException) {
 			throw new RuntimeException(ioException);
@@ -2614,7 +2611,7 @@ public class IntrabandProxyUtilTest {
 	private static class TestExtractMethodsClass2 {
 
 		@Id
-		public String getId(Object obj) {
+		public String getId(Object object) {
 			return null;
 		}
 
@@ -2739,9 +2736,9 @@ public class IntrabandProxyUtilTest {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(Object object) {
 			TestGenerateTargetLocator testGenerateTargetLocator =
-				(TestGenerateTargetLocator)obj;
+				(TestGenerateTargetLocator)object;
 
 			return _clazz.equals(testGenerateTargetLocator._clazz);
 		}
@@ -2793,19 +2790,19 @@ public class IntrabandProxyUtilTest {
 		@Proxy
 		protected abstract short syncCallShort(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 		@Proxy
 		abstract Object syncCallObject(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 		@Proxy
 		abstract String syncCallString(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 	}
@@ -2889,49 +2886,49 @@ public class IntrabandProxyUtilTest {
 		@Proxy
 		public void asyncCall(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 		@Proxy
 		public boolean syncCallBoolean(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 		@Proxy
 		public byte syncCallByte(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 		@Proxy
 		public char syncCallChar(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 		@Proxy
 		public double syncCallDouble(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 		@Proxy
 		public float syncCallFloat(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 		@Proxy
 		public int syncCallInt(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 		@Proxy
 		public long syncCallLong(
 				boolean z, byte b, char c, double d, float f, int i, long j,
-				short s, String string, Date date, Object obj)
+				short s, String string, Date date, Object object)
 			throws InterruptedException, IOException;
 
 	}

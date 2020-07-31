@@ -1,7 +1,7 @@
 definition {
 
 	macro enableReadingTime {
-		ProductMenu.gotoPortlet(
+		ApplicationsMenu.gotoPortlet(
 			category = "Configuration",
 			panel = "Control Panel",
 			portlet = "System Settings");
@@ -11,7 +11,13 @@ definition {
 			configurationName = "Blogs",
 			configurationScope = "Widget Scope");
 
-		FormFields.enableCheckbox(fieldName = "enableReadingTime");
+		if (IsNotChecked.isNotCheckedNotVisible(locator1 = "FormFields#CHECKBOX", key_fieldName = "enableReadingTime")) {
+			Check.checkNotVisible(
+				key_fieldName = "enableReadingTime",
+				locator1 = "FormFields#CHECKBOX");
+		}
+
+		FormFields.viewCheckboxChecked(fieldName = "enableReadingTime");
 
 		Button.clickSave();
 
@@ -39,7 +45,7 @@ definition {
 	}
 
 	macro selectConfigurationIFrame {
-		SelectFrame(locator1 = "IFrame#DIALOG");
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 	}
 
 	macro selectDisplayTemplate {
@@ -194,7 +200,7 @@ definition {
 		if (IsElementPresent(locator1 = "Portlet#OPTIONS_MENULIST_PERMISSIONS")) {
 			Click(locator1 = "Portlet#OPTIONS_MENULIST_PERMISSIONS");
 
-			SelectFrame(locator1 = "IFrame#DIALOG");
+			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 		}
 
 		MenuItem.viewPresent(menuItem = "Permissions");
@@ -205,7 +211,6 @@ definition {
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
-			panel = "Site Administration",
 			portlet = "Blogs");
 
 		AssertElementPresent(locator1 = "ProductMenu#PRODUCT_MENU_PANEL_SCOPE");

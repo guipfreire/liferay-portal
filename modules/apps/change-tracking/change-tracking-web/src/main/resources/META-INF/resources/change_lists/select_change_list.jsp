@@ -20,12 +20,10 @@
 SearchContainer<CTCollection> searchContainer = changeListsDisplayContext.getSearchContainer();
 
 searchContainer.setId("selectChangeList");
-
-SelectChangeListManagementToolbarDisplayContext selectChangeListManagementToolbarDisplayContext = new SelectChangeListManagementToolbarDisplayContext(request, liferayPortletRequest, liferayPortletResponse, searchContainer);
 %>
 
 <clay:management-toolbar
-	displayContext="<%= selectChangeListManagementToolbarDisplayContext %>"
+	displayContext="<%= new SelectChangeListManagementToolbarDisplayContext(request, liferayPortletRequest, liferayPortletResponse, searchContainer) %>"
 />
 
 <c:if test="<%= !searchContainer.hasResults() %>">
@@ -36,7 +34,9 @@ SelectChangeListManagementToolbarDisplayContext selectChangeListManagementToolba
 	</div>
 </c:if>
 
-<div class="container container-fluid-1280" id="<portlet:namespace />selectChangeListContainer">
+<clay:container-fluid
+	id='<%= liferayPortletResponse.getNamespace() + "selectChangeListContainer" %>'
+>
 	<div class="table-responsive">
 		<table class="change-lists-table select-change-list-table table table-autofit">
 			<tbody>
@@ -94,7 +94,7 @@ SelectChangeListManagementToolbarDisplayContext selectChangeListManagementToolba
 		markupView="lexicon"
 		searchContainer="<%= searchContainer %>"
 	/>
-</div>
+</clay:container-fluid>
 
 <aui:script>
 	Liferay.Util.selectEntityHandler(

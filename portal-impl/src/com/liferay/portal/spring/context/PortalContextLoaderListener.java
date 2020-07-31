@@ -16,6 +16,7 @@ package com.liferay.portal.spring.context;
 
 import com.liferay.petra.executor.PortalExecutorManager;
 import com.liferay.petra.lang.ClassLoaderPool;
+import com.liferay.petra.log4j.Log4JUtil;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
@@ -25,6 +26,7 @@ import com.liferay.portal.dao.init.DBInitUtil;
 import com.liferay.portal.dao.orm.hibernate.FieldInterceptionHelperUtil;
 import com.liferay.portal.deploy.hot.CustomJspBagRegistryUtil;
 import com.liferay.portal.deploy.hot.ServiceWrapperRegistry;
+import com.liferay.portal.events.StartupHelperUtil;
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.cache.thread.local.ThreadLocalCacheManager;
 import com.liferay.portal.kernel.deploy.hot.HotDeployUtil;
@@ -181,6 +183,8 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 		catch (Exception exception) {
 			_log.error(exception, exception);
 		}
+
+		Log4JUtil.shutdownLog4J();
 	}
 
 	@Override
@@ -337,18 +341,6 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 
 		PortalBeanLocatorUtil.setBeanLocator(beanLocatorImpl);
 
-		try {
-
-			// Upgrade
-
-			if (PropsValues.UPGRADE_DATABASE_AUTO_RUN) {
-				DBUpgrader.upgrade();
-			}
-		}
-		catch (Exception exception) {
-			throw new RuntimeException(exception);
-		}
-
 		ClassLoader classLoader = portalClassLoader;
 
 		while (classLoader != null) {
@@ -366,7 +358,14 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 		dynamicProxyCreator.clear();
 
 		try {
-			ModuleFrameworkUtilAdapter.registerContext(applicationContext);
+			if (PropsValues.UPGRADE_DATABASE_AUTO_RUN) {
+				DBUpgrader.upgrade(applicationContext);
+
+				StartupHelperUtil.setUpgrading(false);
+			}
+			else {
+				ModuleFrameworkUtilAdapter.registerContext(applicationContext);
+			}
 		}
 		catch (Exception exception) {
 			throw new RuntimeException(exception);

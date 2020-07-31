@@ -12,10 +12,12 @@
  * details.
  */
 
+import ClayLayout from '@clayui/layout';
 import {SearchInput} from 'data-engine-taglib';
 import React, {useState} from 'react';
 
 import {useRequest} from '../../../hooks/index.es';
+import {getTranslatedValue} from '../../../utils/utils.es';
 import ListItems from './ListItems.es';
 
 export default ({endpoint, title, ...restProps}) => {
@@ -27,27 +29,27 @@ export default ({endpoint, title, ...restProps}) => {
 	} = useRequest(endpoint);
 
 	const filteredItems = items.filter((item) =>
-		new RegExp(searchText, 'ig').test(item.name.en_US)
+		new RegExp(searchText, 'ig').test(getTranslatedValue(item, 'name'))
 	);
 
 	return (
 		<>
-			<div className="autofit-row mb-4 pl-4 pr-4">
-				<div className="autofit-col-expand">
+			<ClayLayout.ContentRow className="mb-4 pl-4 pr-4">
+				<ClayLayout.ContentCol expand>
 					<h2>{title}</h2>
-				</div>
-			</div>
+				</ClayLayout.ContentCol>
+			</ClayLayout.ContentRow>
 
-			<div className="autofit-row mb-4 pl-4 pr-4">
-				<div className="autofit-col-expand">
+			<ClayLayout.ContentRow className="mb-4 pl-4 pr-4">
+				<ClayLayout.ContentCol expand>
 					<SearchInput
 						onChange={(searchText) => setSearchText(searchText)}
 					/>
-				</div>
-			</div>
+				</ClayLayout.ContentCol>
+			</ClayLayout.ContentRow>
 
-			<div className="autofit-row pl-4 pr-4 scrollable-container">
-				<div className="autofit-col-expand">
+			<ClayLayout.ContentRow className="pl-4 pr-4 scrollable-container">
+				<ClayLayout.ContentCol expand>
 					<ListItems
 						isEmpty={filteredItems.length === 0}
 						isLoading={isLoading}
@@ -55,8 +57,8 @@ export default ({endpoint, title, ...restProps}) => {
 						keywords={searchText}
 						{...restProps}
 					/>
-				</div>
-			</div>
+				</ClayLayout.ContentCol>
+			</ClayLayout.ContentRow>
 		</>
 	);
 };

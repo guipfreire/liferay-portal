@@ -27,6 +27,8 @@ definition {
 	@description = "This is a use case for LPS-110191. The related assets should be in AP when select Related Assets as Collection Provider."
 	@priority = "5"
 	test DisplayRelatedAssetsInAssetPublisher {
+		property portal.acceptance = "true";
+
 		task ("Add a Web Content Article, a Blogs Entry and a Document") {
 			JSONWebcontent.addWebContent(
 				content = "Web Content Content",
@@ -117,7 +119,7 @@ definition {
 
 			MenuItem.click(menuItem = "Configuration");
 
-			SelectFrame(locator1 = "IFrame#DIALOG");
+			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 			Navigator.gotoNavTab(navTab = "Asset Selection");
 

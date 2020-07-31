@@ -19,6 +19,14 @@ import {act} from 'react-dom/test-utils';
 import {Modal} from '../../../src/main/resources/META-INF/resources/liferay/modal/Modal';
 
 describe('Modal', () => {
+	beforeAll(() => {
+		Liferay.on = jest.fn(() => {
+			return {
+				detach: jest.fn(),
+			};
+		});
+	});
+
 	beforeEach(() => {
 		jest.useFakeTimers();
 	});
@@ -27,6 +35,7 @@ describe('Modal', () => {
 		const {baseElement} = render(
 			<Modal
 				id="abcd"
+				iframeProps={{id: 'efgh'}}
 				size="lg"
 				title="My Modal"
 				url="https://www.sample.url?p_p_id=com_liferay_MyPortlet"
@@ -82,6 +91,18 @@ describe('Modal', () => {
 		const sampleId = 'sampleId';
 
 		render(<Modal bodyHTML={`<div id='${sampleId}' />`} />);
+
+		act(() => {
+			jest.runAllTimers();
+		});
+
+		expect(document.getElementById(sampleId)).toBeTruthy();
+	});
+
+	it('renders given header HTML', () => {
+		const sampleId = 'sampleId';
+
+		render(<Modal headerHTML={`<div id='${sampleId}' />`} />);
 
 		act(() => {
 			jest.runAllTimers();

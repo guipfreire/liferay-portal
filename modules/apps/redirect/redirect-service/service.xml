@@ -67,16 +67,8 @@
 
 		<!-- Other fields -->
 
-		<column name="hits" type="long" />
 		<column name="ignored" type="boolean" />
 		<column name="url" type="String" />
-
-		<!-- Order -->
-
-		<order by="desc">
-			<order-column name="hits" />
-			<order-column name="redirectNotFoundEntryId" />
-		</order>
 
 		<!-- Finder methods -->
 

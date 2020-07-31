@@ -14,7 +14,9 @@
 
 package com.liferay.redirect.service.impl;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
+import com.liferay.portal.kernel.exception.LayoutFriendlyURLException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
@@ -23,8 +25,10 @@ import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.redirect.configuration.RedirectConfiguration;
+import com.liferay.portal.model.impl.LayoutImpl;
+import com.liferay.redirect.exception.CircularRedirectEntryException;
 import com.liferay.redirect.exception.DuplicateRedirectEntrySourceURLException;
 import com.liferay.redirect.exception.RequiredRedirectEntryDestinationURLException;
 import com.liferay.redirect.exception.RequiredRedirectEntrySourceURLException;
@@ -128,11 +132,29 @@ public class RedirectEntryLocalServiceImpl
 		return redirectEntry;
 	}
 
+	@Indexable(type = IndexableType.REINDEX)
 	@Override
-	public boolean checkRedirectionChain(long groupId, String destinationURL) {
-		return ListUtil.isNotEmpty(
-			getRedirectEntriesByGroupIdAndDestinationURL(
-				groupId, destinationURL));
+	public RedirectEntry addRedirectEntry(
+			long groupId, String destinationURL, Date expirationDate,
+			String groupBaseURL, boolean permanent, String sourceURL,
+			boolean updateChainedRedirectEntries, ServiceContext serviceContext)
+		throws PortalException {
+
+		_checkDestinationURLMustNotBeEqualToSourceURL(
+			destinationURL, groupBaseURL, sourceURL);
+
+		RedirectEntry redirectEntry = addRedirectEntry(
+			groupId, destinationURL, expirationDate, permanent, sourceURL,
+			serviceContext);
+
+		_checkChainedRedirectEntries(groupBaseURL, redirectEntry);
+
+		if (updateChainedRedirectEntries) {
+			redirectEntry = _updateChainedRedirectEntries(
+				groupBaseURL, redirectEntry);
+		}
+
+		return redirectEntry;
 	}
 
 	@Override
@@ -144,10 +166,6 @@ public class RedirectEntryLocalServiceImpl
 	@Override
 	public RedirectEntry fetchRedirectEntry(
 		long groupId, String sourceURL, boolean updateLastOccurrenceDate) {
-
-		if (!_redirectConfiguration.isEnabled()) {
-			return null;
-		}
 
 		RedirectEntry redirectEntry = redirectEntryPersistence.fetchByG_S(
 			groupId, sourceURL);
@@ -176,13 +194,14 @@ public class RedirectEntryLocalServiceImpl
 	@Override
 	public List<RedirectEntry> getRedirectEntries(
 		long groupId, int start, int end,
-		OrderByComparator<RedirectEntry> obc) {
+		OrderByComparator<RedirectEntry> orderByComparator) {
 
-		return redirectEntryPersistence.findByGroupId(groupId, start, end, obc);
+		return redirectEntryPersistence.findByGroupId(
+			groupId, start, end, orderByComparator);
 	}
 
 	@Override
-	public List<RedirectEntry> getRedirectEntriesByGroupIdAndDestinationURL(
+	public List<RedirectEntry> getRedirectEntries(
 		long groupId, String destinationURL) {
 
 		return ListUtil.filter(
@@ -224,10 +243,92 @@ public class RedirectEntryLocalServiceImpl
 		return redirectEntryPersistence.update(redirectEntry);
 	}
 
+	@Indexable(type = IndexableType.REINDEX)
+	@Override
+	public RedirectEntry updateRedirectEntry(
+			long redirectEntryId, String destinationURL, Date expirationDate,
+			String groupBaseURL, boolean permanent, String sourceURL,
+			boolean updateChainedRedirectEntries)
+		throws PortalException {
+
+		_checkDestinationURLMustNotBeEqualToSourceURL(
+			destinationURL, groupBaseURL, sourceURL);
+
+		RedirectEntry redirectEntry =
+			redirectEntryLocalService.updateRedirectEntry(
+				redirectEntryId, destinationURL, expirationDate, permanent,
+				sourceURL);
+
+		_checkChainedRedirectEntries(groupBaseURL, redirectEntry);
+
+		if (updateChainedRedirectEntries) {
+			redirectEntry = _updateChainedRedirectEntries(
+				groupBaseURL, redirectEntry);
+		}
+
+		return redirectEntry;
+	}
+
 	private static Instant _getDayInstant(Date date) {
 		Instant instant = date.toInstant();
 
 		return instant.truncatedTo(ChronoUnit.DAYS);
+	}
+
+	private void _checkChainedRedirectEntries(
+			String groupBaseURL, RedirectEntry redirectEntry)
+		throws PortalException {
+
+		List<RedirectEntry> chainedRedirectEntries =
+			redirectEntryLocalService.getRedirectEntries(
+				redirectEntry.getGroupId(),
+				groupBaseURL + StringPool.SLASH + redirectEntry.getSourceURL());
+
+		for (RedirectEntry chainedRedirectEntry : chainedRedirectEntries) {
+			_checkMustNotFormALoopWithAnotherRedirectEntry(
+				redirectEntry.getDestinationURL(), groupBaseURL,
+				chainedRedirectEntry.getSourceURL());
+		}
+
+		RedirectEntry chainedRedirectEntry =
+			redirectEntryLocalService.fetchRedirectEntry(
+				redirectEntry.getGroupId(),
+				StringUtil.removeSubstring(
+					redirectEntry.getDestinationURL(),
+					groupBaseURL + StringPool.SLASH));
+
+		if (chainedRedirectEntry != null) {
+			_checkMustNotFormALoopWithAnotherRedirectEntry(
+				chainedRedirectEntry.getDestinationURL(), groupBaseURL,
+				redirectEntry.getSourceURL());
+		}
+	}
+
+	private void _checkDestinationURLMustNotBeEqualToSourceURL(
+			String destinationURL, String groupBaseURL, String sourceURL)
+		throws CircularRedirectEntryException.
+			DestinationURLMustNotBeEqualToSourceURL {
+
+		String completeSourceURL = groupBaseURL + StringPool.SLASH + sourceURL;
+
+		if (StringUtil.equalsIgnoreCase(completeSourceURL, destinationURL)) {
+			throw new CircularRedirectEntryException.
+				DestinationURLMustNotBeEqualToSourceURL(
+					sourceURL, destinationURL);
+		}
+	}
+
+	private void _checkMustNotFormALoopWithAnotherRedirectEntry(
+			String destinationURL, String groupBaseURL, String sourceURL)
+		throws CircularRedirectEntryException.
+			MustNotFormALoopWithAnotherRedirectEntry {
+
+		String completeSourceURL = groupBaseURL + StringPool.SLASH + sourceURL;
+
+		if (StringUtil.equalsIgnoreCase(completeSourceURL, destinationURL)) {
+			throw new CircularRedirectEntryException.
+				MustNotFormALoopWithAnotherRedirectEntry();
+		}
 	}
 
 	private boolean _isExpired(RedirectEntry redirectEntry) {
@@ -249,6 +350,56 @@ public class RedirectEntryLocalServiceImpl
 		return instant1.equals(instant2);
 	}
 
+	private RedirectEntry _updateChainedRedirectEntries(
+			String groupBaseURL, RedirectEntry redirectEntry)
+		throws PortalException {
+
+		List<RedirectEntry> chainedRedirectEntries =
+			redirectEntryLocalService.getRedirectEntries(
+				redirectEntry.getGroupId(),
+				groupBaseURL + StringPool.SLASH + redirectEntry.getSourceURL());
+
+		for (RedirectEntry chainedRedirectEntry : chainedRedirectEntries) {
+			RedirectEntry updatedRedirectEntry =
+				redirectEntryLocalService.updateRedirectEntry(
+					chainedRedirectEntry.getRedirectEntryId(),
+					redirectEntry.getDestinationURL(),
+					chainedRedirectEntry.getExpirationDate(),
+					chainedRedirectEntry.isPermanent(),
+					chainedRedirectEntry.getSourceURL());
+
+			RedirectEntry destinationRedirectEntry =
+				redirectEntryLocalService.fetchRedirectEntry(
+					redirectEntry.getGroupId(),
+					StringUtil.removeSubstring(
+						updatedRedirectEntry.getDestinationURL(),
+						groupBaseURL + StringPool.SLASH));
+
+			if (destinationRedirectEntry != null) {
+				_checkMustNotFormALoopWithAnotherRedirectEntry(
+					updatedRedirectEntry.getDestinationURL(), groupBaseURL,
+					destinationRedirectEntry.getSourceURL());
+			}
+		}
+
+		RedirectEntry chainedRedirectEntry =
+			redirectEntryLocalService.fetchRedirectEntry(
+				redirectEntry.getGroupId(),
+				StringUtil.removeSubstring(
+					redirectEntry.getDestinationURL(),
+					groupBaseURL + StringPool.SLASH));
+
+		if (chainedRedirectEntry != null) {
+			return redirectEntryLocalService.updateRedirectEntry(
+				redirectEntry.getRedirectEntryId(),
+				chainedRedirectEntry.getDestinationURL(),
+				redirectEntry.getExpirationDate(), redirectEntry.isPermanent(),
+				redirectEntry.getSourceURL());
+		}
+
+		return redirectEntry;
+	}
+
 	private void _validate(String destinationURL, String sourceURL)
 		throws PortalException {
 
@@ -259,10 +410,19 @@ public class RedirectEntryLocalServiceImpl
 		if (Validator.isNull(sourceURL)) {
 			throw new RequiredRedirectEntrySourceURLException();
 		}
-	}
 
-	@Reference
-	private RedirectConfiguration _redirectConfiguration;
+		if (sourceURL.startsWith(StringPool.SLASH)) {
+			throw new LayoutFriendlyURLException(
+				LayoutFriendlyURLException.DOES_NOT_START_WITH_SLASH);
+		}
+
+		int exceptionType = LayoutImpl.validateFriendlyURL(
+			StringPool.SLASH + sourceURL, true);
+
+		if (exceptionType != -1) {
+			throw new LayoutFriendlyURLException(exceptionType);
+		}
+	}
 
 	@Reference
 	private RedirectNotFoundEntryLocalService

@@ -67,6 +67,7 @@ public class ExpandoValueModelImpl
 	public static final String TABLE_NAME = "ExpandoValue";
 
 	public static final Object[][] TABLE_COLUMNS = {
+		{"mvccVersion", Types.BIGINT}, {"ctCollectionId", Types.BIGINT},
 		{"valueId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"tableId", Types.BIGINT}, {"columnId", Types.BIGINT},
 		{"rowId_", Types.BIGINT}, {"classNameId", Types.BIGINT},
@@ -77,6 +78,8 @@ public class ExpandoValueModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("ctCollectionId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("valueId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("tableId", Types.BIGINT);
@@ -88,7 +91,7 @@ public class ExpandoValueModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table ExpandoValue (valueId LONG not null primary key,companyId LONG,tableId LONG,columnId LONG,rowId_ LONG,classNameId LONG,classPK LONG,data_ TEXT null)";
+		"create table ExpandoValue (mvccVersion LONG default 0 not null,ctCollectionId LONG default 0 not null,valueId LONG not null,companyId LONG,tableId LONG,columnId LONG,rowId_ LONG,classNameId LONG,classPK LONG,data_ TEXT null,primary key (valueId, ctCollectionId))";
 
 	public static final String TABLE_SQL_DROP = "drop table ExpandoValue";
 
@@ -104,20 +107,23 @@ public class ExpandoValueModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.entity.cache.enabled.com.liferay.expando.kernel.model.ExpandoValue"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean ENTITY_CACHE_ENABLED = true;
 
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.finder.cache.enabled.com.liferay.expando.kernel.model.ExpandoValue"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean FINDER_CACHE_ENABLED = true;
 
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.portal.util.PropsUtil.get(
-			"value.object.column.bitmask.enabled.com.liferay.expando.kernel.model.ExpandoValue"),
-		true);
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public static final boolean COLUMN_BITMASK_ENABLED = true;
 
 	public static final long CLASSNAMEID_COLUMN_BITMASK = 1L;
 
@@ -144,6 +150,8 @@ public class ExpandoValueModelImpl
 
 		ExpandoValue model = new ExpandoValueImpl();
 
+		model.setMvccVersion(soapModel.getMvccVersion());
+		model.setCtCollectionId(soapModel.getCtCollectionId());
 		model.setValueId(soapModel.getValueId());
 		model.setCompanyId(soapModel.getCompanyId());
 		model.setTableId(soapModel.getTableId());
@@ -233,9 +241,6 @@ public class ExpandoValueModelImpl
 				attributeGetterFunction.apply((ExpandoValue)this));
 		}
 
-		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
-		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
-
 		return attributes;
 	}
 
@@ -308,6 +313,16 @@ public class ExpandoValueModelImpl
 		Map<String, BiConsumer<ExpandoValue, ?>> attributeSetterBiConsumers =
 			new LinkedHashMap<String, BiConsumer<ExpandoValue, ?>>();
 
+		attributeGetterFunctions.put(
+			"mvccVersion", ExpandoValue::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<ExpandoValue, Long>)ExpandoValue::setMvccVersion);
+		attributeGetterFunctions.put(
+			"ctCollectionId", ExpandoValue::getCtCollectionId);
+		attributeSetterBiConsumers.put(
+			"ctCollectionId",
+			(BiConsumer<ExpandoValue, Long>)ExpandoValue::setCtCollectionId);
 		attributeGetterFunctions.put("valueId", ExpandoValue::getValueId);
 		attributeSetterBiConsumers.put(
 			"valueId",
@@ -344,6 +359,28 @@ public class ExpandoValueModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		_mvccVersion = mvccVersion;
+	}
+
+	@JSON
+	@Override
+	public long getCtCollectionId() {
+		return _ctCollectionId;
+	}
+
+	@Override
+	public void setCtCollectionId(long ctCollectionId) {
+		_ctCollectionId = ctCollectionId;
 	}
 
 	@JSON
@@ -552,6 +589,8 @@ public class ExpandoValueModelImpl
 	public Object clone() {
 		ExpandoValueImpl expandoValueImpl = new ExpandoValueImpl();
 
+		expandoValueImpl.setMvccVersion(getMvccVersion());
+		expandoValueImpl.setCtCollectionId(getCtCollectionId());
 		expandoValueImpl.setValueId(getValueId());
 		expandoValueImpl.setCompanyId(getCompanyId());
 		expandoValueImpl.setTableId(getTableId());
@@ -616,16 +655,16 @@ public class ExpandoValueModelImpl
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof ExpandoValue)) {
+		if (!(object instanceof ExpandoValue)) {
 			return false;
 		}
 
-		ExpandoValue expandoValue = (ExpandoValue)obj;
+		ExpandoValue expandoValue = (ExpandoValue)object;
 
 		long primaryKey = expandoValue.getPrimaryKey();
 
@@ -642,11 +681,19 @@ public class ExpandoValueModelImpl
 		return (int)getPrimaryKey();
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isEntityCacheEnabled() {
 		return ENTITY_CACHE_ENABLED;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public boolean isFinderCacheEnabled() {
 		return FINDER_CACHE_ENABLED;
@@ -687,6 +734,10 @@ public class ExpandoValueModelImpl
 	public CacheModel<ExpandoValue> toCacheModel() {
 		ExpandoValueCacheModel expandoValueCacheModel =
 			new ExpandoValueCacheModel();
+
+		expandoValueCacheModel.mvccVersion = getMvccVersion();
+
+		expandoValueCacheModel.ctCollectionId = getCtCollectionId();
 
 		expandoValueCacheModel.valueId = getValueId();
 
@@ -783,6 +834,8 @@ public class ExpandoValueModelImpl
 
 	}
 
+	private long _mvccVersion;
+	private long _ctCollectionId;
 	private long _valueId;
 	private long _companyId;
 	private long _tableId;

@@ -14,15 +14,20 @@
 
 import ClayForm, {ClayCheckbox, ClaySelectWithOption} from '@clayui/form';
 import PropTypes from 'prop-types';
-import React, {useState} from 'react';
+import React from 'react';
 
 import {getLayoutDataItemPropTypes} from '../../../prop-types/index';
-import {LAYOUT_DATA_ITEM_DEFAULT_CONFIGURATIONS} from '../../config/constants/layoutDataItemDefaultConfigurations';
-import {LAYOUT_DATA_ITEM_TYPES} from '../../config/constants/layoutDataItemTypes';
+import {VIEWPORT_SIZES} from '../../config/constants/viewportSizes';
 import selectSegmentsExperienceId from '../../selectors/selectSegmentsExperienceId';
 import {useDispatch, useSelector} from '../../store/index';
 import updateItemConfig from '../../thunks/updateItemConfig';
 import updateRowColumns from '../../thunks/updateRowColumns';
+import {getResponsiveConfig} from '../../utils/getResponsiveConfig';
+import {useId} from '../../utils/useId';
+import {
+	useSetCustomRowContext,
+	useSetUpdatedLayoutDataContext,
+} from '../ResizeContext';
 
 const NUMBER_OF_COLUMNS_OPTIONS = ['1', '2', '3', '4', '5', '6'];
 
@@ -31,31 +36,28 @@ const ROW_CONFIGURATION_IDENTIFIERS = {
 	numberOfColumns: 'numberOfColumns',
 };
 
-const ClayCheckboxWithState = ({onValueChange, ...otherProps}) => {
-	const [value, setValue] = useState(false);
-
-	return (
-		<ClayCheckbox
-			checked={value}
-			onChange={({target: {checked}}) => {
-				setValue((val) => !val);
-				onValueChange(checked);
-			}}
-			{...otherProps}
-		/>
-	);
-};
-
 export const RowConfigurationPanel = ({item}) => {
 	const dispatch = useDispatch();
 	const segmentsExperienceId = useSelector(selectSegmentsExperienceId);
-
-	const rowConfig = {
-		...LAYOUT_DATA_ITEM_DEFAULT_CONFIGURATIONS[LAYOUT_DATA_ITEM_TYPES.row],
-		...item.config,
-	};
+	const selectedViewportSize = useSelector(
+		(state) => state.selectedViewportSize
+	);
+	const setUpdatedLayoutData = useSetUpdatedLayoutDataContext();
+	const setCustomRow = useSetCustomRowContext();
 
 	const handleConfigurationValueChanged = (identifier, value) => {
+		setCustomRow(false);
+		setUpdatedLayoutData(null);
+
+		let itemConfig = {[identifier]: value};
+
+		if (
+			selectedViewportSize !== VIEWPORT_SIZES.desktop &&
+			identifier !== ROW_CONFIGURATION_IDENTIFIERS.gutters
+		) {
+			itemConfig = {[selectedViewportSize]: itemConfig};
+		}
+
 		if (identifier === ROW_CONFIGURATION_IDENTIFIERS.numberOfColumns) {
 			const currentNumberOfColumns = rowConfig.numberOfColumns;
 			const newNumberOfColumns = value;
@@ -74,6 +76,7 @@ export const RowConfigurationPanel = ({item}) => {
 						itemId: item.itemId,
 						numberOfColumns: newNumberOfColumns,
 						segmentsExperienceId,
+						viewportSizeId: selectedViewportSize,
 					})
 				);
 			}
@@ -83,51 +86,41 @@ export const RowConfigurationPanel = ({item}) => {
 
 		dispatch(
 			updateItemConfig({
-				itemConfig: {
-					[identifier]: value,
-				},
+				itemConfig,
 				itemId: item.itemId,
 				segmentsExperienceId,
 			})
 		);
 	};
 
+	const rowConfig = getResponsiveConfig(item.config, selectedViewportSize);
+
 	return (
 		<>
-			<ClayForm.Group small>
-				<label htmlFor="rowNumberOfColumns">
-					{Liferay.Language.get('number-of-columns')}
-				</label>
-				<ClaySelectWithOption
-					aria-label={Liferay.Language.get('number-of-columns')}
-					id="rowNumberOfColumns"
-					onChange={({target: {value}}) => {
-						handleConfigurationValueChanged(
-							ROW_CONFIGURATION_IDENTIFIERS.numberOfColumns,
-							Number(value)
-						);
-					}}
-					options={NUMBER_OF_COLUMNS_OPTIONS.map((value) => ({
-						label: value,
-						value,
-					}))}
-					value={String(rowConfig.numberOfColumns)}
-				/>
-			</ClayForm.Group>
+			<div className="page-editor__floating-toolbar__panel-header">
+				<p>{Liferay.Language.get('configuration')}</p>
+			</div>
+
+			<Select
+				configurationKey="numberOfColumns"
+				handleChange={handleConfigurationValueChanged}
+				label={Liferay.Language.get('number-of-modules')}
+				options={NUMBER_OF_COLUMNS_OPTIONS.map((option) => ({
+					label: option,
+				}))}
+				value={rowConfig.numberOfColumns}
+			/>
+
 			{rowConfig.numberOfColumns > 1 && (
-				<ClayForm.Group>
-					<ClayCheckboxWithState
-						aria-label={Liferay.Language.get('columns-gutter')}
+				<>
+					<ClayCheckbox
 						checked={rowConfig.gutters}
-						label={Liferay.Language.get('columns-gutter')}
-						onValueChange={(value) =>
-							handleConfigurationValueChanged(
-								ROW_CONFIGURATION_IDENTIFIERS.gutters,
-								value
-							)
+						label={Liferay.Language.get('show-gutter')}
+						onChange={({target: {checked}}) =>
+							handleConfigurationValueChanged('gutters', checked)
 						}
 					/>
-				</ClayForm.Group>
+				</>
 			)}
 		</>
 	);
@@ -137,4 +130,46 @@ RowConfigurationPanel.propTypes = {
 	item: getLayoutDataItemPropTypes({
 		config: PropTypes.shape({numberOfColumns: PropTypes.number}),
 	}),
+};
+
+const Select = ({configurationKey, handleChange, label, options, value}) => {
+	const inputId = useId();
+
+	return (
+		<ClayForm.Group small>
+			<label htmlFor={inputId}>{label}</label>
+
+			<ClaySelectWithOption
+				id={inputId}
+				onChange={(event) => {
+					const nextValue = event.target.value;
+
+					handleChange(
+						configurationKey,
+						typeof value === 'string'
+							? String(nextValue)
+							: Number(nextValue)
+					);
+				}}
+				options={options}
+				value={String(value)}
+			/>
+		</ClayForm.Group>
+	);
+};
+
+Select.propTypes = {
+	configurationKey: PropTypes.string.isRequired,
+	handleChange: PropTypes.func.isRequired,
+	label: PropTypes.string.isRequired,
+	options: PropTypes.arrayOf(
+		PropTypes.shape({
+			label: PropTypes.string,
+			value: PropTypes.oneOfType([
+				PropTypes.string.isRequired,
+				PropTypes.number.isRequired,
+			]),
+		})
+	),
+	value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
