@@ -309,14 +309,6 @@ public class DDMStructureLayoutLocalServiceWrapper
 	}
 
 	@Override
-	public DDMStructureLayout fetchStructureLayoutByStructureVersionId(
-		long structureVersionId) {
-
-		return _ddmStructureLayoutLocalService.
-			fetchStructureLayoutByStructureVersionId(structureVersionId);
-	}
-
-	@Override
 	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery
 		getActionableDynamicQuery() {
 

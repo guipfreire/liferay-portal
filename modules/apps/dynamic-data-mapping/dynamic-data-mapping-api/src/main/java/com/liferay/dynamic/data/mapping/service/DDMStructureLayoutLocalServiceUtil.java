@@ -300,13 +300,6 @@ public class DDMStructureLayoutLocalServiceUtil {
 			groupId, classNameId, structureLayoutKey);
 	}
 
-	public static com.liferay.dynamic.data.mapping.model.DDMStructureLayout
-		fetchStructureLayoutByStructureVersionId(long structureVersionId) {
-
-		return getService().fetchStructureLayoutByStructureVersionId(
-			structureVersionId);
-	}
-
 	public static com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery
 		getActionableDynamicQuery() {
 
