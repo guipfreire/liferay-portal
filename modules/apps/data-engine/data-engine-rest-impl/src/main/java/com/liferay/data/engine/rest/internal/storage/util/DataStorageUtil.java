@@ -24,6 +24,7 @@ import com.liferay.dynamic.data.mapping.model.LocalizedValue;
 import com.liferay.dynamic.data.mapping.model.Value;
 import com.liferay.dynamic.data.mapping.storage.DDMFormFieldValue;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -126,10 +127,18 @@ public class DataStorageUtil {
 				!GetterUtil.getBoolean(
 					ddmFormField.getProperty("upgradedStructure"))) {
 
+				Locale defaultLocale = ddmFormValues.getDefaultLocale();
+
+				LocalizedValue localizedValue = new LocalizedValue(
+					defaultLocale);
+
+				localizedValue.addString(defaultLocale, StringPool.BLANK);
+
 				DDMFormFieldValue ddmFormFieldValue = new DDMFormFieldValue() {
 					{
 						setInstanceId(StringUtil.randomString());
 						setName(ddmFormField.getName());
+						setValue(localizedValue);
 					}
 				};
 
