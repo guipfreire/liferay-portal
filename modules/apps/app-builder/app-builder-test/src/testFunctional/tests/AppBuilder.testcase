@@ -1134,7 +1134,6 @@ definition {
 		FormViewBuilder.save();
 
 		AppBuilderAdmin.validateItemNameOnTable(itemName = "${myFormViewName}");
-
 	}
 
 	@description = "Place a widget in my page with only a Form View of my App"

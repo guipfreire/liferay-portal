@@ -122,7 +122,6 @@
 	<td></td>
 </tr>
 
-<tr>
 	<td>SAVE_BUTTON_DISABLED</td>
 	<td>//button[@disabled='' and contains(@class,'btn-primary') and contains(text(),'Save')]</td>
 	<td></td>
