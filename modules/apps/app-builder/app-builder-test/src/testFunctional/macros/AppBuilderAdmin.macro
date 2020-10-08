@@ -616,4 +616,8 @@ definition {
 		}
 	}
 
+	macro viewInactiveSaveButton {
+        AssertElementPresent(locator1 = "AppBuilder#SAVE_BUTTON_DISABLED");
+    }
+
 }
