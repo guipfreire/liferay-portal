@@ -1094,45 +1094,47 @@ definition {
 	}
 
 	@description = "Remove a field added to the Objects Sidebar and make sure is not possible to save an empty form"
-	@priority = "5"
-	test MakeSureIsNotPossibleSaveEmptyFormView {
-		property portal.upstream = "quarantine";
+    @priority = "5"
+    test MakeSureIsNotPossibleSaveEmptyFormView {
+        property portal.upstream = “true;
 
-		AppBuilderAdmin.addCustomObject(
-			customObjectName = "my custom object",
-			isCreatingFormView = "true",
-			isCreatingViaPlusIcon = "true");
+        var myFormViewName = "My Form View Title";
 
-		FormViewBuilder.addFormView(
-			fieldType = "Text",
-			formViewName = "My Form View Title");
+        AppBuilderAdmin.addCustomObject(
+            customObjectName = "my custom object",
+            isCreatingFormView = "true",
+            isCreatingViaPlusIcon = "true");
 
-		FormViewBuilder.openFormView(formViewName = "My Form View Title");
+        FormViewBuilder.addFormView(
+            fieldType = "Text",
+            formViewName = "My Form View Title");
 
-		FormViewBuilder.deleteObjectSidebarField(
-			fieldLabel = "Text",
-			fieldName = "Text");
+        FormViewBuilder.openFormView(formViewName = "My Form View Title");
 
-		Button.clickSave();
+        FormViewBuilder.deleteObjectSidebarField(
+            fieldLabel = "Text",
+            fieldName = "Text");
 
-		Alert.viewErrorMessage(errorMessage = "Layout is empty.");
+        AppBuilderAdmin.viewInactiveSaveButton();
 
-		FormViewBuilder.addFieldToObject(fieldName = "Text");
+        FormViewBuilder.addFieldByDoubleClick(fieldType = "Text");
 
-		Button.clickSave();
+        FormViewBuilder.save();
 
-		Alert.viewErrorMessage(errorMessage = "Layout is empty.");
+        FormViewBuilder.openFormView(formViewName = "My Form View Title");
 
-		FormViewBuilder.addFieldByDoubleClickFromObjectSidebar(fieldLabel = "Text");
+        FormViewBuilder.deleteObjectSidebarField(
+            fieldLabel = "Text",
+            fieldName = "Text");
 
-		FormViewBuilder.fieldEllipsisAction(
-			fieldLabel = "Text",
-			selectAction = "Remove");
+        AppBuilderAdmin.viewInactiveSaveButton();
 
-		Button.clickSave();
+        FormViewBuilder.addFieldByDoubleClick(fieldType = "Text");
 
-		Alert.viewErrorMessage(errorMessage = "Layout is empty.");
-	}
+        FormViewBuilder.save();
+
+        AppBuilderAdmin.validateItemNameOnTable(itemName = "${myFormViewName}");
+    }
 
 	@description = "Place a widget in my page with only a Form View of my App"
 	@priority = "5"
