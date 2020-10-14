@@ -1094,6 +1094,8 @@ definition {
 	test MakeSureIsNotPossibleSaveEmptyFormView {
 		property portal.upstream = "quarantine";
 
+		var myFormViewName = "My Form View Title";
+
 		AppBuilderAdmin.addCustomObject(
 			customObjectName = "my custom object",
 			isCreatingFormView = "true",
@@ -1109,25 +1111,25 @@ definition {
 			fieldLabel = "Text",
 			fieldName = "Text");
 
-		Button.clickSave();
+		AppBuilderAdmin.viewInactiveSaveButton();
 
-		Alert.viewErrorMessage(errorMessage = "Layout is empty.");
+		FormViewBuilder.addFieldByDoubleClick(fieldType = "Text");
 
-		FormViewBuilder.addFieldToObject(fieldName = "Text");
+		FormViewBuilder.save();
 
-		Button.clickSave();
+		FormViewBuilder.openFormView(formViewName = "My Form View Title");
 
-		Alert.viewErrorMessage(errorMessage = "Layout is empty.");
-
-		FormViewBuilder.addFieldByDoubleClickFromObjectSidebar(fieldLabel = "Text");
-
-		FormViewBuilder.fieldEllipsisAction(
+		FormViewBuilder.deleteObjectSidebarField(
 			fieldLabel = "Text",
-			selectAction = "Remove");
+			fieldName = "Text");
 
-		Button.clickSave();
+		AppBuilderAdmin.viewInactiveSaveButton();
 
-		Alert.viewErrorMessage(errorMessage = "Layout is empty.");
+		FormViewBuilder.addFieldByDoubleClick(fieldType = "Text");
+
+		FormViewBuilder.save();
+
+		AppBuilderAdmin.validateItemNameOnTable(itemName = "${myFormViewName}");
 	}
 
 	@description = "Place a widget in my page with only a Form View of my App"
