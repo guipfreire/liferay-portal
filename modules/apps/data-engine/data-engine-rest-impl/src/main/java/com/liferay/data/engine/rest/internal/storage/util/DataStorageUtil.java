@@ -16,7 +16,6 @@ package com.liferay.data.engine.rest.internal.storage.util;
 
 import com.liferay.data.engine.rest.dto.v2_0.DataDefinition;
 import com.liferay.data.engine.rest.dto.v2_0.DataDefinitionField;
-import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.model.DDMFormFieldType;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
@@ -60,20 +59,36 @@ public class DataStorageUtil {
 			return Collections.emptyMap();
 		}
 
-		DDMForm ddmForm = ddmStructure.getDDMForm();
-
-		_addMissingDDMFormFieldValues(
-			ddmForm.getDDMFormFields(), ddmFormValues);
-
-		Map<String, DDMFormField> ddmFormFields =
+		Map<String, DDMFormField> ddmFormFieldsMap =
 			ddmStructure.getFullHierarchyDDMFormFieldsMap(true);
 
-		Map<String, Object> values = new HashMap<>(ddmFormFields.size());
+		List<DDMFormField> ddmFormFields = ListUtil.fromMapValues(
+			ddmFormFieldsMap);
+
+		List<DDMFormField> childDDMFormFields = ListUtil.filter(
+			ddmFormFields,
+			ddmFormField -> !ddmFormField.getType(
+			).equals(
+				"fieldset"
+			));
+
+		_addMissingDDMFormFieldValues(childDDMFormFields, ddmFormValues);
+
+		List<DDMFormField> parentDDMFormFields = ListUtil.filter(
+			ddmFormFields,
+			ddmFormField -> ddmFormField.getType(
+			).equals(
+				"fieldset"
+			));
+
+		_addMissingDDMFormFieldValues(parentDDMFormFields, ddmFormValues);
+
+		Map<String, Object> values = new HashMap<>(ddmFormFieldsMap.size());
 
 		for (DDMFormFieldValue ddmFormFieldValue :
 				ddmFormValues.getDDMFormFieldValues()) {
 
-			_addValues(ddmFormFields, ddmFormFieldValue, values);
+			_addValues(ddmFormFieldsMap, ddmFormFieldValue, values);
 		}
 
 		return values;
@@ -127,20 +142,10 @@ public class DataStorageUtil {
 				!GetterUtil.getBoolean(
 					ddmFormField.getProperty("upgradedStructure"))) {
 
-				Locale defaultLocale = ddmFormValues.getDefaultLocale();
+				Locale locale = ddmFormValues.getDefaultLocale();
 
-				LocalizedValue localizedValue = new LocalizedValue(
-					defaultLocale);
-
-				localizedValue.addString(defaultLocale, StringPool.BLANK);
-
-				DDMFormFieldValue ddmFormFieldValue = new DDMFormFieldValue() {
-					{
-						setInstanceId(StringUtil.randomString());
-						setName(ddmFormField.getName());
-						setValue(localizedValue);
-					}
-				};
+				DDMFormFieldValue ddmFormFieldValue = _createDDMFormFieldValue(
+					ddmFormField, locale);
 
 				ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
 
@@ -149,7 +154,7 @@ public class DataStorageUtil {
 
 					_addMissingDDMFormFieldValues(
 						ddmFormField.getNestedDDMFormFields(),
-						ddmFormFieldValues, ddmFormFieldValue);
+						ddmFormFieldValues, locale, ddmFormFieldValue);
 				}
 			}
 		}
@@ -157,17 +162,13 @@ public class DataStorageUtil {
 
 	private static void _addMissingDDMFormFieldValues(
 		List<DDMFormField> ddmFormFields,
-		Map<String, List<DDMFormFieldValue>> ddmFormFieldValues,
+		Map<String, List<DDMFormFieldValue>> ddmFormFieldValues, Locale locale,
 		DDMFormFieldValue parentDDMFormFieldValue) {
 
 		for (DDMFormField ddmFormField : ddmFormFields) {
 			if (!ddmFormFieldValues.containsKey(ddmFormField.getName())) {
-				DDMFormFieldValue ddmFormFieldValue = new DDMFormFieldValue() {
-					{
-						setInstanceId(StringUtil.randomString());
-						setName(ddmFormField.getName());
-					}
-				};
+				DDMFormFieldValue ddmFormFieldValue = _createDDMFormFieldValue(
+					ddmFormField, locale);
 
 				parentDDMFormFieldValue.addNestedDDMFormFieldValue(
 					ddmFormFieldValue);
@@ -177,7 +178,7 @@ public class DataStorageUtil {
 
 					_addMissingDDMFormFieldValues(
 						ddmFormField.getNestedDDMFormFields(),
-						ddmFormFieldValues, ddmFormFieldValue);
+						ddmFormFieldValues, locale, ddmFormFieldValue);
 				}
 			}
 		}
@@ -287,6 +288,22 @@ public class DataStorageUtil {
 		else {
 			_addValue(ddmFormField, ddmFormFieldValue, values);
 		}
+	}
+
+	private static DDMFormFieldValue _createDDMFormFieldValue(
+		DDMFormField ddmFormField, Locale locale) {
+
+		LocalizedValue localizedValue = new LocalizedValue(locale);
+
+		localizedValue.addString(locale, StringPool.BLANK);
+
+		return new DDMFormFieldValue() {
+			{
+				setInstanceId(StringUtil.randomString());
+				setName(ddmFormField.getName());
+				setValue(localizedValue);
+			}
+		};
 	}
 
 	private static Map<String, Object> _toLocalizedMap(
