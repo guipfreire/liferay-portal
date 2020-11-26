@@ -23,7 +23,7 @@ definition {
 			portlet = "Objects");
 	}
 
-	tearDown {
+	/*tearDown {
 		User.logoutAndLoginPG(
 			userLoginEmailAddress = "test@liferay.com",
 			userLoginFullName = "Test Test");
@@ -62,6 +62,7 @@ definition {
 			}
 		}
 	}
+	*/
 
 	@description = "Access and set permissions for a custom object"
 	@priority = "4"
