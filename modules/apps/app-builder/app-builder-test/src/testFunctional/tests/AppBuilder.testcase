@@ -3514,10 +3514,6 @@ definition {
 			fieldLabel = "Numeric",
 			label = "Total");
 
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Multiple Selection");
-
-		FormViewBuilder.gotoRules();
-
 		FormViewBuilder.addRule();
 
 		FormViewBuilder.editRuleName(ruleName = "Multiple Selection Rule");
@@ -3533,10 +3529,6 @@ definition {
 			actionTarget = "Upload");
 
 		FormViewBuilder.ruleSave();
-
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Numeric");
-
-		FormViewBuilder.gotoRules();
 
 		FormViewBuilder.addRule();
 
@@ -3555,10 +3547,6 @@ definition {
 			actionTarget = "Text");
 
 		FormViewBuilder.ruleSave();
-
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Numeric");
-
-		FormViewBuilder.gotoRules();
 
 		FormViewBuilder.addRule();
 
@@ -3587,10 +3575,6 @@ definition {
 
 		FormViewBuilder.ruleSave();
 
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Select from List");
-
-		FormViewBuilder.gotoRules();
-
 		FormViewBuilder.addRule();
 
 		FormViewBuilder.editRuleName(ruleName = "Select from List");
@@ -3608,10 +3592,6 @@ definition {
 			actionTarget = "Single Selection");
 
 		FormViewBuilder.ruleSave();
-
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Text");
-
-		FormViewBuilder.gotoRules();
 
 		FormViewBuilder.addRule();
 
@@ -3641,10 +3621,6 @@ definition {
 			actionTarget = "Single Selection");
 
 		FormViewBuilder.ruleSave();
-
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Numeric");
-
-		FormViewBuilder.gotoRules();
 
 		FormViewBuilder.addRule();
 
