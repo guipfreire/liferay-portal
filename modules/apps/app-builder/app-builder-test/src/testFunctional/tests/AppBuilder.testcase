@@ -3445,7 +3445,7 @@ definition {
 	@description = "Saved form view rules run during new entry submissions"
 	@priority = "5"
 	test ViewFormViewRules {
-		property portal.acceptance = "quarantine";
+		property portal.acceptance = "true";
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Users",
