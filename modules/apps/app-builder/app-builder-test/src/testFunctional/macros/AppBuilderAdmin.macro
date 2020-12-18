@@ -590,13 +590,13 @@ definition {
 		AssertChecked.assertCheckedNotVisible(locator1 = "AppBuilder#CHECKBOX");
 	}
 
+	macro viewInactiveRuleSaveButton {
+		AssertElementPresent(locator1 = "AppBuilder#RULE_SAVE_BUTTON_DISABLED");
+	}
+
 	macro viewInactiveSaveButton {
 		AssertElementPresent(locator1 = "AppBuilder#SAVE_BUTTON_DISABLED");
 	}
-
-    macro viewInactiveRuleSaveButton {
-        AssertElementPresent(locator1 = "AppBuilder#RULE_SAVE_BUTTON_DISABLED");
-    }
 
 	macro viewItem {
 		AppBuilderAdmin.openActionMenu(itemName = "${itemName}");
