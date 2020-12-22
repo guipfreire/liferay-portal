@@ -164,7 +164,6 @@ definition {
 	@priority = "5"
 	test AddRulesViaFormView {
 		property portal.acceptance = "true";
-		property portal.upstream = "true";
 		property test.name.skip.portal.instance = "AppBuilder#AddRulesViaFormView";
 
 		var myFormViewName = "My Registration form";
