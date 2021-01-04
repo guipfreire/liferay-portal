@@ -3512,6 +3512,8 @@ definition {
 		FormViewBuilder.editFieldLabel(
 			fieldLabel = "Numeric",
 			label = "Total");
+		
+		FormViewBuilder.gotoRules();
 
 		FormViewBuilder.addRule();
 
