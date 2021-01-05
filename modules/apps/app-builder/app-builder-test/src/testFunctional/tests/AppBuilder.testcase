@@ -163,8 +163,7 @@ definition {
 	@description = "This is a use case for LPS-95964"
 	@priority = "5"
 	test AddRulesViaFormView {
-		property portal.acceptance = "quarantine";
-		property portal.upstream = "quarantine";
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "AppBuilder#AddRulesViaFormView";
 
 		var myFormViewName = "My Registration form";
@@ -193,9 +192,9 @@ definition {
 		FormViewBuilder.createFirstRule();
 
 		FormViewBuilder.setRuleName(ruleName = "My First Rule");
-
-		FormRules.viewInactiveSaveButton();
-
+		
+		AppBuilderAdmin.viewInactiveRuleSaveButton();
+		
 		FormRules.configureConditionOptions(
 			conditionField = "Text Field",
 			conditionOperator = "Is not empty",
@@ -3506,7 +3505,7 @@ definition {
 	@description = "Saved form view rules run during new entry submissions"
 	@priority = "5"
 	test ViewFormViewRules {
-		property portal.acceptance = "quarantine";
+		property portal.acceptance = "true";
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Users",
@@ -3575,8 +3574,6 @@ definition {
 			fieldLabel = "Numeric",
 			label = "Total");
 
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Multiple Selection");
-
 		FormViewBuilder.gotoRules();
 
 		FormViewBuilder.addRule();
@@ -3595,10 +3592,6 @@ definition {
 
 		FormViewBuilder.ruleSave();
 
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Numeric");
-
-		FormViewBuilder.gotoRules();
-
 		FormViewBuilder.addRule();
 
 		FormViewBuilder.editRuleName(ruleName = "Numeric Rule One");
@@ -3616,10 +3609,6 @@ definition {
 			actionTarget = "Text");
 
 		FormViewBuilder.ruleSave();
-
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Numeric");
-
-		FormViewBuilder.gotoRules();
 
 		FormViewBuilder.addRule();
 
@@ -3648,10 +3637,6 @@ definition {
 
 		FormViewBuilder.ruleSave();
 
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Select from List");
-
-		FormViewBuilder.gotoRules();
-
 		FormViewBuilder.addRule();
 
 		FormViewBuilder.editRuleName(ruleName = "Select from List");
@@ -3669,10 +3654,6 @@ definition {
 			actionTarget = "Single Selection");
 
 		FormViewBuilder.ruleSave();
-
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Text");
-
-		FormViewBuilder.gotoRules();
 
 		FormViewBuilder.addRule();
 
@@ -3702,10 +3683,6 @@ definition {
 			actionTarget = "Single Selection");
 
 		FormViewBuilder.ruleSave();
-
-		FormViewBuilder.clickFieldLabel(fieldLabel = "Numeric");
-
-		FormViewBuilder.gotoRules();
 
 		FormViewBuilder.addRule();
 
