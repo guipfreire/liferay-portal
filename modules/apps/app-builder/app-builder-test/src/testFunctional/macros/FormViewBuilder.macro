@@ -488,6 +488,10 @@ definition {
 			value1 = "${fieldValue}");
 	}
 
+	macro setFieldRepeatable {
+		FormViewBuilder.checkSwitcher(propertyName = "repeatable");
+	}
+
 	macro setFieldRequired {
 		FormViewBuilder.checkSwitcher(propertyName = "required");
 	}
@@ -784,6 +788,14 @@ definition {
 
 		AssertTextEquals(
 			locator1 = "FormViewBuilder#FORM_FIELD_FIRST_ITEM",
+			value1 = "${fieldLabel}");
+	}
+
+	macro validateTranslatedFieldTest {
+		var key_fieldLabel = "${fieldLabel}";
+
+		AssertTextEquals(
+			locator1 = "FormViewBuilder#FORM_FIELD_TEST",
 			value1 = "${fieldLabel}");
 	}
 
