@@ -489,8 +489,8 @@ definition {
 	}
 
 	macro setFieldRepeatable {
-        FormViewBuilder.checkSwitcher(propertyName = "repeatable");
-    }
+		FormViewBuilder.checkSwitcher(propertyName = "repeatable");
+	}
 
 	macro setFieldRequired {
 		FormViewBuilder.checkSwitcher(propertyName = "required");

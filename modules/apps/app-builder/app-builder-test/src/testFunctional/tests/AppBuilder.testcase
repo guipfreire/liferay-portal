@@ -591,66 +591,66 @@ definition {
 	}
 
 	@description = "This is a use case for LPS-119844"
-    @priority = "5"
-    test CreateAnEntryWithRepeatableField {
-        property portal.acceptance = "true";
+	@priority = "5"
+	test CreateAnEntryWithRepeatableField {
+		property portal.acceptance = "true";
 
-        AppBuilderAdmin.addCustomObject(
-            customObjectName = "my custom object",
-            isCreatingFormView = "true",
-            isCreatingViaPlusIcon = "true");
+		AppBuilderAdmin.addCustomObject(
+			customObjectName = "my custom object",
+			isCreatingFormView = "true",
+			isCreatingViaPlusIcon = "true");
 
-        FormViewBuilder.addFieldByDoubleClick(fieldType = "Text");
+		FormViewBuilder.addFieldByDoubleClick(fieldType = "Text");
 
-        FormViewBuilder.setFieldLabel(fieldLabel = "Text Field");
+		FormViewBuilder.setFieldLabel(fieldLabel = "Text Field");
 
-        FormViewBuilder.switchToAdvancedTab();
+		FormViewBuilder.switchToAdvancedTab();
 
-        FormViewBuilder.setFieldRepeatable();
+		FormViewBuilder.setFieldRepeatable();
 
-        FormViewBuilder.setName(formViewName = "My Form View");
+		FormViewBuilder.setName(formViewName = "My Form View");
 
-        FormViewBuilder.save();
+		FormViewBuilder.save();
 
-        AppBuilderAdmin.switchTab(tabName = "Table Views");
+		AppBuilderAdmin.switchTab(tabName = "Table Views");
 
-        AppBuilderAdmin.add();
+		AppBuilderAdmin.add();
 
-        TableViewBuilder.setName(tableViewName = "My Table View");
+		TableViewBuilder.setName(tableViewName = "My Table View");
 
-        TableViewBuilder.addColumnByDoubleClick(fieldType = "Text Field");
+		TableViewBuilder.addColumnByDoubleClick(fieldType = "Text Field");
 
-        TableViewBuilder.save();
+		TableViewBuilder.save();
 
-        AppBuilderAdmin.switchTab(tabName = "Apps");
+		AppBuilderAdmin.switchTab(tabName = "Apps");
 
-        AppBuilderAdmin.add();
+		AppBuilderAdmin.add();
 
-        AppBuilderAdmin.setName(title = "My First App");
+		AppBuilderAdmin.setName(title = "My First App");
 
-        App.selectFormView(formViewName = "My Form View");
+		App.selectFormView(formViewName = "My Form View");
 
-        App.selectTableView(tableViewName = "My Table View");
+		App.selectTableView(tableViewName = "My Table View");
 
-        Button.clickNext();
+		Button.clickNext();
 
-        App.toggleDeploy(deployOption = "Standalone");
+		App.toggleDeploy(deployOption = "Standalone");
 
-        App.clickDeploy();
+		App.clickDeploy();
 
-        AppBuilderAdmin.openStandAloneApp(itemName = "My First App");
+		AppBuilderAdmin.openStandAloneApp(itemName = "My First App");
 
-        SelectWindow.selectPopUp(locator1 = "null");
+		SelectWindow.selectPopUp(locator1 = "null");
 
-        AppBuilderAdmin.addEntry();
+		AppBuilderAdmin.addEntry();
 
-        FormViewBuilder.editText(
-            fieldName = "Text Field",
-            fieldValue = "Content from Form 1");
-        AppBuilderAdmin.save();
-        Alert.viewSuccessMessage();
-        AppBuilderAdmin.validateItemNameOnTable(itemName = "Content from Form 1");
-    }
+		FormViewBuilder.editText(
+			fieldName = "Text Field",
+			fieldValue = "Content from Form 1");
+		AppBuilderAdmin.save();
+		Alert.viewSuccessMessage();
+		AppBuilderAdmin.validateItemNameOnTable(itemName = "Content from Form 1");
+	}
 
 	@description = "Automate LPS-117199 Define translations when creating fieldsets"
 	@priority = "5"
