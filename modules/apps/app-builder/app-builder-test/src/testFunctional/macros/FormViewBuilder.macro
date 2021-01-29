@@ -488,6 +488,10 @@ definition {
 			value1 = "${fieldValue}");
 	}
 
+	macro setFieldRepeatable {
+        FormViewBuilder.checkSwitcher(propertyName = "repeatable");
+    }
+
 	macro setFieldRequired {
 		FormViewBuilder.checkSwitcher(propertyName = "required");
 	}

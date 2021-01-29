@@ -590,6 +590,68 @@ definition {
 			title = "Numeric Field - Table View Title");
 	}
 
+	@description = "This is a use case for LPS-119844"
+    @priority = "5"
+    test CreateAnEntryWithRepeatableField {
+        property portal.acceptance = "true";
+
+        AppBuilderAdmin.addCustomObject(
+            customObjectName = "my custom object",
+            isCreatingFormView = "true",
+            isCreatingViaPlusIcon = "true");
+
+        FormViewBuilder.addFieldByDoubleClick(fieldType = "Text");
+
+        FormViewBuilder.setFieldLabel(fieldLabel = "Text Field");
+
+        FormViewBuilder.switchToAdvancedTab();
+
+        FormViewBuilder.setFieldRepeatable();
+
+        FormViewBuilder.setName(formViewName = "My Form View");
+
+        FormViewBuilder.save();
+
+        AppBuilderAdmin.switchTab(tabName = "Table Views");
+
+        AppBuilderAdmin.add();
+
+        TableViewBuilder.setName(tableViewName = "My Table View");
+
+        TableViewBuilder.addColumnByDoubleClick(fieldType = "Text Field");
+
+        TableViewBuilder.save();
+
+        AppBuilderAdmin.switchTab(tabName = "Apps");
+
+        AppBuilderAdmin.add();
+
+        AppBuilderAdmin.setName(title = "My First App");
+
+        App.selectFormView(formViewName = "My Form View");
+
+        App.selectTableView(tableViewName = "My Table View");
+
+        Button.clickNext();
+
+        App.toggleDeploy(deployOption = "Standalone");
+
+        App.clickDeploy();
+
+        AppBuilderAdmin.openStandAloneApp(itemName = "My First App");
+
+        SelectWindow.selectPopUp(locator1 = "null");
+
+        AppBuilderAdmin.addEntry();
+
+        FormViewBuilder.editText(
+            fieldName = "Text Field",
+            fieldValue = "Content from Form 1");
+        AppBuilderAdmin.save();
+        Alert.viewSuccessMessage();
+        AppBuilderAdmin.validateItemNameOnTable(itemName = "Content from Form 1");
+    }
+
 	@description = "Automate LPS-117199 Define translations when creating fieldsets"
 	@priority = "5"
 	test DefineTranslationCreatedFieldSets {
