@@ -358,8 +358,20 @@
 </tr>
 
 <tr>
+	<td>FIELD_ELLIPSIS_FIELDSET</td>
+	<td>//div[@class='modal-body']//button[@data-title='Actions']</td>
+	<td></td>
+</tr>
+
+<tr>
 	<td>FIELD_ELLIPSIS_ACTION</td>
 	<td>//div[contains(@class,'dropdown-menu show')]//button[contains(@class,'dropdown-item')][contains(text(),'${key_selectAction}')]</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td>FIELD_ELLIPSIS_ACTION_FIELDSET</td>
+	<td>//div[@class='dropdown-menu show']//button[@class='dropdown-item'][contains(text(),'${key_selectAction}')]</td>
 	<td></td>
 </tr>
 
@@ -549,6 +561,12 @@
 </tr>
 
 <tr>
+	<td>FIELD_SET_PROPAGATE_BUTTON</td>
+	<td>//button[contains(text(),'Propagate')]</td>
+	<td></td>
+</tr>
+
+<tr>
 	<td>FIELD_SET_SAVE_BUTTON</td>
 	<td>//div[contains(@class, 'modal-footer')]//button[contains(@class,'btn-primary')][contains(text(),'Save')]</td>
 	<td></td>
@@ -567,6 +585,12 @@
 </tr>
 
 <tr>
+	<td>FIELD_FROM_FIELDSET</td>
+	<td>//div[@class='modal-body']//label[text()='${fieldLabel}'] | //div[@class='modal-body']//legend[text()='${fieldLabel}']</td>
+	<td></td>
+</tr>
+
+<tr>
 	<td>EMPTY_FORM_FIELD</td>
 	<td>//p[contains(text(),'Drag fields from the sidebar to compose your form.')]</td>
 	<td></td>
@@ -581,6 +605,18 @@
 <tr>
 	<td>FORM_FIELD_FIRST_ITEM</td>
 	<td>//div[contains(@class,"form-group") and contains(.,'${key_fieldLabel}')]//label</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td>FIELD_IN_FORM_BUILDER</td>
+	<td>//legend[text()='${fieldLabel}']</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td>OPTIONS_PLACED_IN_FORM_BUILDER</td>
+	<td>//div[@class='ddm-radio']//span[text()='${optionLabel}']</td>
 	<td></td>
 </tr>
 
