@@ -4773,6 +4773,49 @@ definition {
 		FormViewBuilder.switchToBacisTab();
 
 		FormViewBuilder.validateShowAsSwitcherIsON();
+
+		AppBuilderAdmin.cancel();
+
+		AppBuilderAdmin.add();
+
+		FormViewBuilder.addFieldByDoubleClickFromObjectSidebar(fieldLabel = "${age}");
+		FormViewBuilder.addFieldByDoubleClickFromObjectSidebar(fieldLabel = "${country}");
+		FormViewBuilder.addFieldByDoubleClickFromObjectSidebar(fieldLabel = "${maritalStatus}");
+		FormViewBuilder.addFieldByDoubleClickFromObjectSidebar(fieldLabel = "${nameFormView1}");
+		FormViewBuilder.addFieldByDoubleClickFromObjectSidebar(fieldLabel = "${since}");
+		FormViewBuilder.addFieldByDoubleClickFromObjectSidebar(fieldLabel = "${teams}");
+
+		FormViewBuilder.clickFieldLabel(fieldLabel = "${nameFormView1}");
+
+		FormViewBuilder.validateFieldLabelAtSidebar(fieldLabel = "${nameFormView1}");
+
+		FormViewBuilder.clickFieldLabel(fieldLabel = "${age}");
+
+		FormViewBuilder.assertPlaceholderTextAtSidebar(placeHolder = "${agePlaceholderFormView2}");
+
+		FormViewBuilder.clickFieldLabel(fieldLabel = "${country}");
+
+		FormViewBuilder.assertHelpTextPresent(
+			fieldName = "${country}",
+			fieldValue = "${countryHelpTextFormView2}");
+
+		FormViewBuilder.clickFieldLabel(fieldLabel = "${since}");
+
+		FormViewBuilder.switchToAdvancedTab();
+
+		FormViewBuilder.assertPredefinedValueAtSidebar(predefinedValue = "${sincePredefinedDateFormView2}");
+
+		FormViewBuilder.clickFieldLabel(fieldLabel = "${maritalStatus}");
+
+		FormViewBuilder.validateShowLabelIsOn();
+
+		FormViewBuilder.clickFieldLabel(fieldLabel = "${teams}");
+
+		FormViewBuilder.validateInlineOptionIsSetOFF();
+
+		FormViewBuilder.switchToBacisTab();
+
+		FormViewBuilder.validateShowAsSwitcherIsOFF();
 	}
 
 }
