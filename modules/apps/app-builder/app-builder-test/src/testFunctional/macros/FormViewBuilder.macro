@@ -230,6 +230,10 @@ definition {
 		Click(locator1 = "FormViewBuilder#FORM_FIELD_REQUIRED_ELLIPSES");
 	}
 
+	macro clickRuleSidebar {
+		Click(locator1 = "FormViewBuilder#EDIT_RULE_COLLAPSE");
+	}
+
 	macro clickShowAsSwitcher {
 		Click(locator1 = "FormViewBuilder#SIDEBAR_BASIC_SHOW_AS_SWITCHER");
 	}
