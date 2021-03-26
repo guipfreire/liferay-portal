@@ -625,4 +625,10 @@ definition {
 		}
 	}
 
+	macro renameObject {
+		Type(
+			locator1 = "AppBuilder#INPUT_OBJECT_RENAME",
+			value1 = "${newName}");
+	}
+
 }
